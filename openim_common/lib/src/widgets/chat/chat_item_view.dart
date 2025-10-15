@@ -190,6 +190,54 @@ class _ChatItemViewState extends State<ChatItemView> {
     );
   }
 
+  void _showDefaultMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: Styles.c_FFFFFF,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: ImageRes.menuCopy.toImage..width = 24.w..height = 24.h,
+              title: Text(StrRes.menuCopy, style: Styles.ts_0C1C33_14sp),
+              onTap: () {
+                Navigator.pop(context);
+                if (_message.isTextType) {
+                  Clipboard.setData(ClipboardData(text: _message.textElem!.content!));
+                  IMViews.showToast(StrRes.copySuccessfully);
+                }
+              },
+            ),
+            ListTile(
+              leading: ImageRes.menuForward.toImage..width = 24.w..height = 24.h,
+              title: Text(StrRes.menuForward, style: Styles.ts_0C1C33_14sp),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: 实现转发功能
+                IMViews.showToast('转发功能开发中');
+              },
+            ),
+            if (_isISend && _canRevoke(_message))
+              ListTile(
+                leading: Icon(Icons.delete_outline, color: Styles.c_FF381F),
+                title: Text(StrRes.menuRevoke, style: Styles.ts_FF381F_14sp),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onRevokeMessage?.call(_message);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildChildView() {
     Widget? child;
     String? senderNickname;
@@ -271,7 +319,8 @@ class _ChatItemViewState extends State<ChatItemView> {
               print('显示撤回菜单');
               _showRevokeMenu();
             } else {
-              print('不满足撤回条件');
+              print('不满足撤回条件，显示默认菜单');
+              _showDefaultMenu();
             }
           },
           child: Padding(

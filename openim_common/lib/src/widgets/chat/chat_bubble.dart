@@ -30,7 +30,7 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         constraints: constraints,
         margin: margin,
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
         alignment: alignment,
         decoration: BoxDecoration(
           color:

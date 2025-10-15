@@ -17,18 +17,8 @@ class HomePage extends StatelessWidget {
         PersistentTabConfig(
           screen: ConversationPage(),
           item: ItemConfig(
-            icon: _setupIcon(Image.asset(
-              ImageRes.homeTab1Sel,
-              package: 'openim_common',
-              width: 24,
-              height: 24,
-            ), logic.unreadMsgCount.value),
-            inactiveIcon: _setupIcon(Image.asset(
-              ImageRes.homeTab1Nor,
-              package: 'openim_common',
-              width: 24,
-              height: 24,
-            ), logic.unreadMsgCount.value),
+            icon: _setupIcon(ImageRes.homeTab1Sel.toImage, logic.unreadMsgCount.value),
+            inactiveIcon: _setupIcon(ImageRes.homeTab1Nor.toImage, logic.unreadMsgCount.value),
             title: StrRes.home,
             textStyle: Styles.ts_0089FF_10sp_semibold,
           ),

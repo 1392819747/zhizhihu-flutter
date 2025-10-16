@@ -45,7 +45,7 @@ class SplashLogic extends GetxController {
       Logger.print('---------push login success----');
       final result = await ConversationLogic.getConversationFirstPage();
 
-      AppNavigator.startSplashToMain(isAutoLogin: true, conversations: result);
+      AppNavigator.startDesktop();
     } catch (e, s) {
       IMViews.showToast('$e $s');
       await DataSp.removeLoginCertificate();

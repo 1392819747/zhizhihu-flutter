@@ -3,6 +3,7 @@ import 'package:flutter_openim_sdk/flutter_openim_sdk.dart';
 import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
 
+import '../../routes/app_navigator.dart';
 import 'chat_logic.dart';
 
 class ChatPage extends StatelessWidget {
@@ -147,6 +148,83 @@ class ChatPage extends StatelessWidget {
 
   Widget? get _groupCallHintView => null;
 
+  PreferredSizeWidget _buildCustomAppBar() {
+    return AppBar(
+      backgroundColor: Styles.c_FFFFFF,
+      elevation: 0,
+      leading: GestureDetector(
+        onTap: () => Get.back(),
+        child: Container(
+          padding: EdgeInsets.all(10.w),
+          child: ImageRes.backBlack.toImage
+            ..width = 24.w
+            ..height = 24.h,
+        ),
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Flexible(
+            flex: 5,
+            child: Text(
+              logic.nickname.value,
+              style: Styles.ts_0C1C33_17sp_semibold,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          if (logic.memberStr.isNotEmpty)
+            Flexible(
+              flex: 2,
+              child: Text(
+                logic.memberStr,
+                style: Styles.ts_0C1C33_17sp_semibold,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          // 回到桌面按钮
+          GestureDetector(
+            onTap: () => AppNavigator.startDesktop(),
+            child: Container(
+              margin: EdgeInsets.only(left: 8.w),
+              padding: EdgeInsets.all(4.w),
+              child: Icon(
+                Icons.home_outlined,
+                size: 20.w,
+                color: Styles.c_0C1C33,
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (!logic.isGroupChat)
+          GestureDetector(
+            onTap: logic.call,
+            child: Container(
+              padding: EdgeInsets.all(10.w),
+              child: ImageRes.callBack.toImage
+                ..width = 28.w
+                ..height = 28.h,
+            ),
+          ),
+        SizedBox(width: 8.w),
+        GestureDetector(
+          onTap: logic.chatSetup,
+          child: Container(
+            padding: EdgeInsets.all(10.w),
+            child: ImageRes.moreBlack.toImage
+              ..width = 28.w
+              ..height = 28.h,
+          ),
+        ),
+        SizedBox(width: 16.w),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -154,43 +232,45 @@ class ChatPage extends StatelessWidget {
       child: Obx(() {
         return Scaffold(
             backgroundColor: Styles.c_F0F2F6,
-            appBar: TitleBar.chat(
-              title: logic.nickname.value,
-              member: logic.memberStr,
-              onCloseMultiModel: logic.exit,
-              onClickMoreBtn: logic.chatSetup,
-              onClickCallBtn: logic.isGroupChat ? null : logic.call,
-            ),
-            body: SafeArea(
-              child: WaterMarkBgView(
-                text: '',
-                path: logic.background.value,
-                backgroundColor: Styles.c_FFFFFF,
-                floatView: _groupCallHintView,
-                bottomView: ChatInputBox(
-                  forceCloseToolboxSub: logic.forceCloseToolbox,
-                  controller: logic.inputCtrl,
-                  focusNode: logic.focusNode,
-                  isNotInGroup: logic.isInvalidGroup,
-                  directionalText: logic.directionalText(),
-                  onCloseDirectional: logic.onClearDirectional,
-                  onSend: (v) => logic.sendTextMsg(),
-                  toolbox: ChatToolBox(
-                    onTapAlbum: logic.onTapAlbum,
-                    onTapCall: logic.isGroupChat ? null : logic.call,
+            appBar: _buildCustomAppBar(),
+            body: GestureDetector(
+              onPanEnd: (details) {
+                // 检测从右向左的滑动手势
+                if (details.velocity.pixelsPerSecond.dx < -500) {
+                  AppNavigator.startDesktop();
+                }
+              },
+              child: SafeArea(
+                child: WaterMarkBgView(
+                  text: '',
+                  path: logic.background.value,
+                  backgroundColor: Styles.c_FFFFFF,
+                  floatView: _groupCallHintView,
+                  bottomView: ChatInputBox(
+                    forceCloseToolboxSub: logic.forceCloseToolbox,
+                    controller: logic.inputCtrl,
+                    focusNode: logic.focusNode,
+                    isNotInGroup: logic.isInvalidGroup,
+                    directionalText: logic.directionalText(),
+                    onCloseDirectional: logic.onClearDirectional,
+                    onSend: (v) => logic.sendTextMsg(),
+                    toolbox: ChatToolBox(
+                      onTapAlbum: logic.onTapAlbum,
+                      onTapCall: logic.isGroupChat ? null : logic.call,
+                    ),
+                    voiceRecordBar: const SizedBox(),
                   ),
-                  voiceRecordBar: const SizedBox(),
-                ),
-                child: ChatListView(
-                  onTouch: () => logic.closeToolbox(),
-                  itemCount: logic.messageList.length,
-                  controller: logic.scrollController,
-                  onScrollToBottomLoad: logic.onScrollToBottomLoad,
-                  onScrollToTop: logic.onScrollToTop,
-                  itemBuilder: (_, index) {
-                    final message = logic.indexOfMessage(index);
-                    return Obx(() => _buildItemView(message));
-                  },
+                  child: ChatListView(
+                    onTouch: () => logic.closeToolbox(),
+                    itemCount: logic.messageList.length,
+                    controller: logic.scrollController,
+                    onScrollToBottomLoad: logic.onScrollToBottomLoad,
+                    onScrollToTop: logic.onScrollToTop,
+                    itemBuilder: (_, index) {
+                      final message = logic.indexOfMessage(index);
+                      return Obx(() => _buildItemView(message));
+                    },
+                  ),
                 ),
               ),
             ));

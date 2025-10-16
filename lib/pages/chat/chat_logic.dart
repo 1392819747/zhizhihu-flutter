@@ -190,6 +190,13 @@ class ChatLogic extends SuperController {
         if (messageList[i].clientMsgID == info.clientMsgID) {
           // 更新消息为撤回状态
           messageList[i].contentType = MessageType.revokeMessageNotification;
+          
+          // 更新消息内容为撤回提示文本
+          final isSelfRevoke = messageList[i].sendID == OpenIM.iMManager.userID;
+          final revokeUserName = isSelfRevoke ? '你' : (messageList[i].senderNickname ?? '未知用户');
+          messageList[i].textElem?.content = '$revokeUserName${StrRes.revokeMsg}';
+          
+          // 强制刷新UI
           messageList.refresh();
           break;
         }

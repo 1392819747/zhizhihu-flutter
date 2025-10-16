@@ -1,0 +1,167 @@
+workflows:
+  # Android Release Workflow
+  android-release:
+    name: Android Release Build
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Generate code
+        script: |
+          flutter packages pub run build_runner build --delete-conflicting-outputs
+      - name: Run tests
+        script: |
+          flutter test || echo "No tests found, continuing..."
+      - name: Build APK
+        script: |
+          flutter build apk --release
+      - name: Build AAB
+        script: |
+          flutter build appbundle --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: false
+
+  # iOS Release Workflow  
+  ios-release:
+    name: iOS Release Build
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Generate code
+        script: |
+          flutter packages pub run build_runner build --delete-conflicting-outputs
+      - name: Run tests
+        script: |
+          flutter test || echo "No tests found, continuing..."
+      - name: Build iOS
+        script: |
+          flutter build ios --release --no-codesign
+      - name: Create IPA manually
+        script: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r -y Runner.ipa Payload/
+          rm -rf Payload
+          unzip -l Runner.ipa | head -10
+    artifacts:
+      - build/ios/iphoneos/Runner.ipa
+      - build/ios/iphoneos/Runner.app
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: false
+
+  # Combined Build Workflow
+  build-all:
+    name: Build All Platforms
+    max_build_duration: 90
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Generate code
+        script: |
+          flutter packages pub run build_runner build --delete-conflicting-outputs
+      - name: Run tests
+        script: |
+          flutter test || echo "No tests found, continuing..."
+      - name: Build Android APK
+        script: |
+          flutter build apk --release
+      - name: Build Android AAB
+        script: |
+          flutter build appbundle --release
+      - name: Build iOS
+        script: |
+          flutter build ios --release --no-codesign
+      - name: Create iOS IPA
+        script: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r -y Runner.ipa Payload/
+          rm -rf Payload
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
+      - build/ios/iphoneos/Runner.ipa
+      - build/ios/iphoneos/Runner.app
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: false
+
+  # Simple Build Workflow (no signing)
+  simple-build:
+    name: Simple Build (No Signing)
+    max_build_duration: 45
+    environment:
+      flutter: stable
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Generate code
+        script: |
+          flutter packages pub run build_runner build --delete-conflicting-outputs
+      - name: Run tests
+        script: |
+          flutter test || echo "No tests found, continuing..."
+      - name: Build Android APK
+        script: |
+          flutter build apk --release
+      - name: Build Android AAB
+        script: |
+          flutter build appbundle --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: false

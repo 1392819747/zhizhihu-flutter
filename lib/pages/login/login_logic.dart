@@ -140,7 +140,15 @@ class LoginLogic extends GetxController with GetTickerProviderStateMixin {
 
         Get.find<CacheController>().resetCache();
         AppNavigator.startMain(conversations: result);
+      } else {
+        // 登录失败时显示用户友好的提示
+        IMViews.showToast('连接服务器失败，请重试');
       }
+    }).catchError((error) {
+      // 确保LoadingView正确关闭
+      LoadingView.singleton.dismiss();
+      // 显示用户友好的错误提示
+      IMViews.showToast('连接服务器失败，请重试');
     });
   }
 
@@ -193,8 +201,9 @@ class LoginLogic extends GetxController with GetTickerProviderStateMixin {
       return true;
     } catch (e, s) {
       Logger.print('login e: $e $s');
+      // 确保在异常情况下返回false
+      return false;
     }
-    return false;
   }
 
   void togglePasswordType() {

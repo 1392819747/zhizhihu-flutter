@@ -160,6 +160,20 @@ class ImageView extends StatelessWidget {
             height: height,
             color: color,
             fit: fit,
+            errorBuilder: (context, error, stackTrace) {
+              // 当图片加载失败时，显示一个默认的消息图标
+              return Container(
+                width: width,
+                height: height,
+                color: Colors.grey.shade200,
+                child: Icon(
+                  Icons.message,
+                  size: width != null && height != null ? 
+                      (width! < height! ? width! * 0.6 : height! * 0.6) : 24,
+                  color: Colors.grey,
+                ),
+              );
+            },
           ),
         ),
       );

@@ -16,7 +16,7 @@ class ImageRes {
   static const homeTab2Nor = "$_dir/ic_home_tab2_nor.webp";
   static const homeTab3Nor = "$_dir/ic_home_tab3_nor.webp";
   static const homeTab4Nor = "$_dir/ic_home_tab4_nor.webp";
-  static const homeTab1Sel = "$_dir/ic_message.webp";
+  static const homeTab1Sel = "$_dir/ic_home_tab1_sel.webp";
   static const homeTab2Sel = "$_dir/ic_home_tab2_sel.webp";
   static const homeTab3Sel = "$_dir/ic_home_tab3_sel.webp";
   static const homeTab4Sel = "$_dir/ic_home_tab4_sel.webp";

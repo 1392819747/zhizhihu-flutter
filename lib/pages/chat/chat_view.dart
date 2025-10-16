@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_openim_sdk/flutter_openim_sdk.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
 
@@ -235,8 +236,8 @@ class ChatPage extends StatelessWidget {
             appBar: _buildCustomAppBar(),
             body: GestureDetector(
               onPanEnd: (details) {
-                // 检测从右向左的滑动手势
-                if (details.velocity.pixelsPerSecond.dx < -500) {
+                // 检测从左向右的滑动手势（返回桌面）
+                if (details.velocity.pixelsPerSecond.dx > 500) {
                   AppNavigator.startDesktop();
                 }
               },

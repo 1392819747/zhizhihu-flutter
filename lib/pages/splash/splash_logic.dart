@@ -43,7 +43,7 @@ class SplashLogic extends GetxController {
         },
       );
       Logger.print('---------push login success----');
-      final result = await ConversationLogic.getConversationFirstPage();
+      await ConversationLogic.getConversationFirstPage();
 
       AppNavigator.startDesktop();
     } catch (e, s) {

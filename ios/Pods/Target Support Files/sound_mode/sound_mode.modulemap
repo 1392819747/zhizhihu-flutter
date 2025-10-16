@@ -1,0 +1,6 @@
+framework module sound_mode {
+  umbrella header "sound_mode-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,6 @@
+framework module flutter_openim_sdk {
+  umbrella header "flutter_openim_sdk-umbrella.h"
+
+  export *
+  module * { export * }
+}

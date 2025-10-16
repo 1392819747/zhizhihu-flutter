@@ -139,7 +139,7 @@ class LoginLogic extends GetxController with GetTickerProviderStateMixin {
         final result = await ConversationLogic.getConversationFirstPage();
 
         Get.find<CacheController>().resetCache();
-        AppNavigator.startMain(conversations: result);
+        AppNavigator.startDesktop();
       } else {
         // 登录失败时显示用户友好的提示
         IMViews.showToast('连接服务器失败，请重试');

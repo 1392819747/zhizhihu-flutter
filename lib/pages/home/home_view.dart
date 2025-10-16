@@ -19,7 +19,7 @@ class HomePage extends StatelessWidget {
           item: ItemConfig(
             icon: _setupIcon(ImageRes.homeTab1Sel.toImage, logic.unreadMsgCount.value),
             inactiveIcon: _setupIcon(ImageRes.homeTab1Nor.toImage, logic.unreadMsgCount.value),
-            title: StrRes.home,
+            title: '社区',
             textStyle: Styles.ts_0089FF_10sp_semibold,
           ),
         ),

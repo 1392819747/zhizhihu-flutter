@@ -79,6 +79,10 @@ class HomeLogic extends SuperController {
     }
     if (Get.arguments != null) {
       conversationsAtFirstPage = Get.arguments['conversations'] ?? [];
+      final initialIndex = Get.arguments['initialIndex'];
+      if (initialIndex != null) {
+        index.value = initialIndex;
+      }
     }
     imLogic.unreadMsgCountEventSubject.listen((value) {
       unreadMsgCount.value = value;

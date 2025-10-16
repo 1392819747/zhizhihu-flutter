@@ -21,11 +21,15 @@ class AppNavigator {
     Get.until((route) => Get.currentRoute == AppRoutes.login);
   }
 
-  static void startMain({bool isAutoLogin = false, List<ConversationInfo>? conversations}) {
+  static void startMain({bool isAutoLogin = false, List<ConversationInfo>? conversations, int? initialIndex}) {
     Get.offAllNamed(
       AppRoutes.home,
-      arguments: {'isAutoLogin': isAutoLogin, 'conversations': conversations},
+      arguments: {'isAutoLogin': isAutoLogin, 'conversations': conversations, 'initialIndex': initialIndex},
     );
+  }
+
+  static void startDesktop() {
+    Get.offAllNamed(AppRoutes.desktop);
   }
 
   static void startSplashToMain({bool isAutoLogin = false, List<ConversationInfo>? conversations}) {

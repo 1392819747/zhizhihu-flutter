@@ -4,6 +4,7 @@ abstract class AppRoutes {
   static const notFound = '/not-found';
   static const splash = '/splash';
   static const login = '/login';
+  static const desktop = '/desktop';
   static const home = '/home';
   static const chat = '/chat';
   static const chatSetup = '/chat_setup';

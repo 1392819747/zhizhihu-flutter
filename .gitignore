@@ -44,3 +44,18 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Xcode user data
+**/xcuserdata/
+**/project.xcworkspace/xcuserdata/
+**/*.xcuserdata
+**/*.xcuserstate
+**/*.xcscmblueprint
+**/xcshareddata/WorkspaceSettings.xcsettings
+**/xcshareddata/
+**/DerivedData/
+**/*.moved-aside
+**/*.pbxuser
+**/*.mode1v3
+**/*.mode2v3
+**/*.perspectivev3

@@ -62,7 +62,7 @@ class DesktopPage extends StatelessWidget {
   }
 
   Widget _buildWeatherWidget() {
-    return Container(
+    return Obx(() => Container(
       margin: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 20.h),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.r),
@@ -75,18 +75,18 @@ class DesktopPage extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.white.withOpacity(0.2),
-                  Colors.white.withOpacity(0.1),
+                  logic.getWidgetBackgroundColor(),
+                  logic.getWidgetBackgroundColor().withOpacity(0.5),
                 ],
               ),
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
-                color: Colors.white.withOpacity(0.3),
+                color: logic.getBorderColor(),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withOpacity(logic.isDarkMode.value ? 0.3 : 0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -95,27 +95,40 @@ class DesktopPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 位置信息
+                // 位置信息和夜间模式切换
                 Row(
                   children: [
                     Icon(
                       Icons.location_on_outlined,
-                      color: Colors.white.withOpacity(0.8),
+                      color: logic.getTextColor().withOpacity(0.8),
                       size: 16.w,
                     ),
                     4.horizontalSpace,
                     Text(
                       '浦东新区',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: logic.getTextColor().withOpacity(0.8),
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const Spacer(),
+                    // 夜间模式切换按钮
+                    GestureDetector(
+                      onTap: logic.toggleDarkMode,
+                      child: Container(
+                        padding: EdgeInsets.all(4.w),
+                        child: Icon(
+                          logic.isDarkMode.value ? Icons.light_mode : Icons.dark_mode,
+                          color: logic.getTextColor().withOpacity(0.8),
+                          size: 20.w,
+                        ),
+                      ),
+                    ),
+                    8.horizontalSpace,
                     Icon(
                       Icons.keyboard_arrow_up,
-                      color: Colors.white.withOpacity(0.6),
+                      color: logic.getTextColor().withOpacity(0.6),
                       size: 16.w,
                     ),
                   ],
@@ -127,7 +140,7 @@ class DesktopPage extends StatelessWidget {
                 Text(
                   '27°',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: logic.getTextColor(),
                     fontSize: 48.sp,
                     fontWeight: FontWeight.w300,
                   ),
@@ -140,14 +153,14 @@ class DesktopPage extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.cloud_outlined,
-                      color: Colors.white.withOpacity(0.8),
+                      color: logic.getTextColor().withOpacity(0.8),
                       size: 20.w,
                     ),
                     8.horizontalSpace,
                     Text(
                       '多云',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: logic.getTextColor().withOpacity(0.8),
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w500,
                       ),
@@ -161,7 +174,7 @@ class DesktopPage extends StatelessWidget {
                 Text(
                   '高34° 低24°',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: logic.getTextColor().withOpacity(0.7),
                     fontSize: 14.sp,
                   ),
                 ),
@@ -173,7 +186,7 @@ class DesktopPage extends StatelessWidget {
                   child: Text(
                     '天气',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: logic.getTextColor().withOpacity(0.6),
                       fontSize: 12.sp,
                     ),
                   ),
@@ -341,8 +354,8 @@ class DesktopPage extends StatelessWidget {
                 return GestureDetector(
                   onTap: () => logic.onAppTap(app),
                   child: Container(
-                    width: 50.w,
-                    height: 50.w,
+                    width: 60.w,
+                    height: 60.w,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -352,19 +365,19 @@ class DesktopPage extends StatelessWidget {
                           app.color.withOpacity(0.8),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(14.r),
+                      borderRadius: BorderRadius.circular(18.r),
                       boxShadow: [
                         BoxShadow(
                           color: app.color.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
                     child: Icon(
                       app.icon,
                       color: Colors.white,
-                      size: 24.w,
+                      size: 30.w,
                     ),
                   ),
                 );

@@ -20,6 +20,8 @@ class AppItem {
 }
 
 class DesktopLogic extends GetxController {
+  // 夜间模式状态
+  final isDarkMode = false.obs;
   final List<AppItem> appList = [
     AppItem(
       name: '社区',
@@ -166,5 +168,34 @@ class DesktopLogic extends GetxController {
     
     // 刷新UI
     update();
+  }
+
+  // 切换夜间模式
+  void toggleDarkMode() {
+    isDarkMode.value = !isDarkMode.value;
+  }
+
+  // 获取当前主题颜色
+  Color getBackgroundColor() {
+    return isDarkMode.value ? const Color(0xFF1C1C1E) : Colors.transparent;
+  }
+
+  // 获取文本颜色
+  Color getTextColor() {
+    return isDarkMode.value ? Colors.white : Colors.white;
+  }
+
+  // 获取小组件背景颜色
+  Color getWidgetBackgroundColor() {
+    return isDarkMode.value 
+        ? Colors.white.withOpacity(0.1) 
+        : Colors.white.withOpacity(0.2);
+  }
+
+  // 获取边框颜色
+  Color getBorderColor() {
+    return isDarkMode.value 
+        ? Colors.white.withOpacity(0.2) 
+        : Colors.white.withOpacity(0.3);
   }
 }

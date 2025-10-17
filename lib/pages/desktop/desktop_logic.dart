@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
 
 import '../../routes/app_navigator.dart';
+import '../conversation/conversation_logic.dart';
 
 class AppItem {
   final String name;

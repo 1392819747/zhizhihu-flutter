@@ -105,11 +105,12 @@ class DesktopLogic extends GetxController {
     ),
   ];
 
-  void onAppTap(AppItem app) {
+  void onAppTap(AppItem app) async {
     switch (app.name) {
       case '社区':
-        // 进入聊天应用
-        AppNavigator.startMain();
+        // 进入聊天应用，先获取会话数据
+        final conversations = await ConversationLogic.getConversationFirstPage();
+        AppNavigator.startMain(conversations: conversations);
         break;
       case '通讯录':
         // 进入通讯录

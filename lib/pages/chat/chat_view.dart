@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
 
-import '../../routes/app_navigator.dart';
 import 'chat_logic.dart';
 
 class ChatPage extends StatelessWidget {
@@ -149,16 +148,6 @@ class ChatPage extends StatelessWidget {
 
   Widget? get _groupCallHintView => null;
 
-  PreferredSizeWidget _buildCustomAppBar() {
-    return TitleBar.chat(
-      title: logic.nickname.value,
-      member: logic.memberStr.isNotEmpty ? logic.memberStr : null,
-      showCallBtn: !logic.isGroupChat,
-      onClickCallBtn: logic.call,
-      onClickMoreBtn: logic.chatSetup,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -166,15 +155,14 @@ class ChatPage extends StatelessWidget {
       child: Obx(() {
         return Scaffold(
             backgroundColor: Styles.c_F0F2F6,
-            appBar: _buildCustomAppBar(),
-            body: GestureDetector(
-              onPanEnd: (details) {
-                // 检测从左向右的滑动手势（返回桌面）
-                if (details.velocity.pixelsPerSecond.dx > 500) {
-                  AppNavigator.startDesktop();
-                }
-              },
-              child: SafeArea(
+            appBar: TitleBar.chat(
+              title: logic.nickname.value,
+              member: logic.memberStr.isNotEmpty ? logic.memberStr : null,
+              showCallBtn: !logic.isGroupChat,
+              onClickCallBtn: logic.call,
+              onClickMoreBtn: logic.chatSetup,
+            ),
+            body: SafeArea(
                 child: WaterMarkBgView(
                   text: '',
                   path: logic.background.value,

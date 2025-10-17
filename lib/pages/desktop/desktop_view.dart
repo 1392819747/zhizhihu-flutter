@@ -213,9 +213,32 @@ class DesktopPage extends StatelessWidget {
         itemCount: logic.getAppsForPage(pageIndex).length,
         itemBuilder: (context, index) {
           final app = logic.getAppsForPage(pageIndex)[index];
+          if (app == null) {
+            return _buildEmptySlot(pageIndex, index);
+          }
           return _buildDraggableAppItem(app, pageIndex, index);
         },
       ),
+    );
+  }
+
+  Widget _buildEmptySlot(int pageIndex, int index) {
+    return DragTarget<AppItem>(
+      onWillAccept: (data) => data != null,
+      onAccept: (data) {
+        // 处理拖拽到空位
+        logic.moveAppToPosition(data, pageIndex, index);
+      },
+      builder: (context, candidateData, rejectedData) {
+        return Container(
+          width: 60.w,
+          height: 60.w,
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(18.r),
+          ),
+        );
+      },
     );
   }
 

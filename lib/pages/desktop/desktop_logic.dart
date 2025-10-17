@@ -22,6 +22,10 @@ class AppItem {
 class DesktopLogic extends GetxController {
   // 夜间模式状态
   final isDarkMode = false.obs;
+  
+  // App位置管理：使用Map来存储每个位置的App，null表示空位
+  final Map<int, AppItem?> appPositions = {};
+  
   final List<AppItem> appList = [
     AppItem(
       name: '社区',
@@ -108,6 +112,20 @@ class DesktopLogic extends GetxController {
     ),
   ];
 
+  @override
+  void onInit() {
+    super.onInit();
+    _initializeAppPositions();
+  }
+
+  // 初始化App位置
+  void _initializeAppPositions() {
+    appPositions.clear();
+    for (int i = 0; i < appList.length; i++) {
+      appPositions[i] = appList[i];
+    }
+  }
+
   void onAppTap(AppItem app) async {
     switch (app.name) {
       case '社区':
@@ -124,35 +142,44 @@ class DesktopLogic extends GetxController {
 
   // 获取总页数
   int getPageCount() {
-    return (appList.length / 12).ceil(); // 每页12个App (4x3)
+    final maxPosition = appPositions.keys.isEmpty ? 0 : appPositions.keys.reduce((a, b) => a > b ? a : b);
+    return ((maxPosition + 1) / 12).ceil(); // 每页12个App (4x3)
   }
 
   // 获取指定页面的App列表
-  List<AppItem> getAppsForPage(int pageIndex) {
+  List<AppItem?> getAppsForPage(int pageIndex) {
+    final List<AppItem?> pageApps = [];
     final startIndex = pageIndex * 12;
-    final endIndex = (startIndex + 12).clamp(0, appList.length);
-    return appList.sublist(startIndex, endIndex);
+    final endIndex = startIndex + 12;
+    
+    for (int i = startIndex; i < endIndex; i++) {
+      pageApps.add(appPositions[i]);
+    }
+    
+    return pageApps;
   }
 
   // 移动App到指定位置
   void moveAppToPosition(AppItem app, int targetPageIndex, int targetIndex) {
     // 找到当前App的位置
-    final currentIndex = appList.indexOf(app);
-    if (currentIndex == -1) return;
+    int? currentIndex;
+    for (var entry in appPositions.entries) {
+      if (entry.value == app) {
+        currentIndex = entry.key;
+        break;
+      }
+    }
+    
+    if (currentIndex == null) return;
 
     // 计算目标位置
     final targetGlobalIndex = targetPageIndex * 12 + targetIndex;
     
-    // 如果目标位置超出范围，则添加到末尾
-    if (targetGlobalIndex >= appList.length) {
-      appList.removeAt(currentIndex);
-      appList.add(app);
-    } else {
-      // 移除原位置的App
-      appList.removeAt(currentIndex);
-      // 插入到新位置
-      appList.insert(targetGlobalIndex, app);
-    }
+    // 移除原位置的App
+    appPositions[currentIndex] = null;
+    
+    // 放置到新位置
+    appPositions[targetGlobalIndex] = app;
     
     // 刷新UI
     update();

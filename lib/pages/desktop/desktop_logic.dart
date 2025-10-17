@@ -23,62 +23,62 @@ class DesktopLogic extends GetxController {
     AppItem(
       name: '社区',
       icon: Icons.chat_bubble_outline,
-      color: const Color(0xFF007AFF),
+      color: const Color(0xFF007AFF), // iOS Messages Blue
     ),
     AppItem(
       name: '通讯录',
       icon: Icons.contacts_outlined,
-      color: const Color(0xFF34C759),
+      color: const Color(0xFF34C759), // iOS Contacts Green
     ),
     AppItem(
       name: '发现',
       icon: Icons.explore_outlined,
-      color: const Color(0xFFFF9500),
+      color: const Color(0xFFFF9500), // iOS Safari Orange
     ),
     AppItem(
       name: '我的',
       icon: Icons.person_outline,
-      color: const Color(0xFF5856D6),
+      color: const Color(0xFF5856D6), // iOS Settings Purple
     ),
     AppItem(
       name: '设置',
       icon: Icons.settings_outlined,
-      color: const Color(0xFF8E8E93),
+      color: const Color(0xFF8E8E93), // iOS Settings Gray
     ),
     AppItem(
       name: '相册',
       icon: Icons.photo_library_outlined,
-      color: const Color(0xFFFF3B30),
+      color: const Color(0xFFFF3B30), // iOS Photos Red
     ),
     AppItem(
       name: '相机',
       icon: Icons.camera_alt_outlined,
-      color: const Color(0xFF32D74B),
+      color: const Color(0xFF32D74B), // iOS Camera Green
     ),
     AppItem(
       name: '音乐',
       icon: Icons.music_note_outlined,
-      color: const Color(0xFFFF2D92),
+      color: const Color(0xFFFF2D92), // iOS Music Pink
     ),
     AppItem(
       name: '视频',
       icon: Icons.videocam_outlined,
-      color: const Color(0xFF007AFF),
+      color: const Color(0xFF007AFF), // iOS Camera Blue
     ),
     AppItem(
       name: '文件',
       icon: Icons.folder_outlined,
-      color: const Color(0xFFFF9500),
+      color: const Color(0xFFFF9500), // iOS Files Orange
     ),
     AppItem(
       name: '日历',
       icon: Icons.calendar_today_outlined,
-      color: const Color(0xFF5856D6),
+      color: const Color(0xFF5856D6), // iOS Calendar Purple
     ),
     AppItem(
       name: '备忘录',
       icon: Icons.note_outlined,
-      color: const Color(0xFFFFCC00),
+      color: const Color(0xFFFFCC00), // iOS Notes Yellow
     ),
   ];
 
@@ -86,22 +86,22 @@ class DesktopLogic extends GetxController {
     AppItem(
       name: '社区',
       icon: Icons.chat_bubble_outline,
-      color: const Color(0xFF007AFF),
+      color: const Color(0xFF007AFF), // iOS Messages Blue
     ),
     AppItem(
       name: '通讯录',
       icon: Icons.contacts_outlined,
-      color: const Color(0xFF34C759),
+      color: const Color(0xFF34C759), // iOS Contacts Green
     ),
     AppItem(
       name: '发现',
       icon: Icons.explore_outlined,
-      color: const Color(0xFFFF9500),
+      color: const Color(0xFFFF9500), // iOS Safari Orange
     ),
     AppItem(
       name: '我的',
       icon: Icons.person_outline,
-      color: const Color(0xFF5856D6),
+      color: const Color(0xFF5856D6), // iOS Settings Purple
     ),
   ];
 

@@ -196,7 +196,7 @@ class DesktopPage extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildAppGridForPage(int pageIndex) {

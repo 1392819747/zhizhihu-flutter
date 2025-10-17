@@ -321,11 +321,11 @@ class DesktopPage extends StatelessWidget {
     return Container(
       margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 10.h),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24.r),
+        borderRadius: BorderRadius.circular(28.r),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -335,7 +335,7 @@ class DesktopPage extends StatelessWidget {
                   Colors.white.withOpacity(0.15),
                 ],
               ),
-              borderRadius: BorderRadius.circular(24.r),
+              borderRadius: BorderRadius.circular(28.r),
               border: Border.all(
                 color: Colors.white.withOpacity(0.3),
                 width: 1,

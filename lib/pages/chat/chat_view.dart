@@ -150,66 +150,12 @@ class ChatPage extends StatelessWidget {
   Widget? get _groupCallHintView => null;
 
   PreferredSizeWidget _buildCustomAppBar() {
-    return AppBar(
-      backgroundColor: Styles.c_FFFFFF,
-      elevation: 0,
-      leading: GestureDetector(
-        onTap: () => Get.back(),
-        child: Container(
-          padding: EdgeInsets.all(10.w),
-          child: ImageRes.backBlack.toImage
-            ..width = 24.w
-            ..height = 24.h,
-        ),
-      ),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            flex: 5,
-            child: Text(
-              logic.nickname.value,
-              style: Styles.ts_0C1C33_17sp_semibold,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          if (logic.memberStr.isNotEmpty)
-            Flexible(
-              flex: 2,
-              child: Text(
-                logic.memberStr,
-                style: Styles.ts_0C1C33_17sp_semibold,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-        ],
-      ),
-      actions: [
-        if (!logic.isGroupChat)
-          GestureDetector(
-            onTap: logic.call,
-            child: Container(
-              padding: EdgeInsets.all(10.w),
-              child: ImageRes.callBack.toImage
-                ..width = 28.w
-                ..height = 28.h,
-            ),
-          ),
-        SizedBox(width: 8.w),
-        GestureDetector(
-          onTap: logic.chatSetup,
-          child: Container(
-            padding: EdgeInsets.all(10.w),
-            child: ImageRes.moreBlack.toImage
-              ..width = 28.w
-              ..height = 28.h,
-          ),
-        ),
-        SizedBox(width: 16.w),
-      ],
+    return TitleBar.chat(
+      title: logic.nickname.value,
+      member: logic.memberStr.isNotEmpty ? logic.memberStr : null,
+      showCallBtn: !logic.isGroupChat,
+      onClickCallBtn: logic.call,
+      onClickMoreBtn: logic.chatSetup,
     );
   }
 

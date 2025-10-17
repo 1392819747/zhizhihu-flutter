@@ -171,21 +171,27 @@ class DesktopPage extends StatelessWidget {
   }
 
   Widget _buildAppGrid() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 12.w,
-          mainAxisSpacing: 16.h,
-          childAspectRatio: 0.9,
-        ),
-        itemCount: logic.appList.length,
-        itemBuilder: (context, index) {
-          final app = logic.appList[index];
-          return _buildAppItem(app);
-        },
-      ),
+    return PageView.builder(
+      itemCount: logic.getPageCount(),
+      itemBuilder: (context, pageIndex) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(), // 禁用GridView的滚动
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 12.w,
+              mainAxisSpacing: 16.h,
+              childAspectRatio: 0.9,
+            ),
+            itemCount: logic.getAppsForPage(pageIndex).length,
+            itemBuilder: (context, index) {
+              final app = logic.getAppsForPage(pageIndex)[index];
+              return _buildAppItem(app);
+            },
+          ),
+        );
+      },
     );
   }
 

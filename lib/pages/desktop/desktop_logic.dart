@@ -131,4 +131,16 @@ class DesktopLogic extends GetxController {
         break;
     }
   }
+
+  // 获取总页数
+  int getPageCount() {
+    return (appList.length / 12).ceil(); // 每页12个App (4x3)
+  }
+
+  // 获取指定页面的App列表
+  List<AppItem> getAppsForPage(int pageIndex) {
+    final startIndex = pageIndex * 12;
+    final endIndex = (startIndex + 12).clamp(0, appList.length);
+    return appList.sublist(startIndex, endIndex);
+  }
 }

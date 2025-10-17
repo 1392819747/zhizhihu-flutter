@@ -115,18 +115,6 @@ class DesktopLogic extends GetxController {
         final conversations = await ConversationLogic.getConversationFirstPage();
         AppNavigator.startMain(conversations: conversations);
         break;
-      case '通讯录':
-        // 进入通讯录
-        AppNavigator.startMain(initialIndex: 1);
-        break;
-      case '发现':
-        // 进入发现页面
-        AppNavigator.startMain(initialIndex: 2);
-        break;
-      case '我的':
-        // 进入我的页面
-        AppNavigator.startMain(initialIndex: 3);
-        break;
       default:
         // 其他应用暂时显示提示
         IMViews.showToast('${app.name}功能开发中');

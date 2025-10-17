@@ -185,19 +185,6 @@ class ChatPage extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-          // 回到桌面按钮
-          GestureDetector(
-            onTap: () => AppNavigator.startDesktop(),
-            child: Container(
-              margin: EdgeInsets.only(left: 8.w),
-              padding: EdgeInsets.all(4.w),
-              child: Icon(
-                Icons.home_outlined,
-                size: 20.w,
-                color: Styles.c_0C1C33,
-              ),
-            ),
-          ),
         ],
       ),
       actions: [

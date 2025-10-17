@@ -6,6 +6,7 @@ import 'package:openim/core/controller/im_controller.dart';
 import 'package:openim_common/openim_common.dart';
 import 'package:sprintf/sprintf.dart';
 
+import '../../routes/app_navigator.dart';
 import 'conversation_logic.dart';
 
 class ConversationPage extends StatelessWidget {
@@ -44,6 +45,19 @@ class ConversationPage extends StatelessWidget {
                           ..maxLines = 1
                           ..overflow = TextOverflow.ellipsis,
                       ),
+                    // 回到桌面按钮
+                    GestureDetector(
+                      onTap: () => AppNavigator.startDesktop(),
+                      child: Container(
+                        margin: EdgeInsets.only(left: 8.w),
+                        padding: EdgeInsets.all(4.w),
+                        child: Icon(
+                          Icons.home_outlined,
+                          size: 20.w,
+                          color: Styles.c_0C1C33,
+                        ),
+                      ),
+                    ),
                     10.horizontalSpace,
                     if (null != logic.imSdkStatus && (!logic.reInstall || logic.isFailedSdkStatus))
                       Flexible(

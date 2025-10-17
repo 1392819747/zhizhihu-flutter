@@ -143,4 +143,28 @@ class DesktopLogic extends GetxController {
     final endIndex = (startIndex + 12).clamp(0, appList.length);
     return appList.sublist(startIndex, endIndex);
   }
+
+  // 移动App到指定位置
+  void moveAppToPosition(AppItem app, int targetPageIndex, int targetIndex) {
+    // 找到当前App的位置
+    final currentIndex = appList.indexOf(app);
+    if (currentIndex == -1) return;
+
+    // 计算目标位置
+    final targetGlobalIndex = targetPageIndex * 12 + targetIndex;
+    
+    // 如果目标位置超出范围，则添加到末尾
+    if (targetGlobalIndex >= appList.length) {
+      appList.removeAt(currentIndex);
+      appList.add(app);
+    } else {
+      // 移除原位置的App
+      appList.removeAt(currentIndex);
+      // 插入到新位置
+      appList.insert(targetGlobalIndex, app);
+    }
+    
+    // 刷新UI
+    update();
+  }
 }

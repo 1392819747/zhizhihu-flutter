@@ -26,12 +26,14 @@ class DesktopPage extends StatelessWidget {
             // 顶部状态栏占位空间
             SizedBox(height: MediaQuery.of(context).padding.top),
             
-            // 顶部天气小组件 - Liquid Glass风格
-            _buildWeatherWidget(),
-            
-            // App列表区域
+            // 桌面页面内容区域
             Expanded(
-              child: _buildAppGrid(),
+              child: PageView.builder(
+                itemCount: logic.getPageCount(),
+                itemBuilder: (context, pageIndex) {
+                  return _buildDesktopPage(pageIndex);
+                },
+              ),
             ),
             
             // 底部Dock栏 - Liquid Glass风格
@@ -42,6 +44,20 @@ class DesktopPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDesktopPage(int pageIndex) {
+    return Column(
+      children: [
+        // 顶部天气小组件 - Liquid Glass风格
+        _buildWeatherWidget(),
+        
+        // App列表区域
+        Expanded(
+          child: _buildAppGridForPage(pageIndex),
+        ),
+      ],
     );
   }
 
@@ -170,28 +186,71 @@ class DesktopPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAppGrid() {
-    return PageView.builder(
-      itemCount: logic.getPageCount(),
-      itemBuilder: (context, pageIndex) {
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: GridView.builder(
-            physics: const NeverScrollableScrollPhysics(), // 禁用GridView的滚动
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: 12.w,
-              mainAxisSpacing: 16.h,
-              childAspectRatio: 0.9,
+  Widget _buildAppGridForPage(int pageIndex) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(), // 禁用GridView的滚动
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          crossAxisSpacing: 12.w,
+          mainAxisSpacing: 16.h,
+          childAspectRatio: 0.9,
+        ),
+        itemCount: logic.getAppsForPage(pageIndex).length,
+        itemBuilder: (context, index) {
+          final app = logic.getAppsForPage(pageIndex)[index];
+          return _buildDraggableAppItem(app, pageIndex, index);
+        },
+      ),
+    );
+  }
+
+  Widget _buildDraggableAppItem(AppItem app, int pageIndex, int index) {
+    return Draggable<AppItem>(
+      data: app,
+      feedback: Material(
+        elevation: 8,
+        borderRadius: BorderRadius.circular(18.r),
+        child: Container(
+          width: 60.w,
+          height: 60.w,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                app.color,
+                app.color.withOpacity(0.8),
+              ],
             ),
-            itemCount: logic.getAppsForPage(pageIndex).length,
-            itemBuilder: (context, index) {
-              final app = logic.getAppsForPage(pageIndex)[index];
-              return _buildAppItem(app);
-            },
+            borderRadius: BorderRadius.circular(18.r),
           ),
-        );
-      },
+          child: Icon(
+            app.icon,
+            color: Colors.white,
+            size: 30.w,
+          ),
+        ),
+      ),
+      childWhenDragging: Container(
+        width: 60.w,
+        height: 60.w,
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(18.r),
+        ),
+      ),
+      child: DragTarget<AppItem>(
+        onWillAccept: (data) => data != null,
+        onAccept: (data) {
+          // 处理拖拽到其他位置
+          logic.moveAppToPosition(data, pageIndex, index);
+        },
+        builder: (context, candidateData, rejectedData) {
+          return _buildAppItem(app);
+        },
+      ),
     );
   }
 

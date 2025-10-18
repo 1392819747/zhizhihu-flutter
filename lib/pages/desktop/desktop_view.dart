@@ -69,129 +69,197 @@ class DesktopPage extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 20.h),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(16.r),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
             child: Container(
-              padding: EdgeInsets.all(20.w),
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    logic.getWidgetBackgroundColor(),
-                    logic.getWidgetBackgroundColor().withOpacity(0.5),
-                  ],
+                  colors: logic.getWeatherGradientColors(),
                 ),
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
-                  color: logic.getBorderColor(),
+                  color: Colors.white.withOpacity(0.2),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(logic.isDarkMode.value ? 0.3 : 0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
               child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 位置信息和夜间模式切换
+                // 顶部行：城市名称和夜间模式切换
                 Row(
                   children: [
-                    Icon(
-                      Icons.location_on_outlined,
-                      color: logic.getTextColor().withOpacity(0.8),
-                      size: 16.w,
-                    ),
-                    4.horizontalSpace,
-                    Text(
-                      '浦东新区',
-                      style: TextStyle(
-                        color: logic.getTextColor().withOpacity(0.8),
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            color: Colors.white.withOpacity(0.9),
+                            size: 16.w,
+                          ),
+                          4.horizontalSpace,
+                          Expanded(
+                            child: Text(
+                              logic.getCurrentCityName(),
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const Spacer(),
                     // 夜间模式切换按钮
                     GestureDetector(
                       onTap: logic.toggleDarkMode,
                       child: Container(
-                        padding: EdgeInsets.all(4.w),
+                        padding: EdgeInsets.all(6.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
                         child: Icon(
                           logic.isDarkMode.value ? Icons.light_mode : Icons.dark_mode,
-                          color: logic.getTextColor().withOpacity(0.8),
-                          size: 20.w,
+                          color: Colors.white.withOpacity(0.9),
+                          size: 18.w,
                         ),
                       ),
                     ),
-                    8.horizontalSpace,
-                    Icon(
-                      Icons.keyboard_arrow_up,
-                      color: logic.getTextColor().withOpacity(0.6),
-                      size: 16.w,
-                    ),
                   ],
                 ),
                 
-                12.verticalSpace,
+                16.verticalSpace,
                 
-                // 主要温度
-                Text(
-                  '27°',
-                  style: TextStyle(
-                    color: logic.getTextColor(),
-                    fontSize: 48.sp,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-                
-                8.verticalSpace,
-                
-                // 天气状况
+                // 主要温度和天气图标
                 Row(
                   children: [
-                    Icon(
-                      Icons.cloud_outlined,
-                      color: logic.getTextColor().withOpacity(0.8),
-                      size: 20.w,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 主要温度
+                          Text(
+                            logic.getCurrentTemperature(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 42.sp,
+                              fontWeight: FontWeight.w300,
+                              height: 1.0,
+                            ),
+                          ),
+                          4.verticalSpace,
+                          // 天气描述
+                          Text(
+                            logic.getCurrentWeatherDescription(),
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    8.horizontalSpace,
-                    Text(
-                      '多云',
-                      style: TextStyle(
-                        color: logic.getTextColor().withOpacity(0.8),
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w500,
+                    // 天气图标
+                    Container(
+                      width: 60.w,
+                      height: 60.w,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Center(
+                        child: Image.asset(
+                          logic.getWeatherIconPath(),
+                          width: 40.w,
+                          height: 40.w,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ],
                 ),
                 
-                12.verticalSpace,
+                16.verticalSpace,
                 
-                // 高低温度
-                Text(
-                  '高34° 低24°',
-                  style: TextStyle(
-                    color: logic.getTextColor().withOpacity(0.7),
-                    fontSize: 14.sp,
-                  ),
+                // 底部信息行：高低温度和详细信息
+                Row(
+                  children: [
+                    // 高低温度
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.keyboard_arrow_up,
+                            color: Colors.white.withOpacity(0.8),
+                            size: 16.w,
+                          ),
+                          Text(
+                            logic.getHighTemperature(),
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          8.horizontalSpace,
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.white.withOpacity(0.8),
+                            size: 16.w,
+                          ),
+                          Text(
+                            logic.getLowTemperature(),
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // 体感温度
+                    Text(
+                      '体感 ${logic.getFeelsLikeTemperature()}°',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                  ],
                 ),
                 
                 8.verticalSpace,
                 
-                // 标签
+                // 底部标签
                 Center(
-                  child: Text(
-                    '天气',
-                    style: TextStyle(
-                      color: logic.getTextColor().withOpacity(0.6),
-                      fontSize: 12.sp,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Text(
+                      '点击查看详情',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),

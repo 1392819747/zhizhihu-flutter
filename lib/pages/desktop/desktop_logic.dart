@@ -4,6 +4,8 @@ import 'package:openim_common/openim_common.dart';
 
 import '../../routes/app_navigator.dart';
 import '../conversation/conversation_logic.dart';
+import '../../weather_models/models.dart';
+import '../../weather_service/dart_service.dart';
 
 class AppItem {
   final String name;
@@ -27,6 +29,11 @@ class DesktopLogic extends GetxController {
   
   // PageView控制器
   late PageController pageController;
+  
+  // 天气数据
+  final weatherData = Rxn<WeatherResponse>();
+  final isLoadingWeather = false.obs;
+  final DataService _dataService = DataService();
   
   // App位置管理：使用Map来存储每个位置的App，null表示空位
   final Map<int, AppItem?> appPositions = {};
@@ -127,6 +134,7 @@ class DesktopLogic extends GetxController {
     super.onInit();
     pageController = PageController();
     _initializeAppPositions();
+    _loadWeatherData();
   }
 
   @override
@@ -257,5 +265,110 @@ class DesktopLogic extends GetxController {
   // 天气小组件点击事件
   void onWeatherWidgetTap() {
     AppNavigator.startWeather();
+  }
+
+  // 加载天气数据
+  Future<void> _loadWeatherData() async {
+    try {
+      isLoadingWeather.value = true;
+      // 使用默认位置（上海）
+      final weather = await _dataService.getWeather(121.4737, 31.2304);
+      weatherData.value = weather;
+    } catch (e) {
+      print('加载天气数据失败: $e');
+    } finally {
+      isLoadingWeather.value = false;
+    }
+  }
+
+  // 获取当前城市名称
+  String getCurrentCityName() {
+    if (weatherData.value != null) {
+      return weatherData.value!.cityName;
+    }
+    return '浦东新区';
+  }
+
+  // 获取当前温度
+  String getCurrentTemperature() {
+    if (weatherData.value != null) {
+      return '${weatherData.value!.tempInfo.temperature.round()}°';
+    }
+    return '27°';
+  }
+
+  // 获取当前天气描述
+  String getCurrentWeatherDescription() {
+    if (weatherData.value != null) {
+      return weatherData.value!.weatherInfo.description;
+    }
+    return '多云';
+  }
+
+  // 获取最高温度
+  String getHighTemperature() {
+    if (weatherData.value != null) {
+      return '${weatherData.value!.tempInfo.temperature.round()}°';
+    }
+    return '34°';
+  }
+
+  // 获取最低温度
+  String getLowTemperature() {
+    if (weatherData.value != null) {
+      return '${weatherData.value!.tempInfo.temperature.round()}°';
+    }
+    return '24°';
+  }
+
+  // 获取体感温度
+  String getFeelsLikeTemperature() {
+    if (weatherData.value != null) {
+      return '${weatherData.value!.tempInfo.feelslike.round()}';
+    }
+    return '29';
+  }
+
+  // 获取天气图标路径
+  String getWeatherIconPath() {
+    if (weatherData.value != null) {
+      return 'openim_common/weather_assets/icons/${weatherData.value!.weatherInfo.icon}.png';
+    }
+    return 'openim_common/weather_assets/icons/02d.png';
+  }
+
+  // 获取天气渐变背景颜色
+  List<Color> getWeatherGradientColors() {
+    if (isDarkMode.value) {
+      return [
+        const Color(0xFF2C3E50),
+        const Color(0xFF34495E),
+      ];
+    } else {
+      // 根据天气状况返回不同的渐变颜色
+      if (weatherData.value != null) {
+        final weatherIcon = weatherData.value!.weatherInfo.icon;
+        if (weatherIcon.contains('01')) {
+          // 晴天
+          return [const Color(0xFFFFD700), const Color(0xFFFFA500)];
+        } else if (weatherIcon.contains('02') || weatherIcon.contains('03') || weatherIcon.contains('04')) {
+          // 多云
+          return [const Color(0xFF74B9FF), const Color(0xFF0984E3)];
+        } else if (weatherIcon.contains('09') || weatherIcon.contains('10')) {
+          // 雨天
+          return [const Color(0xFF6C7CE7), const Color(0xFF4C63D2)];
+        } else if (weatherIcon.contains('11')) {
+          // 雷雨
+          return [const Color(0xFF2D3436), const Color(0xFF636E72)];
+        } else if (weatherIcon.contains('13')) {
+          // 雪天
+          return [const Color(0xFFDDD6FE), const Color(0xFFC4B5FD)];
+        } else {
+          // 默认
+          return [const Color(0xFF74B9FF), const Color(0xFF0984E3)];
+        }
+      }
+      return [const Color(0xFF74B9FF), const Color(0xFF0984E3)];
+    }
   }
 }

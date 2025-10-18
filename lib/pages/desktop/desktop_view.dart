@@ -267,11 +267,21 @@ class DesktopPage extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(18.r),
           ),
-          child: Icon(
-            app.icon,
-            color: Colors.white,
-            size: 30.w,
-          ),
+          child: app.iconPath != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(18.r),
+                  child: Image.asset(
+                    app.iconPath!,
+                    width: 60.w,
+                    height: 60.w,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Icon(
+                  app.icon!,
+                  color: Colors.white,
+                  size: 30.w,
+                ),
         ),
       ),
       childWhenDragging: Container(
@@ -326,11 +336,21 @@ class DesktopPage extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(
-              app.icon,
-              color: Colors.white,
-              size: 30.w,
-            ),
+            child: app.iconPath != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(18.r),
+                    child: Image.asset(
+                      app.iconPath!,
+                      width: 60.w,
+                      height: 60.w,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Icon(
+                    app.icon!,
+                    color: Colors.white,
+                    size: 30.w,
+                  ),
           ),
           8.verticalSpace,
           Text(
@@ -406,11 +426,21 @@ class DesktopPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(
-                      app.icon,
-                      color: Colors.white,
-                      size: 30.w,
-                    ),
+                    child: app.iconPath != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(18.r),
+                            child: Image.asset(
+                              app.iconPath!,
+                              width: 60.w,
+                              height: 60.w,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Icon(
+                            app.icon!,
+                            color: Colors.white,
+                            size: 30.w,
+                          ),
                   ),
                 );
               }).toList(),

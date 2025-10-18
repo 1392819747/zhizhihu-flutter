@@ -7,13 +7,15 @@ import '../conversation/conversation_logic.dart';
 
 class AppItem {
   final String name;
-  final IconData icon;
+  final IconData? icon;
+  final String? iconPath;
   final Color color;
   final VoidCallback? onTap;
 
   AppItem({
     required this.name,
-    required this.icon,
+    this.icon,
+    this.iconPath,
     required this.color,
     this.onTap,
   });
@@ -32,7 +34,7 @@ class DesktopLogic extends GetxController {
   final List<AppItem> appList = [
     AppItem(
       name: '社区',
-      icon: Icons.chat_bubble_outline,
+      iconPath: 'packages/openim_common/assets/images/wechat_icon.png',
       color: const Color(0xFF007AFF), // iOS Messages Blue
     ),
     AppItem(
@@ -42,17 +44,17 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '发现',
-      icon: Icons.explore_outlined,
+      iconPath: 'packages/openim_common/assets/images/browser_icon.png',
       color: const Color(0xFFFF9500), // iOS Safari Orange
     ),
     AppItem(
       name: '我的',
-      icon: Icons.person_outline,
+      iconPath: 'packages/openim_common/assets/images/mail_icon.png',
       color: const Color(0xFF5856D6), // iOS Settings Purple
     ),
     AppItem(
       name: '设置',
-      icon: Icons.settings_outlined,
+      iconPath: 'packages/openim_common/assets/images/settings_icon.png',
       color: const Color(0xFF8E8E93), // iOS Settings Gray
     ),
     AppItem(
@@ -67,7 +69,7 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '音乐',
-      icon: Icons.music_note_outlined,
+      iconPath: 'packages/openim_common/assets/images/music_icon.png',
       color: const Color(0xFFFF2D92), // iOS Music Pink
     ),
     AppItem(
@@ -77,7 +79,7 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '文件',
-      icon: Icons.folder_outlined,
+      iconPath: 'packages/openim_common/assets/images/files_icon.png',
       color: const Color(0xFFFF9500), // iOS Files Orange
     ),
     AppItem(
@@ -87,7 +89,7 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '备忘录',
-      icon: Icons.note_outlined,
+      iconPath: 'packages/openim_common/assets/images/notes_icon.png',
       color: const Color(0xFFFFCC00), // iOS Notes Yellow
     ),
   ];
@@ -95,7 +97,7 @@ class DesktopLogic extends GetxController {
   final List<AppItem> dockApps = [
     AppItem(
       name: '社区',
-      icon: Icons.chat_bubble_outline,
+      iconPath: 'packages/openim_common/assets/images/wechat_icon.png',
       color: const Color(0xFF007AFF), // iOS Messages Blue
     ),
     AppItem(
@@ -105,12 +107,12 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '发现',
-      icon: Icons.explore_outlined,
+      iconPath: 'packages/openim_common/assets/images/browser_icon.png',
       color: const Color(0xFFFF9500), // iOS Safari Orange
     ),
     AppItem(
       name: '我的',
-      icon: Icons.person_outline,
+      iconPath: 'packages/openim_common/assets/images/mail_icon.png',
       color: const Color(0xFF5856D6), // iOS Settings Purple
     ),
   ];

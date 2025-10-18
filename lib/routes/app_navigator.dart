@@ -32,6 +32,10 @@ class AppNavigator {
     Get.offAllNamed(AppRoutes.desktop);
   }
 
+  static void startWeather() {
+    Get.toNamed(AppRoutes.weather);
+  }
+
   static void startSplashToMain({bool isAutoLogin = false, List<ConversationInfo>? conversations}) {
     Get.offAndToNamed(
       AppRoutes.home,

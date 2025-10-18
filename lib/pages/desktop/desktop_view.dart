@@ -64,36 +64,38 @@ class DesktopPage extends StatelessWidget {
   }
 
   Widget _buildWeatherWidget() {
-    return Obx(() => Container(
-      margin: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 20.h),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20.r),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  logic.getWidgetBackgroundColor(),
-                  logic.getWidgetBackgroundColor().withOpacity(0.5),
+    return Obx(() => GestureDetector(
+      onTap: () => logic.onWeatherWidgetTap(),
+      child: Container(
+        margin: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 20.h),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20.r),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              padding: EdgeInsets.all(20.w),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    logic.getWidgetBackgroundColor(),
+                    logic.getWidgetBackgroundColor().withOpacity(0.5),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(
+                  color: logic.getBorderColor(),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(logic.isDarkMode.value ? 0.3 : 0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                color: logic.getBorderColor(),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(logic.isDarkMode.value ? 0.3 : 0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

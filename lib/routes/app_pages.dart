@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../pages/chat/chat_binding.dart';
 import '../pages/desktop/desktop_binding.dart';
 import '../pages/desktop/desktop_view.dart';
+import '../pages/weather/weather_binding.dart';
+import '../pages/weather/weather_view.dart';
 import '../pages/chat/chat_setup/chat_setup_binding.dart';
 import '../pages/chat/chat_setup/chat_setup_view.dart';
 import '../pages/chat/chat_view.dart';
@@ -119,6 +121,11 @@ class AppPages {
       name: AppRoutes.desktop,
       page: () => DesktopPage(),
       binding: DesktopBinding(),
+    ),
+    _pageBuilder(
+      name: AppRoutes.weather,
+      page: () => WeatherPage(),
+      binding: WeatherBinding(),
     ),
     _pageBuilder(
       name: AppRoutes.home,

@@ -5,6 +5,7 @@ abstract class AppRoutes {
   static const splash = '/splash';
   static const login = '/login';
   static const desktop = '/desktop';
+  static const weather = '/weather';
   static const home = '/home';
   static const chat = '/chat';
   static const chatSetup = '/chat_setup';

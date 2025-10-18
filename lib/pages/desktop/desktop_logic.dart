@@ -92,6 +92,11 @@ class DesktopLogic extends GetxController {
       iconPath: 'packages/openim_common/assets/images/notes_icon.png',
       color: const Color(0xFFFFCC00), // iOS Notes Yellow
     ),
+    AppItem(
+      name: '天气',
+      icon: Icons.wb_sunny,
+      color: const Color(0xFFFF9500), // iOS Weather Orange
+    ),
   ];
 
   final List<AppItem> dockApps = [
@@ -144,6 +149,10 @@ class DesktopLogic extends GetxController {
         // 进入聊天应用，先获取会话数据
         final conversations = await ConversationLogic.getConversationFirstPage();
         AppNavigator.startMain(conversations: conversations);
+        break;
+      case '天气':
+        // 打开天气应用
+        AppNavigator.startWeather();
         break;
       default:
         // 其他应用暂时显示提示
@@ -243,5 +252,10 @@ class DesktopLogic extends GetxController {
     return isDarkMode.value 
         ? Colors.white.withOpacity(0.2) 
         : Colors.white.withOpacity(0.3);
+  }
+
+  // 天气小组件点击事件
+  void onWeatherWidgetTap() {
+    AppNavigator.startWeather();
   }
 }

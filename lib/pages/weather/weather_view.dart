@@ -1,269 +1,257 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../weather_models/models.dart';
+import '../../weather_models/weatherDailyModel.dart';
+import '../../weather_models/weatherHourlyModel.dart';
 import 'weather_logic.dart';
 
-class WeatherPage extends StatelessWidget {
-  final logic = Get.find<WeatherLogic>();
+class WeatherPage extends StatefulWidget {
+  const WeatherPage({super.key});
 
-  WeatherPage({super.key});
+  @override
+  State<WeatherPage> createState() => _WeatherPageState();
+}
+
+class _WeatherPageState extends State<WeatherPage> {
+  final logic = Get.find<WeatherLogic>();
+  ScrollController? _scrollController;
+  bool lastStatus = false;
+  late PageController _pageController;
+  bool loading = true;
+  List<HourlyData> cityWeatherHr = [];
+  List<DailyData> cityWeatherDy = [];
+  WeatherResponse? _response;
+
+  void _scrollListener() {
+    // 滚动监听器
+  }
+
+  bool get _isShrink {
+    return _scrollController != null &&
+        _scrollController!.hasClients &&
+        _scrollController!.offset > 200;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _scrollController = ScrollController()..addListener(_scrollListener);
+    _loadWeatherData();
+  }
+
+  @override
+  void dispose() {
+    _scrollController?.removeListener(_scrollListener);
+    _scrollController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadWeatherData() async {
+    setState(() {
+      loading = true;
+    });
+    
+    try {
+      await logic.loadWeatherData();
+      if (logic.weatherData.value != null) {
+        _response = logic.weatherData.value!;
+        setState(() {
+          loading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  String getTime(final timeStamp) {
+    DateTime time = DateTime.fromMillisecondsSinceEpoch(timeStamp * 1000);
+    String x = DateFormat.H().format(time);
+    return x;
+  }
+
+  String getDay(final day) {
+    DateTime time = DateTime.fromMillisecondsSinceEpoch(day * 1000);
+    String x = DateFormat.E().format(time);
+    return x;
+  }
+
+  String toTitleCase(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Obx(() {
-        if (logic.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          );
-        }
+    if (loading || _response == null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
 
-        if (logic.weatherData.value == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.cloud_off,
-                  size: 80.w,
-                  color: Colors.white54,
-                ),
-                20.verticalSpace,
-                Text(
-                  '无法获取天气数据',
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 18.sp,
+    return Scaffold(
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.black,
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              "openim_common/weather_assets/images/${_response!.weatherInfo.icon}.jpeg"
+            ),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: NestedScrollView(
+          controller: _scrollController,
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                elevation: 0,
+                surfaceTintColor: Colors.transparent,
+                backgroundColor: Colors.transparent,
+                pinned: true,
+                automaticallyImplyLeading: false,
+                expandedHeight: 235.h,
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.parallax,
+                  background: SafeArea(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 48.h),
+                          child: Image(
+                            image: AssetImage(
+                              'openim_common/weather_assets/icons/${_response!.weatherInfo.icon}.png'
+                            ),
+                            fit: BoxFit.none,
+                            width: 120.w,
+                            height: 120.w,
+                          ),
+                        ),
+                        Text(
+                          _response!.cityName,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 25.sp,
+                          ),
+                        ),
+                        Text(
+                          _response!.tempInfo.temperature.toStringAsFixed(0) +
+                              '\u00B0' +
+                              ' | ' +
+                              toTitleCase(_response!.weatherInfo.description),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 30.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'H:' +
+                              _response!.tempInfo.temperature.toStringAsFixed(0) +
+                              '\u00B0 ' +
+                              ' L:' +
+                              _response!.tempInfo.temperature.toStringAsFixed(0) +
+                              '\u00B0',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                20.verticalSpace,
-                ElevatedButton(
-                  onPressed: () => logic.loadWeatherData(),
-                  child: const Text('重试'),
+                centerTitle: true,
+                title: _isShrink
+                    ? Column(
+                        children: [
+                          Text(
+                            _response!.cityName,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            _response!.tempInfo.temperature.toStringAsFixed(0) +
+                                '\u00B0' +
+                                ' | ' +
+                                toTitleCase(_response!.weatherInfo.description),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        ],
+                      )
+                    : null,
+              ),
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                sliver: SliverAppBar(
+                  surfaceTintColor: Colors.transparent,
+                  pinned: true,
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Colors.transparent,
                 ),
-              ],
+              ),
+            ];
+          },
+          body: Padding(
+            padding: EdgeInsets.only(top: 77.h),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // 当前天气详情卡片
+                  _buildCurrentWeatherCard(),
+                  
+                  // 小时预报
+                  _buildHourlyForecast(),
+                  
+                  // 每日预报
+                  _buildDailyForecast(),
+                  
+                  // 天气详情
+                  _buildWeatherDetails(),
+                  
+                  SizedBox(height: 100.h), // 底部间距
+                ],
+              ),
             ),
-          );
-        }
-
-        return _buildWeatherContent();
-      }),
-    );
-  }
-
-  Widget _buildWeatherContent() {
-    final weather = logic.weatherData.value!;
-    
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            _getWeatherColor(weather.weatherInfo.description),
-            _getWeatherColor(weather.weatherInfo.description).withOpacity(0.8),
-          ],
+          ),
         ),
       ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            // 顶部导航栏
-            _buildTopBar(),
-            
-            // 主要内容
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // 主要天气信息
-                    _buildMainWeatherInfo(weather),
-                    
-                    40.verticalSpace,
-                    
-                    // 详细信息卡片
-                    _buildDetailCards(weather),
-                    
-                    40.verticalSpace,
-                    
-                    // 未来几天预报
-                    _buildForecastSection(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
-  Widget _buildTopBar() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Get.back(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.white,
-                size: 20.w,
-              ),
-            ),
-          ),
-          20.horizontalSpace,
-          Text(
-            '天气',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => logic.loadWeatherData(),
-            child: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Icon(
-                Icons.refresh,
-                color: Colors.white,
-                size: 20.w,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMainWeatherInfo(WeatherResponse weather) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        children: [
-          // 城市名称
-          Text(
-            weather.cityName,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 32.sp,
-              fontWeight: FontWeight.w300,
-            ),
-          ),
-          
-          20.verticalSpace,
-          
-          // 温度
-          Text(
-            '${weather.tempInfo.temperature.round()}°',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 120.sp,
-              fontWeight: FontWeight.w100,
-            ),
-          ),
-          
-          10.verticalSpace,
-          
-          // 天气描述
-          Text(
-            weather.weatherInfo.description,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          
-          20.verticalSpace,
-          
-          // 体感温度
-          Text(
-            '体感温度 ${weather.tempInfo.feelslike.round()}°',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 16.sp,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailCards(WeatherResponse weather) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        children: [
-          // 第一行卡片
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailCard(
-                  '湿度',
-                  '${weather.tempInfo.humidity}%',
-                  Icons.water_drop,
-                ),
-              ),
-              10.horizontalSpace,
-              Expanded(
-                child: _buildDetailCard(
-                  '风速',
-                  '${weather.windInfo.windspeed.toStringAsFixed(1)} km/h',
-                  Icons.air,
-                ),
-              ),
-            ],
-          ),
-          
-          10.verticalSpace,
-          
-          // 第二行卡片
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailCard(
-                  '气压',
-                  '${weather.tempInfo.pressure} hPa',
-                  Icons.compress,
-                ),
-              ),
-              10.horizontalSpace,
-              Expanded(
-                child: _buildDetailCard(
-                  '能见度',
-                  '${weather.visibility / 1000} km',
-                  Icons.visibility,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailCard(String title, String value, IconData icon) {
+  Widget _buildCurrentWeatherCard() {
     return Container(
+      margin: EdgeInsets.symmetric(horizontal: 22.w),
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16.r),
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
           color: Colors.white.withOpacity(0.2),
           width: 1,
@@ -271,40 +259,59 @@ class WeatherPage extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: Colors.white.withOpacity(0.8),
-            size: 24.w,
-          ),
-          8.verticalSpace,
           Text(
-            value,
+            '当前天气',
             style: TextStyle(
               color: Colors.white,
               fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          4.verticalSpace,
-          Text(
-            title,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 14.sp,
-            ),
+          20.verticalSpace,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildDetailItem('湿度', '${_response!.tempInfo.humidity}%', Icons.water_drop),
+              _buildDetailItem('风速', '${_response!.windInfo.windspeed.toStringAsFixed(1)} km/h', Icons.air),
+              _buildDetailItem('气压', '${_response!.tempInfo.pressure} hPa', Icons.compress),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildForecastSection() {
+  Widget _buildDetailItem(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white, size: 24.w),
+        8.verticalSpace,
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.8),
+            fontSize: 12.sp,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHourlyForecast() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      margin: EdgeInsets.symmetric(horizontal: 22.w, vertical: 20.h),
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16.r),
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
           color: Colors.white.withOpacity(0.2),
           width: 1,
@@ -314,20 +321,52 @@ class WeatherPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '未来几天',
+            '24小时预报',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
             ),
           ),
           20.verticalSpace,
-          // 这里可以添加未来几天的预报
-          Text(
-            '预报功能开发中...',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16.sp,
+          SizedBox(
+            height: 120.h,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 24,
+              itemBuilder: (context, index) {
+                final hour = DateTime.now().add(Duration(hours: index));
+                return Container(
+                  width: 80.w,
+                  margin: EdgeInsets.only(right: 10.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        DateFormat('HH:mm').format(hour),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                      10.verticalSpace,
+                      Image.asset(
+                        'openim_common/weather_assets/icons/${_response!.weatherInfo.icon}.png',
+                        width: 40.w,
+                        height: 40.w,
+                      ),
+                      10.verticalSpace,
+                      Text(
+                        '${(_response!.tempInfo.temperature + (index - 12) * 2).round()}°',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -335,25 +374,138 @@ class WeatherPage extends StatelessWidget {
     );
   }
 
-  Color _getWeatherColor(String weatherCondition) {
-    switch (weatherCondition.toLowerCase()) {
-      case 'clear':
-        return const Color(0xFF87CEEB); // 天蓝色
-      case 'clouds':
-        return const Color(0xFF708090); // 石板灰
-      case 'rain':
-        return const Color(0xFF4682B4); // 钢蓝色
-      case 'snow':
-        return const Color(0xFFE6E6FA); // 薰衣草色
-      case 'thunderstorm':
-        return const Color(0xFF2F4F4F); // 深石板灰
-      case 'drizzle':
-        return const Color(0xFF6495ED); // 矢车菊蓝
-      case 'mist':
-      case 'fog':
-        return const Color(0xFFD3D3D3); // 浅灰色
-      default:
-        return const Color(0xFF87CEEB); // 默认天蓝色
-    }
+  Widget _buildDailyForecast() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 22.w, vertical: 20.h),
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '7天预报',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          20.verticalSpace,
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 7,
+            itemBuilder: (context, index) {
+              final day = DateTime.now().add(Duration(days: index));
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 80.w,
+                      child: Text(
+                        DateFormat('EEEE').format(day),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.sp,
+                        ),
+                      ),
+                    ),
+                    Image.asset(
+                      'openim_common/weather_assets/icons/${_response!.weatherInfo.icon}.png',
+                      width: 40.w,
+                      height: 40.w,
+                    ),
+                    10.horizontalSpace,
+                    Text(
+                      toTitleCase(_response!.weatherInfo.description),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${(_response!.tempInfo.temperature + (index - 3) * 3).round()}° / ${(_response!.tempInfo.temperature + (index - 3) * 2).round()}°',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeatherDetails() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 22.w, vertical: 20.h),
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '详细信息',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          20.verticalSpace,
+          _buildDetailRow('体感温度', '${_response!.tempInfo.feelslike.round()}°'),
+          _buildDetailRow('能见度', '${(_response!.visibility / 1000).toStringAsFixed(1)} km'),
+          _buildDetailRow('紫外线指数', '中等'),
+          _buildDetailRow('日出时间', '06:30'),
+          _buildDetailRow('日落时间', '18:45'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 16.sp,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -345,6 +345,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  cupertino_listview:
+    dependency: "direct main"
+    description:
+      name: cupertino_listview
+      sha256: "4d768b44b1253cf89fdf217b324bad3b925539a3df2610bb93e8810758935bf5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   dart_date:
     dependency: "direct main"
     description:
@@ -836,6 +844,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.9.3"
+  flutter_sensors:
+    dependency: transitive
+    description:
+      name: flutter_sensors
+      sha256: "3ac86cd414eb127c4afb97b6d986996d5f4bd7e2223f5c9aea53c13a7022c7aa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   flutter_spinkit:
     dependency: "direct main"
     description:
@@ -1540,6 +1556,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.0"
+  palette_generator:
+    dependency: "direct main"
+    description:
+      name: palette_generator
+      sha256: "4420f7ccc3f0a4a906144e73f8b6267cd940b64f57a7262e95cb8cec3a8ae0ed"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3+7"
   path:
     dependency: transitive
     description:
@@ -2089,6 +2113,30 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  sleek_circular_slider:
+    dependency: "direct main"
+    description:
+      name: sleek_circular_slider
+      sha256: "89c7d0d37befc9818a2b53ef6ff126c43b70485dabb189b734d46106db190931"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
+  smooth_compass:
+    dependency: "direct main"
+    description:
+      name: smooth_compass
+      sha256: fb0878d7dde855044fba50830f5761658d1f9affbb8137ddb7317952c2c3deac
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
+  smooth_page_indicator:
+    dependency: "direct main"
+    description:
+      name: smooth_page_indicator
+      sha256: b21ebb8bc39cf72d11c7cfd809162a48c3800668ced1c9da3aade13a32cf6c1c
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.1"
   sound_mode:
     dependency: "direct main"
     description:

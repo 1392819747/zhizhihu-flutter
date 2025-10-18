@@ -15,6 +15,7 @@
         "country_picker",
         "crypto",
         "cupertino_icons",
+        "cupertino_listview",
         "dart_date",
         "dio",
         "extended_image",
@@ -51,6 +52,7 @@
         "openim_common",
         "openim_live",
         "package_info_plus",
+        "palette_generator",
         "path_provider",
         "percent_indicator",
         "permission_handler",
@@ -62,6 +64,9 @@
         "rxdart",
         "search_keyword_text",
         "shared_preferences",
+        "sleek_circular_slider",
+        "smooth_compass",
+        "smooth_page_indicator",
         "sound_mode",
         "sprintf",
         "synchronized",
@@ -844,6 +849,13 @@
       "dependencies": [
         "crypto",
         "meta"
+      ]
+    },
+    {
+      "name": "cupertino_listview",
+      "version": "3.0.0",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -3254,6 +3266,44 @@
       "version": "1.0.1",
       "dependencies": [
         "meta"
+      ]
+    },
+    {
+      "name": "smooth_compass",
+      "version": "0.0.2",
+      "dependencies": [
+        "flutter",
+        "flutter_sensors",
+        "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_sensors",
+      "version": "1.0.1",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "sleek_circular_slider",
+      "version": "2.1.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "palette_generator",
+      "version": "0.3.3+7",
+      "dependencies": [
+        "collection",
+        "flutter"
+      ]
+    },
+    {
+      "name": "smooth_page_indicator",
+      "version": "1.2.1",
+      "dependencies": [
+        "flutter"
       ]
     }
   ],

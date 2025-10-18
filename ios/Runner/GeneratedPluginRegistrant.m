@@ -90,6 +90,12 @@
 @import flutter_openim_sdk;
 #endif
 
+#if __has_include(<flutter_sensors/FlutterSensorsPlugin.h>)
+#import <flutter_sensors/FlutterSensorsPlugin.h>
+#else
+@import flutter_sensors;
+#endif
+
 #if __has_include(<flutter_webrtc/FlutterWebRTCPlugin.h>)
 #import <flutter_webrtc/FlutterWebRTCPlugin.h>
 #else
@@ -293,6 +299,7 @@
   [FlutterNativeSplashPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterNativeSplashPlugin"]];
   [FlutterNewBadgerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterNewBadgerPlugin"]];
   [FlutterOpenimSdkPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterOpenimSdkPlugin"]];
+  [FlutterSensorsPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterSensorsPlugin"]];
   [FlutterWebRTCPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterWebRTCPlugin"]];
   [GeolocatorPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeolocatorPlugin"]];
   [FLTImageCropperPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTImageCropperPlugin"]];

@@ -22,7 +22,6 @@ class _WeatherPageState extends State<WeatherPage> {
   final logic = Get.find<WeatherLogic>();
   ScrollController? _scrollController;
   bool lastStatus = false;
-  late PageController _pageController;
   bool loading = true;
   List<HourlyData> cityWeatherHr = [];
   List<DailyData> cityWeatherDy = [];
@@ -41,7 +40,6 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
     _scrollController = ScrollController()..addListener(_scrollListener);
     _loadWeatherData();
   }

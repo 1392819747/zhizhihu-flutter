@@ -18,7 +18,7 @@ class AppItem {
     this.iconPath,
     required this.color,
     this.onTap,
-  });
+  }) : assert(icon != null || iconPath != null, 'Either icon or iconPath must be provided');
 }
 
 class DesktopLogic extends GetxController {

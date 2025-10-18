@@ -278,7 +278,7 @@ class DesktopPage extends StatelessWidget {
                   ),
                 )
               : Icon(
-                  app.icon!,
+                  app.icon ?? Icons.error_outline,
                   color: Colors.white,
                   size: 30.w,
                 ),
@@ -347,7 +347,7 @@ class DesktopPage extends StatelessWidget {
                     ),
                   )
                 : Icon(
-                    app.icon!,
+                    app.icon ?? Icons.error_outline,
                     color: Colors.white,
                     size: 30.w,
                   ),
@@ -437,7 +437,7 @@ class DesktopPage extends StatelessWidget {
                             ),
                           )
                         : Icon(
-                            app.icon!,
+                            app.icon ?? Icons.error_outline,
                             color: Colors.white,
                             size: 30.w,
                           ),

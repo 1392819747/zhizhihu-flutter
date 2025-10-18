@@ -96,7 +96,7 @@ class DesktopPage extends StatelessWidget {
                   ),
                 ],
               ),
-            child: Column(
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 位置信息和夜间模式切换
@@ -200,7 +200,7 @@ class DesktopPage extends StatelessWidget {
           ),
         ),
       ),
-    ));
+    )));
   }
 
   Widget _buildAppGridForPage(int pageIndex) {

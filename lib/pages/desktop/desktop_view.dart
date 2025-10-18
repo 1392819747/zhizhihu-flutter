@@ -31,6 +31,7 @@ class DesktopPage extends StatelessWidget {
               child: PageView.builder(
                 controller: logic.pageController,
                 itemCount: logic.getPageCount(),
+                physics: const BouncingScrollPhysics(), // 添加iOS风格的滑动物理效果
                 itemBuilder: (context, pageIndex) {
                   return _buildDesktopPage(pageIndex);
                 },
@@ -248,9 +249,10 @@ class DesktopPage extends StatelessWidget {
   }
 
   Widget _buildDraggableAppItem(AppItem app, int pageIndex, int index) {
-    return Draggable<AppItem>(
+    return LongPressDraggable<AppItem>(
       data: app,
       dragAnchorStrategy: (draggable, context, position) => Offset(30.w, 30.w),
+      hapticFeedbackOnStart: true, // 长按震动反馈
       feedback: Material(
         elevation: 8,
         borderRadius: BorderRadius.circular(18.r),
@@ -306,9 +308,6 @@ class DesktopPage extends StatelessWidget {
         ),
       ),
       child: GestureDetector(
-        onLongPressStart: (details) {
-          // 长按开始拖拽
-        },
         onTap: () => logic.onAppTap(app),
         child: DragTarget<AppItem>(
           onWillAccept: (data) {

@@ -194,23 +194,21 @@ class DesktopLogic extends GetxController {
     final targetGlobalIndex = targetPageIndex * 12 + targetIndex;
     print('当前位置: $currentIndex, 目标位置: $targetGlobalIndex');
     
-    // 如果目标位置超出范围，则添加到末尾
-    if (targetGlobalIndex >= appList.length) {
-      // 找到最后一个空位或添加新位置
-      int newIndex = appList.length;
-      while (appPositions.containsKey(newIndex)) {
-        newIndex++;
-      }
-      appPositions[currentIndex] = null;
-      appPositions[newIndex] = app;
-      print('移动到新位置: $newIndex');
-    } else {
-      // 移除原位置的App
-      appPositions[currentIndex] = null;
-      
-      // 放置到新位置
+    // 如果目标位置有App，先保存它
+    AppItem? targetApp = appPositions[targetGlobalIndex];
+    
+    // 移除原位置的App
+    appPositions[currentIndex] = null;
+    
+    // 如果目标位置有App，交换位置
+    if (targetApp != null) {
       appPositions[targetGlobalIndex] = app;
-      print('移动到目标位置: $targetGlobalIndex');
+      appPositions[currentIndex] = targetApp;
+      print('交换位置: ${app.name} <-> ${targetApp.name}');
+    } else {
+      // 目标位置为空，直接放置
+      appPositions[targetGlobalIndex] = app;
+      print('移动到空位: $targetGlobalIndex');
     }
     
     // 刷新UI

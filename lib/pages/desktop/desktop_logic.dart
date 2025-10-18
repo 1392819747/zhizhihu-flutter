@@ -39,7 +39,7 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '通讯录',
-      icon: Icons.contacts_outlined,
+      iconPath: 'packages/openim_common/assets/images/phone_icon.png',
       color: const Color(0xFF34C759), // iOS Contacts Green
     ),
     AppItem(
@@ -59,12 +59,12 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '相册',
-      icon: Icons.photo_library_outlined,
+      iconPath: 'packages/openim_common/assets/images/photos_icon.png',
       color: const Color(0xFFFF3B30), // iOS Photos Red
     ),
     AppItem(
       name: '相机',
-      icon: Icons.camera_alt_outlined,
+      iconPath: 'packages/openim_common/assets/images/camera_icon.png',
       color: const Color(0xFF32D74B), // iOS Camera Green
     ),
     AppItem(
@@ -74,7 +74,7 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '视频',
-      icon: Icons.videocam_outlined,
+      iconPath: 'packages/openim_common/assets/images/video_icon.png',
       color: const Color(0xFF007AFF), // iOS Camera Blue
     ),
     AppItem(
@@ -84,7 +84,7 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '日历',
-      icon: Icons.calendar_today_outlined,
+      iconPath: 'packages/openim_common/assets/images/calendar_icon.png',
       color: const Color(0xFF5856D6), // iOS Calendar Purple
     ),
     AppItem(
@@ -102,7 +102,7 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: '通讯录',
-      icon: Icons.contacts_outlined,
+      iconPath: 'packages/openim_common/assets/images/phone_icon.png',
       color: const Color(0xFF34C759), // iOS Contacts Green
     ),
     AppItem(

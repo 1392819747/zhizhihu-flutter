@@ -250,6 +250,7 @@ class DesktopPage extends StatelessWidget {
   Widget _buildDraggableAppItem(AppItem app, int pageIndex, int index) {
     return Draggable<AppItem>(
       data: app,
+      dragAnchorStrategy: (draggable, context, position) => Offset(30.w, 30.w),
       feedback: Material(
         elevation: 8,
         borderRadius: BorderRadius.circular(18.r),
@@ -257,15 +258,14 @@ class DesktopPage extends StatelessWidget {
           width: 60.w,
           height: 60.w,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                app.color,
-                app.color.withOpacity(0.8),
-              ],
-            ),
             borderRadius: BorderRadius.circular(18.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
           child: app.iconPath != null
               ? ClipRRect(
@@ -277,10 +277,23 @@ class DesktopPage extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 )
-              : Icon(
-                  app.icon ?? Icons.error_outline,
-                  color: Colors.white,
-                  size: 30.w,
+              : Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        app.color,
+                        app.color.withOpacity(0.8),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(18.r),
+                  ),
+                  child: Icon(
+                    app.icon ?? Icons.error_outline,
+                    color: Colors.white,
+                    size: 30.w,
+                  ),
                 ),
         ),
       ),
@@ -292,19 +305,25 @@ class DesktopPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(18.r),
         ),
       ),
-      child: DragTarget<AppItem>(
-        onWillAccept: (data) {
-          print('App位置 $pageIndex-$index 准备接受: ${data?.name}');
-          return data != null;
+      child: GestureDetector(
+        onLongPressStart: (details) {
+          // 长按开始拖拽
         },
-        onAccept: (data) {
-          print('App位置 $pageIndex-$index 接受: ${data.name}');
-          // 处理拖拽到其他位置
-          logic.moveAppToPosition(data, pageIndex, index);
-        },
-        builder: (context, candidateData, rejectedData) {
-          return _buildAppItem(app);
-        },
+        onTap: () => logic.onAppTap(app),
+        child: DragTarget<AppItem>(
+          onWillAccept: (data) {
+            print('App位置 $pageIndex-$index 准备接受: ${data?.name}');
+            return data != null && data != app; // 不能拖拽到自己身上
+          },
+          onAccept: (data) {
+            print('App位置 $pageIndex-$index 接受: ${data.name}');
+            // 处理拖拽到其他位置
+            logic.moveAppToPosition(data, pageIndex, index);
+          },
+          builder: (context, candidateData, rejectedData) {
+            return _buildAppItem(app);
+          },
+        ),
       ),
     );
   }
@@ -319,20 +338,12 @@ class DesktopPage extends StatelessWidget {
             width: 60.w,
             height: 60.w,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  app.color,
-                  app.color.withOpacity(0.8),
-                ],
-              ),
               borderRadius: BorderRadius.circular(18.r),
               boxShadow: [
                 BoxShadow(
-                  color: app.color.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -346,10 +357,23 @@ class DesktopPage extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
                   )
-                : Icon(
-                    app.icon ?? Icons.error_outline,
-                    color: Colors.white,
-                    size: 30.w,
+                : Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          app.color,
+                          app.color.withOpacity(0.8),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(18.r),
+                    ),
+                    child: Icon(
+                      app.icon ?? Icons.error_outline,
+                      color: Colors.white,
+                      size: 30.w,
+                    ),
                   ),
           ),
           8.verticalSpace,
@@ -409,20 +433,12 @@ class DesktopPage extends StatelessWidget {
                     width: 60.w,
                     height: 60.w,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          app.color,
-                          app.color.withOpacity(0.8),
-                        ],
-                      ),
                       borderRadius: BorderRadius.circular(18.r),
                       boxShadow: [
                         BoxShadow(
-                          color: app.color.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -436,10 +452,23 @@ class DesktopPage extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                           )
-                        : Icon(
-                            app.icon ?? Icons.error_outline,
-                            color: Colors.white,
-                            size: 30.w,
+                        : Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  app.color,
+                                  app.color.withOpacity(0.8),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(18.r),
+                            ),
+                            child: Icon(
+                              app.icon ?? Icons.error_outline,
+                              color: Colors.white,
+                              size: 30.w,
+                            ),
                           ),
                   ),
                 );

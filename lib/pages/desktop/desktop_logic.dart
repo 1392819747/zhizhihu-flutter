@@ -23,6 +23,9 @@ class DesktopLogic extends GetxController {
   // 夜间模式状态
   final isDarkMode = false.obs;
   
+  // PageView控制器
+  late PageController pageController;
+  
   // App位置管理：使用Map来存储每个位置的App，null表示空位
   final Map<int, AppItem?> appPositions = {};
   
@@ -115,7 +118,14 @@ class DesktopLogic extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    pageController = PageController();
     _initializeAppPositions();
+  }
+
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
   }
 
   // 初始化App位置
@@ -142,8 +152,9 @@ class DesktopLogic extends GetxController {
 
   // 获取总页数
   int getPageCount() {
-    final maxPosition = appPositions.keys.isEmpty ? 0 : appPositions.keys.reduce((a, b) => a > b ? a : b);
-    return ((maxPosition + 1) / 12).ceil(); // 每页12个App (4x3)
+    // 确保至少有1页
+    final totalApps = appList.length;
+    return (totalApps / 12).ceil().clamp(1, 10); // 每页12个App (4x3)，最多10页
   }
 
   // 获取指定页面的App列表
@@ -161,6 +172,8 @@ class DesktopLogic extends GetxController {
 
   // 移动App到指定位置
   void moveAppToPosition(AppItem app, int targetPageIndex, int targetIndex) {
+    print('移动App: ${app.name} 到页面: $targetPageIndex, 位置: $targetIndex');
+    
     // 找到当前App的位置
     int? currentIndex;
     for (var entry in appPositions.entries) {
@@ -170,19 +183,37 @@ class DesktopLogic extends GetxController {
       }
     }
     
-    if (currentIndex == null) return;
+    if (currentIndex == null) {
+      print('未找到App: ${app.name}');
+      return;
+    }
 
     // 计算目标位置
     final targetGlobalIndex = targetPageIndex * 12 + targetIndex;
+    print('当前位置: $currentIndex, 目标位置: $targetGlobalIndex');
     
-    // 移除原位置的App
-    appPositions[currentIndex] = null;
-    
-    // 放置到新位置
-    appPositions[targetGlobalIndex] = app;
+    // 如果目标位置超出范围，则添加到末尾
+    if (targetGlobalIndex >= appList.length) {
+      // 找到最后一个空位或添加新位置
+      int newIndex = appList.length;
+      while (appPositions.containsKey(newIndex)) {
+        newIndex++;
+      }
+      appPositions[currentIndex] = null;
+      appPositions[newIndex] = app;
+      print('移动到新位置: $newIndex');
+    } else {
+      // 移除原位置的App
+      appPositions[currentIndex] = null;
+      
+      // 放置到新位置
+      appPositions[targetGlobalIndex] = app;
+      print('移动到目标位置: $targetGlobalIndex');
+    }
     
     // 刷新UI
     update();
+    print('App位置更新完成');
   }
 
   // 切换夜间模式

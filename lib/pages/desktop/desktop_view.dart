@@ -29,6 +29,7 @@ class DesktopPage extends StatelessWidget {
             // 桌面页面内容区域
             Expanded(
               child: PageView.builder(
+                controller: logic.pageController,
                 itemCount: logic.getPageCount(),
                 itemBuilder: (context, pageIndex) {
                   return _buildDesktopPage(pageIndex);
@@ -224,8 +225,12 @@ class DesktopPage extends StatelessWidget {
 
   Widget _buildEmptySlot(int pageIndex, int index) {
     return DragTarget<AppItem>(
-      onWillAccept: (data) => data != null,
+      onWillAccept: (data) {
+        print('空位 $pageIndex-$index 准备接受: ${data?.name}');
+        return data != null;
+      },
       onAccept: (data) {
+        print('空位 $pageIndex-$index 接受: ${data.name}');
         // 处理拖拽到空位
         logic.moveAppToPosition(data, pageIndex, index);
       },
@@ -278,8 +283,12 @@ class DesktopPage extends StatelessWidget {
         ),
       ),
       child: DragTarget<AppItem>(
-        onWillAccept: (data) => data != null,
+        onWillAccept: (data) {
+          print('App位置 $pageIndex-$index 准备接受: ${data?.name}');
+          return data != null;
+        },
         onAccept: (data) {
+          print('App位置 $pageIndex-$index 接受: ${data.name}');
           // 处理拖拽到其他位置
           logic.moveAppToPosition(data, pageIndex, index);
         },

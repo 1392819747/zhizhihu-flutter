@@ -1,16 +1,8 @@
-import 'dart:async';
-import 'dart:math';
-import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import 'package:openim_common/openim_common.dart';
 
 import '../../weather_models/models.dart';
-import '../../weather_service/dart_service.dart';
 import 'weather_logic.dart';
 
 class WeatherPage extends StatelessWidget {
@@ -71,8 +63,8 @@ class WeatherPage extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            _getWeatherColor(weather.weather[0].main),
-            _getWeatherColor(weather.weather[0].main).withOpacity(0.8),
+            _getWeatherColor(weather.weatherInfo.description),
+            _getWeatherColor(weather.weatherInfo.description).withOpacity(0.8),
           ],
         ),
       ),
@@ -166,7 +158,7 @@ class WeatherPage extends StatelessWidget {
         children: [
           // 城市名称
           Text(
-            weather.name,
+            weather.cityName,
             style: TextStyle(
               color: Colors.white,
               fontSize: 32.sp,
@@ -178,7 +170,7 @@ class WeatherPage extends StatelessWidget {
           
           // 温度
           Text(
-            '${weather.main.temp.round()}°',
+            '${weather.tempInfo.temperature.round()}°',
             style: TextStyle(
               color: Colors.white,
               fontSize: 120.sp,
@@ -190,7 +182,7 @@ class WeatherPage extends StatelessWidget {
           
           // 天气描述
           Text(
-            weather.weather[0].description.capitalize(),
+            weather.weatherInfo.description,
             style: TextStyle(
               color: Colors.white.withOpacity(0.9),
               fontSize: 20.sp,
@@ -202,7 +194,7 @@ class WeatherPage extends StatelessWidget {
           
           // 体感温度
           Text(
-            '体感温度 ${weather.main.feelsLike.round()}°',
+            '体感温度 ${weather.tempInfo.feelslike.round()}°',
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
               fontSize: 16.sp,
@@ -224,7 +216,7 @@ class WeatherPage extends StatelessWidget {
               Expanded(
                 child: _buildDetailCard(
                   '湿度',
-                  '${weather.main.humidity}%',
+                  '${weather.tempInfo.humidity}%',
                   Icons.water_drop,
                 ),
               ),
@@ -232,7 +224,7 @@ class WeatherPage extends StatelessWidget {
               Expanded(
                 child: _buildDetailCard(
                   '风速',
-                  '${weather.wind.speed.toStringAsFixed(1)} m/s',
+                  '${weather.windInfo.windspeed.toStringAsFixed(1)} km/h',
                   Icons.air,
                 ),
               ),
@@ -247,7 +239,7 @@ class WeatherPage extends StatelessWidget {
               Expanded(
                 child: _buildDetailCard(
                   '气压',
-                  '${weather.main.pressure} hPa',
+                  '${weather.tempInfo.pressure} hPa',
                   Icons.compress,
                 ),
               ),

@@ -55,51 +55,79 @@ workflows:
           flutter packages pub get
       - name: Fix plugin namespaces
         script: |
-          echo "开始修复所有插件的namespace问题..."
+          echo "=== 开始修复插件namespace问题 ==="
           
-          # 定义需要修复的插件列表
-          declare -A PLUGINS=(
-            ["flutter_keyboard_visibility-5.4.1"]="com.jrai.flutter_keyboard_visibility"
-            ["flutter_openim_sdk-3.8.3+3"]="io.openim.flutter_openim_sdk"
-            ["flutter_sensors-1.0.1"]="com.example.fluttersensors"
-            ["scan-1.6.0"]="com.chavesgu.scan"
-            ["sound_mode-2.0.2"]="com.tryingoutsomething.soundmode.sound_mode"
-            ["uri_to_file-1.0.0"]="in.lazymanstudios.uri_to_file"
-          )
+          # 设置插件路径
+          PUB_CACHE="$HOME/.pub-cache/hosted/pub.dev"
           
-          # 修复每个插件
-          for plugin in "${!PLUGINS[@]}"; do
-            namespace="${PLUGINS[$plugin]}"
-            PLUGIN_PATH="$HOME/.pub-cache/hosted/pub.dev/$plugin/android/build.gradle"
-            
-            echo "检查插件: $plugin"
-            echo "插件路径: $PLUGIN_PATH"
-            
-            if [ -f "$PLUGIN_PATH" ]; then
-              echo "找到插件文件，开始修复 $plugin..."
-              
-              # 检查是否已经有namespace
-              if grep -q "namespace" "$PLUGIN_PATH"; then
-                echo "插件 $plugin 已经有namespace，跳过"
-                continue
-              fi
-              
-              # 备份原文件
-              cp "$PLUGIN_PATH" "$PLUGIN_PATH.backup"
-              
-              # 创建namespace行
-              echo "    namespace \"$namespace\"" > /tmp/namespace_line.txt
-              
-              # 在android {后面插入namespace
-              awk '/android \{/ { print; getline < "/tmp/namespace_line.txt"; print; next } 1' "$PLUGIN_PATH.backup" > "$PLUGIN_PATH"
-              
-              echo "修复 $plugin 完成！"
-            else
-              echo "插件 $plugin 文件不存在，跳过"
-            fi
-          done
+          # 修复 flutter_keyboard_visibility
+          echo "修复 flutter_keyboard_visibility..."
+          KEYBOARD_VISIBILITY_PATH="$PUB_CACHE/flutter_keyboard_visibility-5.4.1/android/build.gradle"
+          if [ -f "$KEYBOARD_VISIBILITY_PATH" ]; then
+            echo "找到文件: $KEYBOARD_VISIBILITY_PATH"
+            # 直接使用sed添加namespace
+            sed -i.bak 's/android {/android {\n    namespace "com.jrai.flutter_keyboard_visibility"/' "$KEYBOARD_VISIBILITY_PATH"
+            echo "flutter_keyboard_visibility 修复完成"
+          else
+            echo "flutter_keyboard_visibility 文件不存在"
+          fi
           
-          echo "所有插件namespace修复完成！"
+          # 修复 flutter_openim_sdk
+          echo "修复 flutter_openim_sdk..."
+          OPENIM_SDK_PATH="$PUB_CACHE/flutter_openim_sdk-3.8.3+3/android/build.gradle"
+          if [ -f "$OPENIM_SDK_PATH" ]; then
+            echo "找到文件: $OPENIM_SDK_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "io.openim.flutter_openim_sdk"/' "$OPENIM_SDK_PATH"
+            echo "flutter_openim_sdk 修复完成"
+          else
+            echo "flutter_openim_sdk 文件不存在"
+          fi
+          
+          # 修复 flutter_sensors
+          echo "修复 flutter_sensors..."
+          SENSORS_PATH="$PUB_CACHE/flutter_sensors-1.0.1/android/build.gradle"
+          if [ -f "$SENSORS_PATH" ]; then
+            echo "找到文件: $SENSORS_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.example.fluttersensors"/' "$SENSORS_PATH"
+            echo "flutter_sensors 修复完成"
+          else
+            echo "flutter_sensors 文件不存在"
+          fi
+          
+          # 修复 scan
+          echo "修复 scan..."
+          SCAN_PATH="$PUB_CACHE/scan-1.6.0/android/build.gradle"
+          if [ -f "$SCAN_PATH" ]; then
+            echo "找到文件: $SCAN_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
+            echo "scan 修复完成"
+          else
+            echo "scan 文件不存在"
+          fi
+          
+          # 修复 sound_mode
+          echo "修复 sound_mode..."
+          SOUND_MODE_PATH="$PUB_CACHE/sound_mode-2.0.2/android/build.gradle"
+          if [ -f "$SOUND_MODE_PATH" ]; then
+            echo "找到文件: $SOUND_MODE_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"/' "$SOUND_MODE_PATH"
+            echo "sound_mode 修复完成"
+          else
+            echo "sound_mode 文件不存在"
+          fi
+          
+          # 修复 uri_to_file
+          echo "修复 uri_to_file..."
+          URI_TO_FILE_PATH="$PUB_CACHE/uri_to_file-1.0.0/android/build.gradle"
+          if [ -f "$URI_TO_FILE_PATH" ]; then
+            echo "找到文件: $URI_TO_FILE_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "in.lazymanstudios.uri_to_file"/' "$URI_TO_FILE_PATH"
+            echo "uri_to_file 修复完成"
+          else
+            echo "uri_to_file 文件不存在"
+          fi
+          
+          echo "=== 所有插件namespace修复完成 ==="
       - name: Generate code
         script: |
           flutter packages pub run build_runner build --delete-conflicting-outputs
@@ -145,51 +173,79 @@ workflows:
           flutter packages pub get
       - name: Fix plugin namespaces
         script: |
-          echo "开始修复所有插件的namespace问题..."
+          echo "=== 开始修复插件namespace问题 ==="
           
-          # 定义需要修复的插件列表
-          declare -A PLUGINS=(
-            ["flutter_keyboard_visibility-5.4.1"]="com.jrai.flutter_keyboard_visibility"
-            ["flutter_openim_sdk-3.8.3+3"]="io.openim.flutter_openim_sdk"
-            ["flutter_sensors-1.0.1"]="com.example.fluttersensors"
-            ["scan-1.6.0"]="com.chavesgu.scan"
-            ["sound_mode-2.0.2"]="com.tryingoutsomething.soundmode.sound_mode"
-            ["uri_to_file-1.0.0"]="in.lazymanstudios.uri_to_file"
-          )
+          # 设置插件路径
+          PUB_CACHE="$HOME/.pub-cache/hosted/pub.dev"
           
-          # 修复每个插件
-          for plugin in "${!PLUGINS[@]}"; do
-            namespace="${PLUGINS[$plugin]}"
-            PLUGIN_PATH="$HOME/.pub-cache/hosted/pub.dev/$plugin/android/build.gradle"
-            
-            echo "检查插件: $plugin"
-            echo "插件路径: $PLUGIN_PATH"
-            
-            if [ -f "$PLUGIN_PATH" ]; then
-              echo "找到插件文件，开始修复 $plugin..."
-              
-              # 检查是否已经有namespace
-              if grep -q "namespace" "$PLUGIN_PATH"; then
-                echo "插件 $plugin 已经有namespace，跳过"
-                continue
-              fi
-              
-              # 备份原文件
-              cp "$PLUGIN_PATH" "$PLUGIN_PATH.backup"
-              
-              # 创建namespace行
-              echo "    namespace \"$namespace\"" > /tmp/namespace_line.txt
-              
-              # 在android {后面插入namespace
-              awk '/android \{/ { print; getline < "/tmp/namespace_line.txt"; print; next } 1' "$PLUGIN_PATH.backup" > "$PLUGIN_PATH"
-              
-              echo "修复 $plugin 完成！"
-            else
-              echo "插件 $plugin 文件不存在，跳过"
-            fi
-          done
+          # 修复 flutter_keyboard_visibility
+          echo "修复 flutter_keyboard_visibility..."
+          KEYBOARD_VISIBILITY_PATH="$PUB_CACHE/flutter_keyboard_visibility-5.4.1/android/build.gradle"
+          if [ -f "$KEYBOARD_VISIBILITY_PATH" ]; then
+            echo "找到文件: $KEYBOARD_VISIBILITY_PATH"
+            # 直接使用sed添加namespace
+            sed -i.bak 's/android {/android {\n    namespace "com.jrai.flutter_keyboard_visibility"/' "$KEYBOARD_VISIBILITY_PATH"
+            echo "flutter_keyboard_visibility 修复完成"
+          else
+            echo "flutter_keyboard_visibility 文件不存在"
+          fi
           
-          echo "所有插件namespace修复完成！"
+          # 修复 flutter_openim_sdk
+          echo "修复 flutter_openim_sdk..."
+          OPENIM_SDK_PATH="$PUB_CACHE/flutter_openim_sdk-3.8.3+3/android/build.gradle"
+          if [ -f "$OPENIM_SDK_PATH" ]; then
+            echo "找到文件: $OPENIM_SDK_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "io.openim.flutter_openim_sdk"/' "$OPENIM_SDK_PATH"
+            echo "flutter_openim_sdk 修复完成"
+          else
+            echo "flutter_openim_sdk 文件不存在"
+          fi
+          
+          # 修复 flutter_sensors
+          echo "修复 flutter_sensors..."
+          SENSORS_PATH="$PUB_CACHE/flutter_sensors-1.0.1/android/build.gradle"
+          if [ -f "$SENSORS_PATH" ]; then
+            echo "找到文件: $SENSORS_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.example.fluttersensors"/' "$SENSORS_PATH"
+            echo "flutter_sensors 修复完成"
+          else
+            echo "flutter_sensors 文件不存在"
+          fi
+          
+          # 修复 scan
+          echo "修复 scan..."
+          SCAN_PATH="$PUB_CACHE/scan-1.6.0/android/build.gradle"
+          if [ -f "$SCAN_PATH" ]; then
+            echo "找到文件: $SCAN_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
+            echo "scan 修复完成"
+          else
+            echo "scan 文件不存在"
+          fi
+          
+          # 修复 sound_mode
+          echo "修复 sound_mode..."
+          SOUND_MODE_PATH="$PUB_CACHE/sound_mode-2.0.2/android/build.gradle"
+          if [ -f "$SOUND_MODE_PATH" ]; then
+            echo "找到文件: $SOUND_MODE_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"/' "$SOUND_MODE_PATH"
+            echo "sound_mode 修复完成"
+          else
+            echo "sound_mode 文件不存在"
+          fi
+          
+          # 修复 uri_to_file
+          echo "修复 uri_to_file..."
+          URI_TO_FILE_PATH="$PUB_CACHE/uri_to_file-1.0.0/android/build.gradle"
+          if [ -f "$URI_TO_FILE_PATH" ]; then
+            echo "找到文件: $URI_TO_FILE_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "in.lazymanstudios.uri_to_file"/' "$URI_TO_FILE_PATH"
+            echo "uri_to_file 修复完成"
+          else
+            echo "uri_to_file 文件不存在"
+          fi
+          
+          echo "=== 所有插件namespace修复完成 ==="
       - name: Generate code
         script: |
           flutter packages pub run build_runner build --delete-conflicting-outputs

@@ -140,6 +140,30 @@ workflows:
           fi
           
           echo "=== 所有插件namespace修复完成 ==="
+          
+          # 修复核心库反糖化问题
+          echo "=== 修复核心库反糖化问题 ==="
+          APP_BUILD_GRADLE="/Users/builder/clone/android/app/build.gradle.kts"
+          if [ -f "$APP_BUILD_GRADLE" ]; then
+            echo "修复应用build.gradle.kts..."
+            # 确保compileOptions包含isCoreLibraryDesugaringEnabled = true
+            if ! grep -q "isCoreLibraryDesugaringEnabled = true" "$APP_BUILD_GRADLE"; then
+              sed -i.bak 's/sourceCompatibility = JavaVersion.VERSION_17/sourceCompatibility = JavaVersion.VERSION_17\n        isCoreLibraryDesugaringEnabled = true/' "$APP_BUILD_GRADLE"
+              echo "已添加isCoreLibraryDesugaringEnabled = true"
+            fi
+            
+            # 确保dependencies包含coreLibraryDesugaring
+            if ! grep -q "coreLibraryDesugaring" "$APP_BUILD_GRADLE"; then
+              echo "" >> "$APP_BUILD_GRADLE"
+              echo "dependencies {" >> "$APP_BUILD_GRADLE"
+              echo "    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")" >> "$APP_BUILD_GRADLE"
+              echo "}" >> "$APP_BUILD_GRADLE"
+              echo "已添加coreLibraryDesugaring依赖"
+            fi
+            echo "核心库反糖化修复完成"
+          else
+            echo "应用build.gradle.kts文件不存在"
+          fi
       - name: Generate code
         script: |
           flutter packages pub run build_runner build --delete-conflicting-outputs
@@ -270,6 +294,30 @@ workflows:
           fi
           
           echo "=== 所有插件namespace修复完成 ==="
+          
+          # 修复核心库反糖化问题
+          echo "=== 修复核心库反糖化问题 ==="
+          APP_BUILD_GRADLE="/Users/builder/clone/android/app/build.gradle.kts"
+          if [ -f "$APP_BUILD_GRADLE" ]; then
+            echo "修复应用build.gradle.kts..."
+            # 确保compileOptions包含isCoreLibraryDesugaringEnabled = true
+            if ! grep -q "isCoreLibraryDesugaringEnabled = true" "$APP_BUILD_GRADLE"; then
+              sed -i.bak 's/sourceCompatibility = JavaVersion.VERSION_17/sourceCompatibility = JavaVersion.VERSION_17\n        isCoreLibraryDesugaringEnabled = true/' "$APP_BUILD_GRADLE"
+              echo "已添加isCoreLibraryDesugaringEnabled = true"
+            fi
+            
+            # 确保dependencies包含coreLibraryDesugaring
+            if ! grep -q "coreLibraryDesugaring" "$APP_BUILD_GRADLE"; then
+              echo "" >> "$APP_BUILD_GRADLE"
+              echo "dependencies {" >> "$APP_BUILD_GRADLE"
+              echo "    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")" >> "$APP_BUILD_GRADLE"
+              echo "}" >> "$APP_BUILD_GRADLE"
+              echo "已添加coreLibraryDesugaring依赖"
+            fi
+            echo "核心库反糖化修复完成"
+          else
+            echo "应用build.gradle.kts文件不存在"
+          fi
       - name: Generate code
         script: |
           flutter packages pub run build_runner build --delete-conflicting-outputs

@@ -159,6 +159,18 @@ jobs:
           echo "应用build.gradle.kts文件不存在"
         fi
         
+        # 修复Google Services配置
+        echo "=== 修复Google Services配置 ==="
+        GOOGLE_SERVICES_JSON="android/app/google-services.json"
+        if [ -f "$GOOGLE_SERVICES_JSON" ]; then
+          echo "修复google-services.json..."
+          # 更新包名为新的包名
+          sed -i.bak 's/"package_name": "io.openim.flutter.demo"/"package_name": "cn.zhizhihu.zhiyin"/' "$GOOGLE_SERVICES_JSON"
+          echo "Google Services配置修复完成"
+        else
+          echo "google-services.json文件不存在"
+        fi
+        
     - name: 生成代码
       run: flutter packages pub run build_runner build --delete-conflicting-outputs
       

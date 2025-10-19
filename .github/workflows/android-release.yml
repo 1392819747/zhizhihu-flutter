@@ -66,7 +66,7 @@ jobs:
         # 修复 sound_mode
         if [ -f "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle" ]; then
           echo "修复 sound_mode..."
-          sed -i 's/android {/android {\n    namespace '\''com.tryingoutsomething.soundmode.sound_mode'\''/' "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
+          sed -i 's/android {/android {\n    namespace '\''com.tryingoutsomething.soundmode.sound_mode'\''\n    compileSdkVersion 34/' "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
         fi
         
         # 修复 uri_to_file

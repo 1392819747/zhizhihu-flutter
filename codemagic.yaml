@@ -110,8 +110,13 @@ workflows:
           SCAN_PATH="$PUB_CACHE/scan-1.6.0/android/build.gradle"
           if [ -f "$SCAN_PATH" ]; then
             echo "找到文件: $SCAN_PATH"
-            # 添加namespace并更新compileSdkVersion
-            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"\n    compileSdkVersion 34/' "$SCAN_PATH"
+            echo "当前scan文件内容:"
+            cat "$SCAN_PATH"
+            # 使用更可靠的方法替换
+            sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SCAN_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
+            echo "修复后scan文件内容:"
+            cat "$SCAN_PATH"
             echo "scan 修复完成"
           else
             echo "scan 文件不存在"
@@ -122,7 +127,13 @@ workflows:
           SOUND_MODE_PATH="$PUB_CACHE/sound_mode-2.0.2/android/build.gradle"
           if [ -f "$SOUND_MODE_PATH" ]; then
             echo "找到文件: $SOUND_MODE_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"\n    compileSdkVersion 34/' "$SOUND_MODE_PATH"
+            echo "当前sound_mode文件内容:"
+            cat "$SOUND_MODE_PATH"
+            # 使用更可靠的方法替换
+            sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SOUND_MODE_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"/' "$SOUND_MODE_PATH"
+            echo "修复后sound_mode文件内容:"
+            cat "$SOUND_MODE_PATH"
             echo "sound_mode 修复完成"
           else
             echo "sound_mode 文件不存在"
@@ -278,8 +289,13 @@ workflows:
           SCAN_PATH="$PUB_CACHE/scan-1.6.0/android/build.gradle"
           if [ -f "$SCAN_PATH" ]; then
             echo "找到文件: $SCAN_PATH"
-            # 添加namespace并更新compileSdkVersion
-            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"\n    compileSdkVersion 34/' "$SCAN_PATH"
+            echo "当前scan文件内容:"
+            cat "$SCAN_PATH"
+            # 使用更可靠的方法替换
+            sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SCAN_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
+            echo "修复后scan文件内容:"
+            cat "$SCAN_PATH"
             echo "scan 修复完成"
           else
             echo "scan 文件不存在"
@@ -290,7 +306,13 @@ workflows:
           SOUND_MODE_PATH="$PUB_CACHE/sound_mode-2.0.2/android/build.gradle"
           if [ -f "$SOUND_MODE_PATH" ]; then
             echo "找到文件: $SOUND_MODE_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"\n    compileSdkVersion 34/' "$SOUND_MODE_PATH"
+            echo "当前sound_mode文件内容:"
+            cat "$SOUND_MODE_PATH"
+            # 使用更可靠的方法替换
+            sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SOUND_MODE_PATH"
+            sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"/' "$SOUND_MODE_PATH"
+            echo "修复后sound_mode文件内容:"
+            cat "$SOUND_MODE_PATH"
             echo "sound_mode 修复完成"
           else
             echo "sound_mode 文件不存在"

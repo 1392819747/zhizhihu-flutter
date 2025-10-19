@@ -55,16 +55,37 @@ workflows:
           flutter packages pub get
       - name: Fix plugin namespaces
         script: |
-          echo "修复flutter_keyboard_visibility插件的namespace问题..."
+          echo "开始修复flutter_keyboard_visibility插件的namespace问题..."
           
-          # 修复 flutter_keyboard_visibility
-          if [ -f "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle" ]; then
-            echo "修复 flutter_keyboard_visibility..."
-            # 使用sed添加namespace
-            sed -i 's/android {/android {\n    namespace "com.jrai.flutter_keyboard_visibility"/' "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle"
+          # 检查文件是否存在
+          PLUGIN_PATH="$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle"
+          echo "检查插件路径: $PLUGIN_PATH"
+          
+          if [ -f "$PLUGIN_PATH" ]; then
+            echo "找到插件文件，开始修复..."
+            
+            # 显示修复前的内容
+            echo "修复前的内容:"
+            head -20 "$PLUGIN_PATH"
+            
+            # 备份原文件
+            cp "$PLUGIN_PATH" "$PLUGIN_PATH.backup"
+            
+            # 使用更简单的方法：直接echo追加namespace
+            echo "    namespace \"com.jrai.flutter_keyboard_visibility\"" > /tmp/namespace_line.txt
+            
+            # 在android {后面插入namespace
+            awk '/android \{/ { print; getline < "/tmp/namespace_line.txt"; print; next } 1' "$PLUGIN_PATH.backup" > "$PLUGIN_PATH"
+            
+            # 显示修复后的内容
+            echo "修复后的内容:"
+            head -20 "$PLUGIN_PATH"
+            
             echo "修复完成！"
           else
-            echo "flutter_keyboard_visibility插件文件不存在"
+            echo "错误：flutter_keyboard_visibility插件文件不存在"
+            echo "查找相关文件:"
+            find "$HOME/.pub-cache" -name "*flutter_keyboard_visibility*" -type d 2>/dev/null || echo "未找到相关目录"
           fi
       - name: Generate code
         script: |
@@ -111,16 +132,37 @@ workflows:
           flutter packages pub get
       - name: Fix plugin namespaces
         script: |
-          echo "修复flutter_keyboard_visibility插件的namespace问题..."
+          echo "开始修复flutter_keyboard_visibility插件的namespace问题..."
           
-          # 修复 flutter_keyboard_visibility
-          if [ -f "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle" ]; then
-            echo "修复 flutter_keyboard_visibility..."
-            # 使用sed添加namespace
-            sed -i 's/android {/android {\n    namespace "com.jrai.flutter_keyboard_visibility"/' "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle"
+          # 检查文件是否存在
+          PLUGIN_PATH="$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle"
+          echo "检查插件路径: $PLUGIN_PATH"
+          
+          if [ -f "$PLUGIN_PATH" ]; then
+            echo "找到插件文件，开始修复..."
+            
+            # 显示修复前的内容
+            echo "修复前的内容:"
+            head -20 "$PLUGIN_PATH"
+            
+            # 备份原文件
+            cp "$PLUGIN_PATH" "$PLUGIN_PATH.backup"
+            
+            # 使用更简单的方法：直接echo追加namespace
+            echo "    namespace \"com.jrai.flutter_keyboard_visibility\"" > /tmp/namespace_line.txt
+            
+            # 在android {后面插入namespace
+            awk '/android \{/ { print; getline < "/tmp/namespace_line.txt"; print; next } 1' "$PLUGIN_PATH.backup" > "$PLUGIN_PATH"
+            
+            # 显示修复后的内容
+            echo "修复后的内容:"
+            head -20 "$PLUGIN_PATH"
+            
             echo "修复完成！"
           else
-            echo "flutter_keyboard_visibility插件文件不存在"
+            echo "错误：flutter_keyboard_visibility插件文件不存在"
+            echo "查找相关文件:"
+            find "$HOME/.pub-cache" -name "*flutter_keyboard_visibility*" -type d 2>/dev/null || echo "未找到相关目录"
           fi
       - name: Generate code
         script: |

@@ -48,7 +48,13 @@ jobs:
         # 修复 flutter_sensors
         if [ -f "$HOME/.pub-cache/hosted/pub.dev/flutter_sensors-1.0.1/android/build.gradle" ]; then
           echo "修复 flutter_sensors..."
-          sed -i 's/android {/android {\n    namespace '\''com.example.fluttersensors'\''/' "$HOME/.pub-cache/hosted/pub.dev/flutter_sensors-1.0.1/android/build.gradle"
+          sed -i 's/android {/android {\n    namespace '\''com.example.fluttersensors'\''\n    compileOptions {\n        sourceCompatibility JavaVersion.VERSION_17\n        targetCompatibility JavaVersion.VERSION_17\n    }\n    kotlinOptions {\n        jvmTarget = "17"\n    }/' "$HOME/.pub-cache/hosted/pub.dev/flutter_sensors-1.0.1/android/build.gradle"
+        fi
+        
+        # 修复 flutter_sensors AndroidManifest.xml
+        if [ -f "$HOME/.pub-cache/hosted/pub.dev/flutter_sensors-1.0.1/android/src/main/AndroidManifest.xml" ]; then
+          echo "修复 flutter_sensors AndroidManifest.xml..."
+          sed -i 's/package="[^"]*"//' "$HOME/.pub-cache/hosted/pub.dev/flutter_sensors-1.0.1/android/src/main/AndroidManifest.xml"
         fi
         
         # 修复 scan

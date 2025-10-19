@@ -82,20 +82,34 @@ jobs:
         APP_BUILD_GRADLE="android/app/build.gradle.kts"
         if [ -f "$APP_BUILD_GRADLE" ]; then
           echo "修复应用build.gradle.kts..."
+          echo "当前文件内容:"
+          cat "$APP_BUILD_GRADLE"
+          
           # 确保compileOptions包含isCoreLibraryDesugaringEnabled = true
           if ! grep -q "isCoreLibraryDesugaringEnabled = true" "$APP_BUILD_GRADLE"; then
+            echo "添加isCoreLibraryDesugaringEnabled = true..."
+            # 使用更可靠的方法替换
             sed -i 's/sourceCompatibility = JavaVersion.VERSION_17/sourceCompatibility = JavaVersion.VERSION_17\n        isCoreLibraryDesugaringEnabled = true/' "$APP_BUILD_GRADLE"
             echo "已添加isCoreLibraryDesugaringEnabled = true"
+          else
+            echo "isCoreLibraryDesugaringEnabled = true 已存在"
           fi
           
           # 确保dependencies包含coreLibraryDesugaring
           if ! grep -q "coreLibraryDesugaring" "$APP_BUILD_GRADLE"; then
+            echo "添加coreLibraryDesugaring依赖..."
+            # 在flutter块后添加dependencies块
             echo "" >> "$APP_BUILD_GRADLE"
             echo "dependencies {" >> "$APP_BUILD_GRADLE"
             echo "    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")" >> "$APP_BUILD_GRADLE"
             echo "}" >> "$APP_BUILD_GRADLE"
             echo "已添加coreLibraryDesugaring依赖"
+          else
+            echo "coreLibraryDesugaring依赖已存在"
           fi
+          
+          echo "修复后的文件内容:"
+          cat "$APP_BUILD_GRADLE"
           echo "核心库反糖化修复完成"
         else
           echo "应用build.gradle.kts文件不存在"

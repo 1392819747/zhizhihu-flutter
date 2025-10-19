@@ -4,13 +4,14 @@ import 'package:geolocator/geolocator.dart';
 
 import '../../weather_models/models.dart';
 import '../../weather_service/dart_service.dart';
+import '../../services/weather_service.dart';
 
 class WeatherLogic extends GetxController {
   final isLoading = false.obs;
-  final weatherData = Rxn<WeatherResponse>();
+  final weatherData = Rxn<WeatherData>();
   final currentLocation = Rxn<Position>();
   
-  final DataService _dataService = DataService();
+  final WeatherService _weatherService = WeatherService();
 
   @override
   void onInit() {
@@ -23,22 +24,25 @@ class WeatherLogic extends GetxController {
       isLoading.value = true;
       
       // 获取当前位置
-      final position = await _getCurrentPosition();
+      final position = await _weatherService.getCurrentPosition();
+      WeatherData? weather;
+      
       if (position != null) {
         currentLocation.value = position;
         
         // 获取天气数据
-        final weather = await _dataService.getWeather(
-          position.longitude,
+        weather = await _weatherService.getWeatherByLocation(
           position.latitude,
+          position.longitude,
         );
-        
-        weatherData.value = weather;
-      } else {
-        // 如果无法获取位置，使用默认位置（上海）
-        final weather = await _dataService.getWeather(121.4737, 31.2304);
-        weatherData.value = weather;
       }
+      
+      // 如果获取当前位置失败，使用默认位置（上海）
+      if (weather == null) {
+        weather = await _weatherService.getWeatherByLocation(31.2304, 121.4737);
+      }
+      
+      weatherData.value = weather;
     } catch (e) {
       print('加载天气数据失败: $e');
       // 显示错误提示
@@ -54,33 +58,6 @@ class WeatherLogic extends GetxController {
     }
   }
 
-  Future<Position?> _getCurrentPosition() async {
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        return null;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          return null;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        return null;
-      }
-
-      return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-    } catch (e) {
-      print('获取位置失败: $e');
-      return null;
-    }
-  }
 
   String getWeatherIcon(String weatherCondition) {
     switch (weatherCondition.toLowerCase()) {

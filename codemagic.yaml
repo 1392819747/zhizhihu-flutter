@@ -65,7 +65,6 @@ workflows:
           KEYBOARD_VISIBILITY_PATH="$PUB_CACHE/flutter_keyboard_visibility-5.4.1/android/build.gradle"
           if [ -f "$KEYBOARD_VISIBILITY_PATH" ]; then
             echo "找到文件: $KEYBOARD_VISIBILITY_PATH"
-            # 直接使用sed添加namespace
             sed -i.bak 's/android {/android {\n    namespace "com.jrai.flutter_keyboard_visibility"/' "$KEYBOARD_VISIBILITY_PATH"
             echo "flutter_keyboard_visibility 修复完成"
           else
@@ -183,7 +182,6 @@ workflows:
           KEYBOARD_VISIBILITY_PATH="$PUB_CACHE/flutter_keyboard_visibility-5.4.1/android/build.gradle"
           if [ -f "$KEYBOARD_VISIBILITY_PATH" ]; then
             echo "找到文件: $KEYBOARD_VISIBILITY_PATH"
-            # 直接使用sed添加namespace
             sed -i.bak 's/android {/android {\n    namespace "com.jrai.flutter_keyboard_visibility"/' "$KEYBOARD_VISIBILITY_PATH"
             echo "flutter_keyboard_visibility 修复完成"
           else

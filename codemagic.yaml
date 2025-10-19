@@ -87,7 +87,8 @@ workflows:
           SENSORS_PATH="$PUB_CACHE/flutter_sensors-1.0.1/android/build.gradle"
           if [ -f "$SENSORS_PATH" ]; then
             echo "找到文件: $SENSORS_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.example.fluttersensors"/' "$SENSORS_PATH"
+            # 添加namespace和JVM目标版本
+            sed -i.bak 's/android {/android {\n    namespace "com.example.fluttersensors"\n    compileOptions {\n        sourceCompatibility JavaVersion.VERSION_17\n        targetCompatibility JavaVersion.VERSION_17\n    }\n    kotlinOptions {\n        jvmTarget = "17"\n    }/' "$SENSORS_PATH"
             echo "flutter_sensors 修复完成"
           else
             echo "flutter_sensors 文件不存在"
@@ -204,7 +205,8 @@ workflows:
           SENSORS_PATH="$PUB_CACHE/flutter_sensors-1.0.1/android/build.gradle"
           if [ -f "$SENSORS_PATH" ]; then
             echo "找到文件: $SENSORS_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.example.fluttersensors"/' "$SENSORS_PATH"
+            # 添加namespace和JVM目标版本
+            sed -i.bak 's/android {/android {\n    namespace "com.example.fluttersensors"\n    compileOptions {\n        sourceCompatibility JavaVersion.VERSION_17\n        targetCompatibility JavaVersion.VERSION_17\n    }\n    kotlinOptions {\n        jvmTarget = "17"\n    }/' "$SENSORS_PATH"
             echo "flutter_sensors 修复完成"
           else
             echo "flutter_sensors 文件不存在"

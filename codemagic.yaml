@@ -110,7 +110,8 @@ workflows:
           SCAN_PATH="$PUB_CACHE/scan-1.6.0/android/build.gradle"
           if [ -f "$SCAN_PATH" ]; then
             echo "找到文件: $SCAN_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
+            # 添加namespace并更新compileSdkVersion
+            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"\n    compileSdkVersion 34/' "$SCAN_PATH"
             echo "scan 修复完成"
           else
             echo "scan 文件不存在"
@@ -239,7 +240,8 @@ workflows:
           SCAN_PATH="$PUB_CACHE/scan-1.6.0/android/build.gradle"
           if [ -f "$SCAN_PATH" ]; then
             echo "找到文件: $SCAN_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
+            # 添加namespace并更新compileSdkVersion
+            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"\n    compileSdkVersion 34/' "$SCAN_PATH"
             echo "scan 修复完成"
           else
             echo "scan 文件不存在"

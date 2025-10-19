@@ -60,7 +60,7 @@ jobs:
         # 修复 scan
         if [ -f "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle" ]; then
           echo "修复 scan..."
-          sed -i 's/android {/android {\n    namespace '\''com.chavesgu.scan'\''/' "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
+          sed -i 's/android {/android {\n    namespace '\''com.chavesgu.scan'\''\n    compileSdkVersion 34/' "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
         fi
         
         # 修复 sound_mode

@@ -6,6 +6,8 @@ import '../../routes/app_navigator.dart';
 import '../conversation/conversation_logic.dart';
 import '../../weather_models/models.dart';
 import '../../weather_service/dart_service.dart';
+import '../../services/weather_service.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AppItem {
   final String name;
@@ -31,9 +33,9 @@ class DesktopLogic extends GetxController {
   late PageController pageController;
   
   // 天气数据
-  final weatherData = Rxn<WeatherResponse>();
+  final weatherData = Rxn<WeatherData>();
   final isLoadingWeather = false.obs;
-  final DataService _dataService = DataService();
+  final WeatherService _weatherService = WeatherService();
   
   // App位置管理：使用Map来存储每个位置的App，null表示空位
   final Map<int, AppItem?> appPositions = {};
@@ -271,8 +273,24 @@ class DesktopLogic extends GetxController {
   Future<void> _loadWeatherData() async {
     try {
       isLoadingWeather.value = true;
-      // 使用默认位置（上海）
-      final weather = await _dataService.getWeather(121.4737, 31.2304);
+      
+      // 尝试获取当前位置
+      final position = await _weatherService.getCurrentPosition();
+      WeatherData? weather;
+      
+      if (position != null) {
+        // 使用当前位置获取天气
+        weather = await _weatherService.getWeatherByLocation(
+          position.latitude, 
+          position.longitude
+        );
+      }
+      
+      // 如果获取当前位置失败，使用默认位置（上海）
+      if (weather == null) {
+        weather = await _weatherService.getWeatherByLocation(31.2304, 121.4737);
+      }
+      
       weatherData.value = weather;
     } catch (e) {
       print('加载天气数据失败: $e');
@@ -286,13 +304,13 @@ class DesktopLogic extends GetxController {
     if (weatherData.value != null) {
       return weatherData.value!.cityName;
     }
-    return '浦东新区';
+    return '上海';
   }
 
   // 获取当前温度
   String getCurrentTemperature() {
     if (weatherData.value != null) {
-      return '${weatherData.value!.tempInfo.temperature.round()}°';
+      return weatherData.value!.temperatureText;
     }
     return '27°';
   }
@@ -300,7 +318,7 @@ class DesktopLogic extends GetxController {
   // 获取当前天气描述
   String getCurrentWeatherDescription() {
     if (weatherData.value != null) {
-      return weatherData.value!.weatherInfo.description;
+      return weatherData.value!.description;
     }
     return '多云';
   }
@@ -308,7 +326,7 @@ class DesktopLogic extends GetxController {
   // 获取最高温度
   String getHighTemperature() {
     if (weatherData.value != null) {
-      return '${weatherData.value!.tempInfo.temperature.round()}°';
+      return '${weatherData.value!.maxTemp.round()}°';
     }
     return '34°';
   }
@@ -316,7 +334,7 @@ class DesktopLogic extends GetxController {
   // 获取最低温度
   String getLowTemperature() {
     if (weatherData.value != null) {
-      return '${weatherData.value!.tempInfo.temperature.round()}°';
+      return '${weatherData.value!.minTemp.round()}°';
     }
     return '24°';
   }
@@ -324,7 +342,7 @@ class DesktopLogic extends GetxController {
   // 获取体感温度
   String getFeelsLikeTemperature() {
     if (weatherData.value != null) {
-      return '${weatherData.value!.tempInfo.feelslike.round()}';
+      return '${weatherData.value!.feelsLike.round()}';
     }
     return '29';
   }
@@ -332,9 +350,9 @@ class DesktopLogic extends GetxController {
   // 获取天气图标路径
   String getWeatherIconPath() {
     if (weatherData.value != null) {
-      return 'openim_common/weather_assets/icons/${weatherData.value!.weatherInfo.icon}.png';
+      return 'packages/openim_common/weather_assets/icons/${weatherData.value!.icon}.png';
     }
-    return 'openim_common/weather_assets/icons/02d.png';
+    return 'packages/openim_common/weather_assets/icons/02d.png';
   }
 
   // 获取天气渐变背景颜色
@@ -347,7 +365,7 @@ class DesktopLogic extends GetxController {
     } else {
       // 根据天气状况返回不同的渐变颜色
       if (weatherData.value != null) {
-        final weatherIcon = weatherData.value!.weatherInfo.icon;
+        final weatherIcon = weatherData.value!.icon;
         if (weatherIcon.contains('01')) {
           // 晴天
           return [const Color(0xFFFFD700), const Color(0xFFFFA500)];

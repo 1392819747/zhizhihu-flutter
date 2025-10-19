@@ -166,10 +166,33 @@ jobs:
           
           echo "修复后的文件内容:"
           cat "$APP_BUILD_GRADLE"
-          echo "核心库反糖化修复完成"
-        else
-          echo "应用build.gradle.kts文件不存在"
-        fi
+                 echo "核心库反糖化修复完成"
+               else
+                 echo "应用build.gradle.kts文件不存在"
+               fi
+               
+               # 修复minSdkVersion冲突
+               echo "=== 修复minSdkVersion冲突 ==="
+               APP_BUILD_GRADLE="android/app/build.gradle.kts"
+               if [ -f "$APP_BUILD_GRADLE" ]; then
+                 echo "修复minSdkVersion为23..."
+                 sed -i.bak 's/minSdk = flutter.minSdkVersion/minSdk = 23/' "$APP_BUILD_GRADLE"
+                 echo "minSdkVersion修复完成"
+               else
+                 echo "应用build.gradle.kts文件不存在"
+               fi
+               
+               # 修复MainActivity重复声明问题
+               echo "=== 修复MainActivity重复声明 ==="
+               JAVA_MAINACTIVITY="android/app/src/main/java/cn/zhizhihu/zhiyin/MainActivity.java"
+               KOTLIN_MAINACTIVITY="android/app/src/main/kotlin/cn/zhizhihu/zhiyin/MainActivity.kt"
+               if [ -f "$JAVA_MAINACTIVITY" ] && [ -f "$KOTLIN_MAINACTIVITY" ]; then
+                 echo "发现重复的MainActivity文件，删除Java版本..."
+                 rm "$JAVA_MAINACTIVITY"
+                 echo "MainActivity重复声明修复完成"
+               else
+                 echo "MainActivity文件正常"
+               fi
         
         # 修复Google Services配置
         echo "=== 修复Google Services配置 ==="

@@ -1113,9 +1113,9 @@
     },
     {
       "name": "meta",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/meta-1.16.0",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/meta-1.17.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.5"
     },
     {
       "name": "mgrs_dart",
@@ -1743,7 +1743,7 @@
     },
     {
       "name": "test_api",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/test_api-0.7.6",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/test_api-0.7.7",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
@@ -2066,15 +2066,15 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "openim",
+      "name": "zhizhihu",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.9.2",
+  "generatorVersion": "3.10.0-162.1.beta",
   "flutterRoot": "file:///opt/homebrew/share/flutter",
-  "flutterVersion": "3.35.3",
+  "flutterVersion": "3.37.0-0.1.pre",
   "pubCache": "file:///Users/lizhiyin/.pub-cache"
 }

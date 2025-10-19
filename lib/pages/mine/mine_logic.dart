@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:openim/core/im_callback.dart';
-import 'package:openim/pages/home/home_logic.dart';
+import 'package:zhizhihu/core/im_callback.dart';
+import 'package:zhizhihu/pages/home/home_logic.dart';
 import 'package:openim_common/openim_common.dart';
 
 import '../../core/controller/im_controller.dart';

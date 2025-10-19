@@ -1,0 +1,6 @@
+framework module flutter_sensors {
+  umbrella header "flutter_sensors-umbrella.h"
+
+  export *
+  module * { export * }
+}

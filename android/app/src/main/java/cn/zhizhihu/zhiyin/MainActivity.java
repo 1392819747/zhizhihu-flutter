@@ -1,4 +1,4 @@
-package io.openim.flutter.demo;
+package cn.zhizhihu.zhiyin;
 
 import io.flutter.embedding.android.FlutterFragmentActivity;
 

@@ -9,7 +9,7 @@ import 'package:flutter_openim_sdk/flutter_openim_sdk.dart' as im;
 import 'package:flutter_openim_sdk/flutter_openim_sdk.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:openim/core/im_callback.dart';
+import 'package:zhizhihu/core/im_callback.dart';
 import 'package:openim_common/openim_common.dart';
 import 'package:sound_mode/sound_mode.dart';
 import 'package:sound_mode/utils/ringer_mode_statuses.dart';

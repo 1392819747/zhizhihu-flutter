@@ -1,11 +1,11 @@
 {
   "roots": [
-    "openim"
+    "zhizhihu"
   ],
   "packages": [
     {
-      "name": "openim",
-      "version": "3.8.3+180",
+      "name": "zhizhihu",
+      "version": "0.0.1+1",
       "dependencies": [
         "animated_text_kit",
         "audio_session",
@@ -976,7 +976,7 @@
     },
     {
       "name": "meta",
-      "version": "1.16.0",
+      "version": "1.17.0",
       "dependencies": []
     },
     {
@@ -1467,7 +1467,7 @@
     },
     {
       "name": "test_api",
-      "version": "0.7.6",
+      "version": "0.7.7",
       "dependencies": [
         "async",
         "boolean_selector",

@@ -92,6 +92,8 @@ PODS:
   - flutter_openim_sdk (0.0.1):
     - Flutter
     - "OpenIMSDKCore (= 3.8.3+3)"
+  - flutter_sensors (0.0.1):
+    - Flutter
   - flutter_webrtc (0.12.6):
     - Flutter
     - WebRTC-SDK (= 125.6422.06)
@@ -246,6 +248,7 @@ DEPENDENCIES:
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_new_badger (from `.symlinks/plugins/flutter_new_badger/ios`)
   - flutter_openim_sdk (from `.symlinks/plugins/flutter_openim_sdk/ios`)
+  - flutter_sensors (from `.symlinks/plugins/flutter_sensors/ios`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
@@ -334,6 +337,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_new_badger/ios"
   flutter_openim_sdk:
     :path: ".symlinks/plugins/flutter_openim_sdk/ios"
+  flutter_sensors:
+    :path: ".symlinks/plugins/flutter_sensors/ios"
   flutter_webrtc:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
   geolocator_apple:
@@ -422,6 +427,7 @@ SPEC CHECKSUMS:
   flutter_native_splash: 6cad9122ea0fad137d23137dd14b937f3e90b145
   flutter_new_badger: 133aaf93e9a5542bf905c8483d8b83c5ef4946ea
   flutter_openim_sdk: eb1fd1e85f854d3ec997fd20360efc11812fcfef
+  flutter_sensors: 7e455ebbfb9a67439304ccc474e98f209aceb821
   flutter_webrtc: 57f32415b8744e806f9c2a96ccdb60c6a627ba33
   geolocator_apple: 1560c3c875af2a412242c7a923e15d0d401966ff
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7

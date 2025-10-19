@@ -55,38 +55,51 @@ workflows:
           flutter packages pub get
       - name: Fix plugin namespaces
         script: |
-          echo "开始修复flutter_keyboard_visibility插件的namespace问题..."
+          echo "开始修复所有插件的namespace问题..."
           
-          # 检查文件是否存在
-          PLUGIN_PATH="$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle"
-          echo "检查插件路径: $PLUGIN_PATH"
+          # 定义需要修复的插件列表
+          declare -A PLUGINS=(
+            ["flutter_keyboard_visibility-5.4.1"]="com.jrai.flutter_keyboard_visibility"
+            ["flutter_openim_sdk-3.8.3+3"]="io.openim.flutter_openim_sdk"
+            ["flutter_sensors-1.0.1"]="com.example.fluttersensors"
+            ["scan-1.6.0"]="com.chavesgu.scan"
+            ["sound_mode-2.0.2"]="com.tryingoutsomething.soundmode.sound_mode"
+            ["uri_to_file-1.0.0"]="in.lazymanstudios.uri_to_file"
+          )
           
-          if [ -f "$PLUGIN_PATH" ]; then
-            echo "找到插件文件，开始修复..."
+          # 修复每个插件
+          for plugin in "${!PLUGINS[@]}"; do
+            namespace="${PLUGINS[$plugin]}"
+            PLUGIN_PATH="$HOME/.pub-cache/hosted/pub.dev/$plugin/android/build.gradle"
             
-            # 显示修复前的内容
-            echo "修复前的内容:"
-            head -20 "$PLUGIN_PATH"
+            echo "检查插件: $plugin"
+            echo "插件路径: $PLUGIN_PATH"
             
-            # 备份原文件
-            cp "$PLUGIN_PATH" "$PLUGIN_PATH.backup"
-            
-            # 使用更简单的方法：直接echo追加namespace
-            echo "    namespace \"com.jrai.flutter_keyboard_visibility\"" > /tmp/namespace_line.txt
-            
-            # 在android {后面插入namespace
-            awk '/android \{/ { print; getline < "/tmp/namespace_line.txt"; print; next } 1' "$PLUGIN_PATH.backup" > "$PLUGIN_PATH"
-            
-            # 显示修复后的内容
-            echo "修复后的内容:"
-            head -20 "$PLUGIN_PATH"
-            
-            echo "修复完成！"
-          else
-            echo "错误：flutter_keyboard_visibility插件文件不存在"
-            echo "查找相关文件:"
-            find "$HOME/.pub-cache" -name "*flutter_keyboard_visibility*" -type d 2>/dev/null || echo "未找到相关目录"
-          fi
+            if [ -f "$PLUGIN_PATH" ]; then
+              echo "找到插件文件，开始修复 $plugin..."
+              
+              # 检查是否已经有namespace
+              if grep -q "namespace" "$PLUGIN_PATH"; then
+                echo "插件 $plugin 已经有namespace，跳过"
+                continue
+              fi
+              
+              # 备份原文件
+              cp "$PLUGIN_PATH" "$PLUGIN_PATH.backup"
+              
+              # 创建namespace行
+              echo "    namespace \"$namespace\"" > /tmp/namespace_line.txt
+              
+              # 在android {后面插入namespace
+              awk '/android \{/ { print; getline < "/tmp/namespace_line.txt"; print; next } 1' "$PLUGIN_PATH.backup" > "$PLUGIN_PATH"
+              
+              echo "修复 $plugin 完成！"
+            else
+              echo "插件 $plugin 文件不存在，跳过"
+            fi
+          done
+          
+          echo "所有插件namespace修复完成！"
       - name: Generate code
         script: |
           flutter packages pub run build_runner build --delete-conflicting-outputs
@@ -132,38 +145,51 @@ workflows:
           flutter packages pub get
       - name: Fix plugin namespaces
         script: |
-          echo "开始修复flutter_keyboard_visibility插件的namespace问题..."
+          echo "开始修复所有插件的namespace问题..."
           
-          # 检查文件是否存在
-          PLUGIN_PATH="$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle"
-          echo "检查插件路径: $PLUGIN_PATH"
+          # 定义需要修复的插件列表
+          declare -A PLUGINS=(
+            ["flutter_keyboard_visibility-5.4.1"]="com.jrai.flutter_keyboard_visibility"
+            ["flutter_openim_sdk-3.8.3+3"]="io.openim.flutter_openim_sdk"
+            ["flutter_sensors-1.0.1"]="com.example.fluttersensors"
+            ["scan-1.6.0"]="com.chavesgu.scan"
+            ["sound_mode-2.0.2"]="com.tryingoutsomething.soundmode.sound_mode"
+            ["uri_to_file-1.0.0"]="in.lazymanstudios.uri_to_file"
+          )
           
-          if [ -f "$PLUGIN_PATH" ]; then
-            echo "找到插件文件，开始修复..."
+          # 修复每个插件
+          for plugin in "${!PLUGINS[@]}"; do
+            namespace="${PLUGINS[$plugin]}"
+            PLUGIN_PATH="$HOME/.pub-cache/hosted/pub.dev/$plugin/android/build.gradle"
             
-            # 显示修复前的内容
-            echo "修复前的内容:"
-            head -20 "$PLUGIN_PATH"
+            echo "检查插件: $plugin"
+            echo "插件路径: $PLUGIN_PATH"
             
-            # 备份原文件
-            cp "$PLUGIN_PATH" "$PLUGIN_PATH.backup"
-            
-            # 使用更简单的方法：直接echo追加namespace
-            echo "    namespace \"com.jrai.flutter_keyboard_visibility\"" > /tmp/namespace_line.txt
-            
-            # 在android {后面插入namespace
-            awk '/android \{/ { print; getline < "/tmp/namespace_line.txt"; print; next } 1' "$PLUGIN_PATH.backup" > "$PLUGIN_PATH"
-            
-            # 显示修复后的内容
-            echo "修复后的内容:"
-            head -20 "$PLUGIN_PATH"
-            
-            echo "修复完成！"
-          else
-            echo "错误：flutter_keyboard_visibility插件文件不存在"
-            echo "查找相关文件:"
-            find "$HOME/.pub-cache" -name "*flutter_keyboard_visibility*" -type d 2>/dev/null || echo "未找到相关目录"
-          fi
+            if [ -f "$PLUGIN_PATH" ]; then
+              echo "找到插件文件，开始修复 $plugin..."
+              
+              # 检查是否已经有namespace
+              if grep -q "namespace" "$PLUGIN_PATH"; then
+                echo "插件 $plugin 已经有namespace，跳过"
+                continue
+              fi
+              
+              # 备份原文件
+              cp "$PLUGIN_PATH" "$PLUGIN_PATH.backup"
+              
+              # 创建namespace行
+              echo "    namespace \"$namespace\"" > /tmp/namespace_line.txt
+              
+              # 在android {后面插入namespace
+              awk '/android \{/ { print; getline < "/tmp/namespace_line.txt"; print; next } 1' "$PLUGIN_PATH.backup" > "$PLUGIN_PATH"
+              
+              echo "修复 $plugin 完成！"
+            else
+              echo "插件 $plugin 文件不存在，跳过"
+            fi
+          done
+          
+          echo "所有插件namespace修复完成！"
       - name: Generate code
         script: |
           flutter packages pub run build_runner build --delete-conflicting-outputs

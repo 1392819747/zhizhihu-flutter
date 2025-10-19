@@ -55,51 +55,17 @@ workflows:
           flutter packages pub get
       - name: Fix plugin namespaces
         script: |
-          echo "修复第三方插件的namespace问题..."
+          echo "修复flutter_keyboard_visibility插件的namespace问题..."
           
           # 修复 flutter_keyboard_visibility
           if [ -f "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle" ]; then
             echo "修复 flutter_keyboard_visibility..."
-            cp "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle" "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle.bak"
-            cat > "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle" << 'EOF'
-group 'com.jrai.flutter_keyboard_visibility'
-version '1.0'
-
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.0'
-    }
-}
-
-rootProject.allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-apply plugin: 'com.android.library'
-
-android {
-    namespace 'com.jrai.flutter_keyboard_visibility'
-    compileSdkVersion 31
-
-    defaultConfig {
-        minSdkVersion 16
-    }
-    lintOptions {
-        disable 'InvalidPackage'
-    }
-}
-EOF
+            # 使用sed添加namespace
+            sed -i 's/android {/android {\n    namespace "com.jrai.flutter_keyboard_visibility"/' "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle"
+            echo "修复完成！"
+          else
+            echo "flutter_keyboard_visibility插件文件不存在"
           fi
-          
-          echo "修复完成！"
       - name: Generate code
         script: |
           flutter packages pub run build_runner build --delete-conflicting-outputs
@@ -145,51 +111,17 @@ EOF
           flutter packages pub get
       - name: Fix plugin namespaces
         script: |
-          echo "修复第三方插件的namespace问题..."
+          echo "修复flutter_keyboard_visibility插件的namespace问题..."
           
           # 修复 flutter_keyboard_visibility
           if [ -f "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle" ]; then
             echo "修复 flutter_keyboard_visibility..."
-            cp "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle" "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle.bak"
-            cat > "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle" << 'EOF'
-group 'com.jrai.flutter_keyboard_visibility'
-version '1.0'
-
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.0'
-    }
-}
-
-rootProject.allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-apply plugin: 'com.android.library'
-
-android {
-    namespace 'com.jrai.flutter_keyboard_visibility'
-    compileSdkVersion 31
-
-    defaultConfig {
-        minSdkVersion 16
-    }
-    lintOptions {
-        disable 'InvalidPackage'
-    }
-}
-EOF
+            # 使用sed添加namespace
+            sed -i 's/android {/android {\n    namespace "com.jrai.flutter_keyboard_visibility"/' "$HOME/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-5.4.1/android/build.gradle"
+            echo "修复完成！"
+          else
+            echo "flutter_keyboard_visibility插件文件不存在"
           fi
-          
-          echo "修复完成！"
       - name: Generate code
         script: |
           flutter packages pub run build_runner build --delete-conflicting-outputs

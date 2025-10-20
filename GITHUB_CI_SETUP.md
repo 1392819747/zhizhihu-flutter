@@ -31,9 +31,13 @@
 
 ## 🔐 GitHub Secrets 配置
 
-### 无需配置 Secrets
+### 必需的 Secrets
 
-当前配置使用无签名构建方式，**无需配置任何 GitHub Secrets**，可以直接使用！
+| 名称 | 用途 |
+| ---- | ---- |
+| `QWEATHER_API_KEY` | 格式为 `凭据ID|项目ID|[API_HOST|]私钥Base64`。若提供 `API_HOST`（例如 `ma4wcmc6h6.re.qweatherapi.com`），会优先使用该域名；私钥可通过 `base64 -w0 ed25519-private.pem` 生成。 |
+
+> 在 GitHub 仓库的 **Settings → Secrets and variables → Actions** 中新增 `QWEATHER_API_KEY`，构建工作流会通过 `--dart-define=QWEATHER_API_KEY=...` 自动注入。
 
 ### 如果需要签名构建
 

@@ -14,6 +14,7 @@
         "common_utils",
         "country_picker",
         "crypto",
+        "cryptography",
         "cupertino_icons",
         "cupertino_listview",
         "dart_date",
@@ -358,6 +359,18 @@
         "webview_flutter",
         "wechat_assets_picker",
         "wechat_camera_picker"
+      ]
+    },
+    {
+      "name": "cryptography",
+      "version": "2.7.0",
+      "dependencies": [
+        "collection",
+        "crypto",
+        "ffi",
+        "js",
+        "meta",
+        "typed_data"
       ]
     },
     {
@@ -1850,6 +1863,18 @@
       ]
     },
     {
+      "name": "typed_data",
+      "version": "1.4.0",
+      "dependencies": [
+        "collection"
+      ]
+    },
+    {
+      "name": "ffi",
+      "version": "2.1.3",
+      "dependencies": []
+    },
+    {
       "name": "go_router",
       "version": "14.8.1",
       "dependencies": [
@@ -2079,13 +2104,6 @@
       ]
     },
     {
-      "name": "typed_data",
-      "version": "1.4.0",
-      "dependencies": [
-        "collection"
-      ]
-    },
-    {
       "name": "timezone",
       "version": "0.10.0",
       "dependencies": [
@@ -2133,11 +2151,6 @@
         "meta",
         "plugin_platform_interface"
       ]
-    },
-    {
-      "name": "ffi",
-      "version": "2.1.3",
-      "dependencies": []
     },
     {
       "name": "image_cropper_for_web",

@@ -17,9 +17,16 @@ workflows:
       - name: Run tests
         script: |
           flutter test || echo "No tests found, continuing..."
+      - name: Validate QWeather credentials
+        script: |
+          if [ -z "$QWEATHER_API_KEY" ]; then
+            echo "QWEATHER_API_KEY is required (format: credentialId|projectId|base64PrivateKey)." >&2
+            exit 1
+          fi
       - name: Build iOS
         script: |
-          flutter build ios --release --no-codesign
+          flutter build ios --release --no-codesign \
+            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
       - name: Create iOS IPA
         script: |
           cd build/ios/iphoneos
@@ -238,12 +245,20 @@ workflows:
       - name: Run tests
         script: |
           flutter test || echo "No tests found, continuing..."
+      - name: Validate QWeather credentials
+        script: |
+          if [ -z "$QWEATHER_API_KEY" ]; then
+            echo "QWEATHER_API_KEY is required (format: credentialId|projectId|base64PrivateKey)." >&2
+            exit 1
+          fi
       - name: Build Android APK
         script: |
-          flutter build apk --release
+          flutter build apk --release \
+            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
       - name: Build Android AAB
         script: |
-          flutter build appbundle --release
+          flutter build appbundle --release \
+            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
       - name: Verify builds
         script: |
           echo "Android builds completed successfully"
@@ -460,15 +475,24 @@ workflows:
       - name: Run tests
         script: |
           flutter test || echo "No tests found, continuing..."
+      - name: Validate QWeather credentials
+        script: |
+          if [ -z "$QWEATHER_API_KEY" ]; then
+            echo "QWEATHER_API_KEY is required (format: credentialId|projectId|base64PrivateKey)." >&2
+            exit 1
+          fi
       - name: Build Android APK
         script: |
-          flutter build apk --release
+          flutter build apk --release \
+            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
       - name: Build Android AAB
         script: |
-          flutter build appbundle --release
+          flutter build appbundle --release \
+            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
       - name: Build iOS
         script: |
-          flutter build ios --release --no-codesign
+          flutter build ios --release --no-codesign \
+            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
       - name: Create iOS IPA
         script: |
           cd build/ios/iphoneos

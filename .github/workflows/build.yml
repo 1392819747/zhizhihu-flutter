@@ -10,6 +10,8 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    env:
+      QWEATHER_API_KEY: ${{ secrets.QWEATHER_API_KEY }}
     steps:
     - uses: actions/checkout@v4
     
@@ -167,7 +169,9 @@ jobs:
       run: flutter test || echo "No tests found, continuing..."
     
     - name: Build APK
-      run: flutter build apk --release
+      run: >
+        flutter build apk --release
+        --dart-define=QWEATHER_API_KEY=${{ secrets.QWEATHER_API_KEY }}
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
@@ -177,6 +181,8 @@ jobs:
 
   build-ios:
     runs-on: macos-latest
+    env:
+      QWEATHER_API_KEY: ${{ secrets.QWEATHER_API_KEY }}
     steps:
     - uses: actions/checkout@v4
     
@@ -197,11 +203,12 @@ jobs:
       run: flutter test || echo "No tests found, continuing..."
     
     - name: Build iOS
-      run: flutter build ios --release --no-codesign
+      run: >
+        flutter build ios --release --no-codesign
+        --dart-define=QWEATHER_API_KEY=${{ secrets.QWEATHER_API_KEY }}
     
     - name: Upload iOS build
       uses: actions/upload-artifact@v4
       with:
         name: ios-build
         path: build/ios/iphoneos/Runner.app
-

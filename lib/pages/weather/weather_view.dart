@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../services/weather_visuals.dart';
 import 'weather_logic.dart';
 
 class WeatherPage extends StatelessWidget {
@@ -12,7 +13,7 @@ class WeatherPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final logic = Get.find<WeatherLogic>();
-    
+
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
@@ -23,7 +24,7 @@ class WeatherPage extends StatelessWidget {
             child: CircularProgressIndicator(color: Colors.white),
           );
         }
-        
+
         if (logic.weatherData.value == null) {
           return const Center(
             child: Text(
@@ -32,20 +33,23 @@ class WeatherPage extends StatelessWidget {
             ),
           );
         }
-        
+
         final weather = logic.weatherData.value!;
-        final fallbackIconCode = weather.icon.contains('n') ? '02n' : '02d';
-        
+        final iconAsset = weather.iconAsset;
+        final backgroundAsset = weather.backgroundAsset;
+        final fallbackIconAsset = WeatherVisuals.iconAsset(null);
+        final fallbackBackgroundAsset = WeatherVisuals.backgroundAsset(null);
+
         return Stack(
           children: [
             Positioned.fill(
               child: Image.asset(
-                'weather_assets/images/${weather.icon}.jpeg',
+                backgroundAsset,
                 package: 'openim_common',
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) {
                   return Image.asset(
-                    'weather_assets/images/$fallbackIconCode.jpeg',
+                    fallbackBackgroundAsset,
                     package: 'openim_common',
                     fit: BoxFit.cover,
                   );
@@ -76,14 +80,14 @@ class WeatherPage extends StatelessWidget {
                               Padding(
                                 padding: EdgeInsets.only(top: 48.h),
                                 child: Image.asset(
-                                  'weather_assets/icons/${weather.icon}.png',
+                                  iconAsset,
                                   package: 'openim_common',
                                   fit: BoxFit.none,
                                   width: 120.w,
                                   height: 120.w,
                                   errorBuilder: (_, __, ___) {
                                     return Image.asset(
-                                      'weather_assets/icons/$fallbackIconCode.png',
+                                      fallbackIconAsset,
                                       package: 'openim_common',
                                       fit: BoxFit.none,
                                       width: 120.w,
@@ -233,7 +237,7 @@ class WeatherPage extends StatelessWidget {
       }),
     );
   }
-  
+
   Widget _buildWeatherDetail(String label, String value, IconData icon) {
     return Column(
       children: [
@@ -262,7 +266,7 @@ class WeatherPage extends StatelessWidget {
       ],
     );
   }
-  
+
   String _formatTime(int timestamp) {
     final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     return DateFormat('HH:mm').format(dateTime);

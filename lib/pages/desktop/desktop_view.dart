@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -460,19 +459,6 @@ class DesktopPage extends StatelessWidget {
   }
 
   Widget? _resolveAppImage(AppItem app, double dimension) {
-    final localPath = app.localIconPath;
-    if (localPath != null && localPath.isNotEmpty) {
-      final file = File(localPath);
-      if (file.existsSync()) {
-        return Image.file(
-          file,
-          width: dimension,
-          height: dimension,
-          fit: BoxFit.cover,
-        );
-      }
-    }
-
     final assetPath = app.assetIconPath;
     if (assetPath != null && assetPath.isNotEmpty) {
       return Image.asset(

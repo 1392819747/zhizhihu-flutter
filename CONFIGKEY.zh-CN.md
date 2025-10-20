@@ -106,10 +106,4 @@
    ```
    > GitHub Actions / Codemagic 示例请参考 `docs/qweather_setup.md`。~~
 
-**已废弃**：现在使用JWT自动认证，无需手动配置Token。
-
-2. **本地开发**
-   - 建议将 token 写入 `config/qweather.env.local`（已在 `.gitignore` 中忽略）。
-   - 构建或运行前执行 `source config/qweather.env.local`。
-
-和风 API Host 已固定为 `ma4wcmc6h6.re.qweatherapi.com`，无需额外配置。
+当前使用 wttr.in 公共接口，无需配置密钥或 Token。如需改为自建天气服务，请在 `WeatherService` 中调整请求逻辑并同步更新文档。

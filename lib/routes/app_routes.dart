@@ -6,6 +6,7 @@ abstract class AppRoutes {
   static const login = '/login';
   static const desktop = '/desktop';
   static const weather = '/weather';
+  static const apiSettings = '/api_settings';
   static const wechatMock = '/wechat_mock';
   static const home = '/home';
   static const chat = '/chat';

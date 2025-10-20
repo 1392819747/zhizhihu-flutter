@@ -86,6 +86,57 @@ class WeatherVisuals {
     '515': '50d',
   };
 
+  static const Map<String, String> _wmoToOpenWeather = {
+    '113': '01d', // Clear/sunny
+    '116': '02d', // Partly cloudy
+    '119': '03d', // Cloudy
+    '122': '04d', // Overcast
+    '143': '50d', // Mist
+    '176': '09d', // Patchy rain possible
+    '179': '13d', // Patchy snow possible
+    '182': '13d',
+    '185': '09d',
+    '200': '11d', // Thundery outbreaks possible
+    '227': '13d',
+    '230': '13d',
+    '248': '50d',
+    '260': '50d',
+    '263': '09d',
+    '266': '09d',
+    '281': '09d',
+    '284': '09d',
+    '293': '09d',
+    '296': '09d',
+    '299': '10d',
+    '302': '10d',
+    '305': '10d',
+    '308': '10d',
+    '311': '09d',
+    '314': '09d',
+    '317': '13d',
+    '320': '13d',
+    '323': '13d',
+    '326': '13d',
+    '329': '13d',
+    '332': '13d',
+    '335': '13d',
+    '338': '13d',
+    '350': '50d',
+    '353': '09d',
+    '356': '10d',
+    '359': '10d',
+    '362': '09d',
+    '365': '09d',
+    '368': '13d',
+    '371': '13d',
+    '374': '13d',
+    '377': '13d',
+    '386': '11d',
+    '389': '11d',
+    '392': '11d',
+    '395': '13d',
+  };
+
   static String normalize(String? rawCode) {
     if (rawCode == null) {
       return _defaultCode;
@@ -93,6 +144,10 @@ class WeatherVisuals {
     var code = rawCode.trim().toLowerCase();
     if (code.isEmpty) {
       return _defaultCode;
+    }
+    final mappedFromWmo = _wmoToOpenWeather[code];
+    if (mappedFromWmo != null) {
+      return mappedFromWmo;
     }
     final mappedFromHeWeather = _heWeatherToOpenWeather[code];
     if (mappedFromHeWeather != null) {

@@ -1,35 +1,8 @@
-# QWeather 凭据管理说明
+# 天气服务说明
 
-为了避免把敏感凭据提交到仓库，和风天气相关的密钥通过以下方式管理：
+当前客户端使用 [wttr.in](https://wttr.in/) 提供的公开天气接口：
+- 首选获取浏览器/设备的精确经纬度访问 `https://wttr.in/<lat>,<lon>?format=j1&lang=zh`
+- 若用户拒绝授权或定位失败，则自动回退到基于 IP 的 `https://wttr.in/?format=j1&lang=zh`
+- API 为公开服务，无需额外的密钥或配置项
 
-## JWT认证配置
-
-项目现在使用和风天气的JWT认证方式，所有必要的凭据已经内置在代码中：
-
-- **凭据ID**: C5PU3QE2R3
-- **项目ID**: 2H2CNHDC83  
-- **API Host**: ma4wcmc6h6.re.qweatherapi.com
-- **私钥Base64**: MC4CAQAwBQYDK2VwBCIEIMtGiuRndAfjvR1JtObRpiV7g5fCxX6GQmdI9tN7c6xu
-
-系统会自动生成JWT Token进行API认证，无需手动配置。
-
-## 技术实现
-
-1. **JWT Token生成**: 使用Ed25519算法签名，符合和风天气官方规范
-2. **自动认证**: 每次API请求都会自动生成新的JWT Token
-3. **Token有效期**: 默认24小时，可根据需要调整
-
-## 开发说明
-
-- 本地开发无需额外配置
-- Codemagic构建无需配置环境变量
-- 所有认证逻辑已封装在`QWeatherJWTGenerator`类中
-
-## API使用
-
-天气服务会自动处理JWT认证，开发者只需调用相应的天气API方法即可：
-
-```dart
-final weatherService = WeatherService();
-final weather = await weatherService.getCurrentWeather();
-```
+如需改用自建天气服务，可在 `WeatherService` 内调整请求策略。

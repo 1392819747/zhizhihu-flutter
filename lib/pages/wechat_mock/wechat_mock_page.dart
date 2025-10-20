@@ -5,343 +5,221 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:openim_common/openim_common.dart';
 
-class WeChatMockPage extends StatefulWidget {
+import '../../services/api_settings_service.dart';
+import '../../routes/app_routes.dart';
+import 'wechat_mock_logic.dart';
+
+class WeChatMockPage extends GetView<WeChatMockLogic> {
   const WeChatMockPage({super.key});
 
   @override
-  State<WeChatMockPage> createState() => _WeChatMockPageState();
-}
-
-class _WeChatMockPageState extends State<WeChatMockPage> {
-  int _currentIndex = 0;
-  late List<MockConversation> _conversations;
-
-  @override
-  void initState() {
-    super.initState();
-    _conversations = _buildSampleConversations();
-  }
-
-  List<MockConversation> _buildSampleConversations() {
-    final now = DateTime.now();
-    return [
-      MockConversation(
-        id: 'assistant',
-        name: '小助手',
-        avatarColor: const Color(0xFF4CD964),
-        unreadCount: 2,
-        cannedReplies: const [
-          '会议安排已经发送到您邮箱，请注意查收。',
-          '若需进一步帮助，随时告诉我。',
-          '收到，稍后我会整理一份概要给您。',
-        ],
-        messages: [
-          MockMessage(
-            text: '您好，这里是小助手，请问有什么可以帮您？',
-            isSelf: false,
-            timestamp: now.subtract(const Duration(minutes: 28)),
-          ),
-          MockMessage(
-            text: '想了解一下下午的会议安排。',
-            isSelf: true,
-            timestamp: now.subtract(const Duration(minutes: 25)),
-          ),
-          MockMessage(
-            text: '好的，我立刻发给您。',
-            isSelf: false,
-            timestamp: now.subtract(const Duration(minutes: 24)),
-          ),
-        ],
-      ),
-      MockConversation(
-        id: 'design-group',
-        name: '设计讨论群',
-        avatarColor: const Color(0xFF007AFF),
-        unreadCount: 5,
-        cannedReplies: const [
-          '欢迎提出想法，大家一起讨论。',
-          '新的配色方案已经同步在群文件。',
-          '感谢，有任何建议随时反馈。',
-        ],
-        messages: [
-          MockMessage(
-            text: '新版图标大家觉得怎么样？',
-            isSelf: false,
-            timestamp: now.subtract(const Duration(hours: 2, minutes: 10)),
-          ),
-          MockMessage(
-            text: '挺清爽的，可以再优化细节。',
-            isSelf: true,
-            timestamp: now.subtract(const Duration(hours: 2, minutes: 5)),
-          ),
-          MockMessage(
-            text: '收到，后续再迭代一版。',
-            isSelf: false,
-            timestamp: now.subtract(const Duration(hours: 2, minutes: 2)),
-          ),
-        ],
-      ),
-      MockConversation(
-        id: 'file-transfer',
-        name: '文件传输助手',
-        avatarColor: const Color(0xFF5856D6),
-        unreadCount: 0,
-        cannedReplies: const [
-          '文件已妥善保存，如需帮助请告知。',
-          '我可以继续为您传输其它文件。',
-        ],
-        messages: [
-          MockMessage(
-            text: '日报模板.xlsx 已上传 ✅',
-            isSelf: false,
-            timestamp: now.subtract(const Duration(hours: 6)),
-          ),
-          MockMessage(
-            text: '收到，谢谢！',
-            isSelf: true,
-            timestamp: now.subtract(const Duration(hours: 5, minutes: 55)),
-          ),
-        ],
-      ),
-      MockConversation(
-        id: 'ai-lab',
-        name: 'AI Lab',
-        avatarColor: const Color(0xFFFF9500),
-        unreadCount: 0,
-        cannedReplies: const [
-          '我是您的智能助手，随时可以尝试新的对话体验。',
-          '未来这里将接入 AI 能力，敬请期待。',
-        ],
-        messages: [
-          MockMessage(
-            text: '欢迎来到 AI Lab，您可以先随便聊聊。',
-            isSelf: false,
-            timestamp: now.subtract(const Duration(minutes: 40)),
-          ),
-        ],
-      ),
-    ];
-  }
-
-  void _openConversation(MockConversation conversation) async {
-    final result = await Get.to<MockConversation>(
-      () => WeChatChatPage(conversation: conversation),
-      fullscreenDialog: false,
-    );
-    if (result != null) {
-      setState(() {
-        _conversations.removeWhere((element) => element.id == result.id);
-        _conversations.insert(0, result.copyWith(unreadCount: 0));
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFEDEDED),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF07C160),
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          '微信',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFEDEDED),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF07C160),
+          elevation: 0,
+          title: const Text('微信'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              onPressed: () => Get.toNamed(AppRoutes.apiSettings),
+              icon: const Icon(Icons.tune),
+              color: Colors.white,
+              tooltip: 'API 设置',
+            ),
+          ],
+          bottom: const TabBar(
+            indicatorColor: Colors.white,
+            tabs: [
+              Tab(text: '微信'),
+              Tab(text: '通讯录'),
+              Tab(text: '发现'),
+              Tab(text: '我'),
+            ],
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search),
-            color: Colors.white,
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.add_circle_outline),
-            color: Colors.white,
-          ),
-        ],
-      ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          _buildChatsTab(),
-          _buildPlaceholder('通讯录正在建设中'),
-          _buildPlaceholder('发现更多精彩即将上线'),
-          _buildPlaceholder('个人中心开发中'),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: const Color(0xFF07C160),
-        unselectedItemColor: Colors.grey,
-        onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            activeIcon: Icon(Icons.chat_bubble),
-            label: '微信',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined),
-            activeIcon: Icon(Icons.group),
-            label: '通讯录',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore_outlined),
-            activeIcon: Icon(Icons.explore),
-            label: '发现',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: '我',
-          ),
-        ],
+        body: TabBarView(
+          children: [
+            _buildChatsTab(),
+            _buildContactsTab(),
+            _buildPlaceholder('探索更多玩法，未来将接入 SillyTavern 式扩展。'),
+            _buildPlaceholder('个人中心正在开发中，敬请期待。'),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildChatsTab() {
-    if (_conversations.isEmpty) {
-      return const Center(child: Text('暂无会话，开始一段新的聊天吧'));
-    }
-    return ListView.separated(
-      itemCount: _conversations.length,
-      separatorBuilder: (_, __) => Divider(
-        height: 0,
-        indent: 76.w,
-        endIndent: 16.w,
-      ),
-      itemBuilder: (context, index) {
-        final conversation = _conversations[index];
-        return InkWell(
-          onTap: () => _openConversation(conversation),
-          child: Container(
-            color: Colors.white,
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 24.w,
-                  backgroundColor: conversation.avatarColor,
-                  child: Text(
-                    conversation.name.characters.first,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
+    return Obx(() {
+      final items = controller.conversations;
+      if (items.isEmpty) {
+        return _buildPlaceholder('还没有配置 AI 伙伴，点击右上角「API 设置」去创建吧。');
+      }
+      return ListView.separated(
+        itemCount: items.length,
+        separatorBuilder: (_, __) => Divider(height: 0, indent: 76.w, endIndent: 16.w),
+        itemBuilder: (context, index) {
+          final conversation = items[index];
+          return InkWell(
+            onTap: () => _openConversation(conversation),
+            child: Container(
+              color: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 24.w,
+                    backgroundColor: conversation.character.avatarColor,
+                    child: Text(
+                      conversation.character.name.characters.first,
+                      style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
                     ),
                   ),
-                ),
-                12.horizontalSpace,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              conversation.name,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
+                  12.horizontalSpace,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                conversation.character.name,
+                                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
                               ),
                             ),
-                          ),
-                          Text(
-                            _formatTime(conversation.lastTimestamp),
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      6.verticalSpace,
-                      Text(
-                        conversation.lastSnippet,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: Colors.grey.shade600,
+                            Text(_formatTime(conversation.preview.lastTime),
+                                style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
+                          ],
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                if (conversation.unreadCount > 0) ...[
-                  10.horizontalSpace,
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF3B30),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Text(
-                      '${conversation.unreadCount}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10.sp,
-                      ),
+                        6.verticalSpace,
+                        Text(
+                          conversation.preview.lastMessage,
+                          style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ],
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    });
+  }
+
+  Widget _buildContactsTab() {
+    return Obx(() {
+      final characters = controller.service.characters;
+      if (characters.isEmpty) {
+        return _buildPlaceholder('暂无联系人。创建 AI 角色后，这里将显示可对话的「好友」。');
+      }
+      final endpointMap = {for (final ep in controller.service.endpoints) ep.id: ep};
+      return ListView.builder(
+        itemCount: characters.length,
+        itemBuilder: (context, index) {
+          final character = characters[index];
+          final endpoint = endpointMap[character.endpointId];
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: character.avatarColor,
+              child: Text(character.name.characters.first, style: const TextStyle(color: Colors.white)),
+            ),
+            title: Text(character.name),
+            subtitle: Text(
+              endpoint == null
+                  ? '未绑定接口'
+                  : '${endpoint.name} · ${endpoint.model.isEmpty ? endpoint.baseUrl : endpoint.model}',
+            ),
+            onTap: () {
+              final conv = controller.conversations.firstWhereOrNull(
+                (element) => element.character.id == character.id,
+              );
+              if (conv != null) {
+                _openConversation(conv);
+              } else {
+                IMViews.showToast('请先为该角色配置接口');
+              }
+            },
+          );
+        },
+      );
+    });
   }
 
   Widget _buildPlaceholder(String text) {
     return Center(
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 14.sp,
-          color: Colors.grey,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32.w),
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+          textAlign: TextAlign.center,
         ),
       ),
     );
   }
 
-  String _formatTime(DateTime? time) {
-    if (time == null) return '';
+  Future<void> _openConversation(WeChatConversation conversation) async {
+    final result = await Get.to<ChatPreview>(
+      () => WeChatChatPage(character: conversation.character, endpoint: conversation.endpoint),
+    );
+    if (result != null) {
+      controller.updatePreview(conversation.character.id, result);
+    }
+  }
+
+  String _formatTime(DateTime time) {
+    final now = DateTime.now();
     final formatter = DateFormat('HH:mm');
-    return formatter.format(time);
+    if (now.day == time.day && now.month == time.month && now.year == time.year) {
+      return formatter.format(time);
+    }
+    return DateFormat('MM-dd HH:mm').format(time);
   }
 }
 
 class WeChatChatPage extends StatefulWidget {
-  const WeChatChatPage({super.key, required this.conversation});
+  const WeChatChatPage({super.key, required this.character, required this.endpoint});
 
-  final MockConversation conversation;
+  final AiCharacter character;
+  final ApiEndpoint endpoint;
 
   @override
   State<WeChatChatPage> createState() => _WeChatChatPageState();
 }
 
 class _WeChatChatPageState extends State<WeChatChatPage> {
-  late List<MockMessage> _messages;
-  late MockConversation _conversation;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late List<_ChatMessage> _messages;
+
+  List<String> get _fallbackReplies => widget.character.sampleReplies.isNotEmpty
+      ? widget.character.sampleReplies
+      : [
+          '这听起来很有意思，我们继续聊聊吧。',
+          '让我整理一下思路，再为你提供建议。',
+          '收到，我会以 ${widget.endpoint.name} 的接口风格进行输出。',
+        ];
 
   @override
   void initState() {
     super.initState();
-    _conversation = widget.conversation;
-    _messages = List<MockMessage>.from(widget.conversation.messages);
+    _messages = [
+      _ChatMessage(
+        text: widget.character.greeting,
+        isSelf: false,
+        timestamp: DateTime.now().subtract(const Duration(minutes: 1)),
+      ),
+    ];
   }
 
   @override
@@ -355,11 +233,7 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
     final content = _controller.text.trim();
     if (content.isEmpty) return;
     setState(() {
-      _messages.add(MockMessage(
-        text: content,
-        isSelf: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(_ChatMessage(text: content, isSelf: true, timestamp: DateTime.now()));
     });
     _controller.clear();
     _scrollToBottom();
@@ -367,16 +241,11 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
   }
 
   void _scheduleMockReply() {
-    if (_conversation.cannedReplies.isEmpty) return;
-    final reply = _conversation.cannedReplies[_messages.length % _conversation.cannedReplies.length];
     Future.delayed(const Duration(milliseconds: 900), () {
       if (!mounted) return;
+      final reply = _fallbackReplies[_messages.length % _fallbackReplies.length];
       setState(() {
-        _messages.add(MockMessage(
-          text: reply,
-          isSelf: false,
-          timestamp: DateTime.now(),
-        ));
+        _messages.add(_ChatMessage(text: reply, isSelf: false, timestamp: DateTime.now()));
       });
       _scrollToBottom();
     });
@@ -387,145 +256,111 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
       if (!_scrollController.hasClients) return;
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent + 80.h,
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
       );
     });
   }
 
-  void _returnResult() {
-    final updated = _conversation.copyWith(
-      messages: List<MockMessage>.from(_messages),
-      unreadCount: 0,
-    );
-    Get.back(result: updated);
+  void _exit() {
+    final last = _messages.isNotEmpty ? _messages.last : null;
+    if (last != null) {
+      Get.back(result: ChatPreview(lastMessage: last.text, lastTime: last.timestamp));
+    } else {
+      Get.back();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        _returnResult();
-        return false;
-      },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFEDEDED),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF07C160),
-          elevation: 0,
-          titleSpacing: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-            color: Colors.white,
-            onPressed: _returnResult,
-          ),
-          title: Row(
-            children: [
-              CircleAvatar(
-                radius: 16.w,
-                backgroundColor: _conversation.avatarColor,
-                child: Text(
-                  _conversation.name.characters.first,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              8.horizontalSpace,
-              Text(
-                _conversation.name,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.more_horiz),
-              color: Colors.white,
+    return Scaffold(
+      backgroundColor: const Color(0xFFEDEDED),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF07C160),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+          color: Colors.white,
+          onPressed: _exit,
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.character.name, style: const TextStyle(color: Colors.white)),
+            Text(
+              widget.endpoint.name,
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ],
         ),
-        body: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 12.w),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final message = _messages[index];
-                  final isSelf = message.isSelf;
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 6.h),
-                    child: Row(
-                      mainAxisAlignment: isSelf
-                          ? MainAxisAlignment.end
-                          : MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (!isSelf) _buildChatAvatar(isSelf: false),
-                        if (!isSelf) 8.horizontalSpace,
-                        Flexible(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12.w, vertical: 8.h),
-                            decoration: BoxDecoration(
-                              color: isSelf
-                                  ? const Color(0xFF07C160)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(12.r),
-                                topRight: Radius.circular(12.r),
-                                bottomLeft:
-                                    Radius.circular(isSelf ? 12.r : 4.r),
-                                bottomRight:
-                                    Radius.circular(isSelf ? 4.r : 12.r),
-                              ),
+        actions: [
+          IconButton(
+            onPressed: () => _showEndpointInfo(),
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                final isSelf = message.isSelf;
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: 6.h),
+                  child: Row(
+                    mainAxisAlignment: isSelf ? MainAxisAlignment.end : MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!isSelf) _buildAvatar(isSelf: false),
+                      if (!isSelf) 8.horizontalSpace,
+                      Flexible(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                          decoration: BoxDecoration(
+                            color: isSelf ? const Color(0xFF07C160) : Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(12.r),
+                              topRight: Radius.circular(12.r),
+                              bottomLeft: Radius.circular(isSelf ? 12.r : 4.r),
+                              bottomRight: Radius.circular(isSelf ? 4.r : 12.r),
                             ),
-                            child: Text(
-                              message.text,
-                              style: TextStyle(
-                                color: isSelf ? Colors.white : Colors.black87,
-                                fontSize: 16.sp,
-                                height: 1.35,
-                              ),
+                          ),
+                          child: Text(
+                            message.text,
+                            style: TextStyle(
+                              color: isSelf ? Colors.white : Colors.black87,
+                              fontSize: 15.sp,
+                              height: 1.35,
                             ),
                           ),
                         ),
-                        if (isSelf) 8.horizontalSpace,
-                        if (isSelf) _buildChatAvatar(isSelf: true),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      ),
+                      if (isSelf) 8.horizontalSpace,
+                      if (isSelf) _buildAvatar(isSelf: true),
+                    ],
+                  ),
+                );
+              },
             ),
-            _buildInputBar(),
-          ],
-        ),
+          ),
+          _buildInputBar(),
+        ],
       ),
     );
   }
 
-  Widget _buildChatAvatar({required bool isSelf}) {
+  Widget _buildAvatar({required bool isSelf}) {
     return CircleAvatar(
       radius: 18.w,
-      backgroundColor:
-          isSelf ? const Color(0xFF07C160) : _conversation.avatarColor,
+      backgroundColor: isSelf ? const Color(0xFF07C160) : widget.character.avatarColor,
       child: Text(
-        isSelf ? '我' : _conversation.name.characters.first,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 12.sp,
-          fontWeight: FontWeight.bold,
-        ),
+        isSelf ? '我' : widget.character.name.characters.first,
+        style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -538,90 +373,59 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
         top: false,
         child: Row(
           children: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.mic_none),
-              color: Colors.grey,
-            ),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.mic_none), color: Colors.grey),
             Expanded(
               child: Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF6F6F6),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: TextField(
                   controller: _controller,
-                  decoration: const InputDecoration.collapsed(
-                    hintText: '发消息…',
-                  ),
+                  decoration: const InputDecoration.collapsed(hintText: '发消息…'),
                   onSubmitted: (_) => _sendMessage(),
                 ),
               ),
             ),
             8.horizontalSpace,
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.emoji_emotions_outlined),
-              color: Colors.grey,
-            ),
-            IconButton(
-              onPressed: _sendMessage,
-              icon: const Icon(Icons.send),
-              color: const Color(0xFF07C160),
-            ),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.emoji_emotions_outlined), color: Colors.grey),
+            IconButton(onPressed: _sendMessage, icon: const Icon(Icons.send), color: const Color(0xFF07C160)),
           ],
         ),
       ),
     );
   }
-}
 
-class MockConversation {
-  const MockConversation({
-    required this.id,
-    required this.name,
-    required this.messages,
-    required this.avatarColor,
-    required this.unreadCount,
-    required this.cannedReplies,
-  });
-
-  final String id;
-  final String name;
-  final List<MockMessage> messages;
-  final Color avatarColor;
-  final int unreadCount;
-  final List<String> cannedReplies;
-
-  MockConversation copyWith({
-    List<MockMessage>? messages,
-    int? unreadCount,
-  }) {
-    return MockConversation(
-      id: id,
-      name: name,
-      avatarColor: avatarColor,
-      cannedReplies: cannedReplies,
-      messages: messages ?? this.messages,
-      unreadCount: unreadCount ?? this.unreadCount,
+  void _showEndpointInfo() {
+    Get.dialog(
+      AlertDialog(
+        title: Text(widget.endpoint.name),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('类型：${widget.endpoint.type == ApiProviderType.openai ? 'OpenAI 兼容' : 'Google Gemini'}'),
+            const SizedBox(height: 8),
+            Text('Base URL：${widget.endpoint.baseUrl}'),
+            const SizedBox(height: 8),
+            Text('默认模型：${widget.endpoint.model.isEmpty ? '未设置' : widget.endpoint.model}'),
+            if (widget.endpoint.notes.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text('备注：${widget.endpoint.notes}')
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('关闭')),
+        ],
+      ),
     );
   }
-
-  MockMessage? get lastMessage => messages.isNotEmpty ? messages.last : null;
-
-  DateTime? get lastTimestamp => lastMessage?.timestamp;
-
-  String get lastSnippet => lastMessage?.text ?? '';
 }
 
-class MockMessage {
-  const MockMessage({
-    required this.text,
-    required this.isSelf,
-    required this.timestamp,
-  });
+class _ChatMessage {
+  _ChatMessage({required this.text, required this.isSelf, required this.timestamp});
 
   final String text;
   final bool isSelf;

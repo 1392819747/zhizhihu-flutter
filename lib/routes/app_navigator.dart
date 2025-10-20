@@ -36,6 +36,10 @@ class AppNavigator {
     Get.toNamed(AppRoutes.weather);
   }
 
+  static void startApiSettings() {
+    Get.toNamed(AppRoutes.apiSettings);
+  }
+
   static void startWeChatMock() {
     Get.toNamed(AppRoutes.wechatMock);
   }

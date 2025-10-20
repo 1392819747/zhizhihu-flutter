@@ -3,8 +3,11 @@ import 'package:get/get.dart';
 import '../pages/chat/chat_binding.dart';
 import '../pages/desktop/desktop_binding.dart';
 import '../pages/desktop/desktop_view.dart';
+import '../pages/api_settings/api_settings_binding.dart';
+import '../pages/api_settings/api_settings_page.dart';
 import '../pages/weather/weather_binding.dart';
 import '../pages/weather/weather_view.dart';
+import '../pages/wechat_mock/wechat_mock_binding.dart';
 import '../pages/wechat_mock/wechat_mock_page.dart';
 import '../pages/chat/chat_setup/chat_setup_binding.dart';
 import '../pages/chat/chat_setup/chat_setup_view.dart';
@@ -129,8 +132,14 @@ class AppPages {
       binding: WeatherBinding(),
     ),
     _pageBuilder(
+      name: AppRoutes.apiSettings,
+      page: () => const ApiSettingsPage(),
+      binding: ApiSettingsBinding(),
+    ),
+    _pageBuilder(
       name: AppRoutes.wechatMock,
-      page: () => WeChatMockPage(),
+      page: () => const WeChatMockPage(),
+      binding: WeChatMockBinding(),
     ),
     _pageBuilder(
       name: AppRoutes.home,

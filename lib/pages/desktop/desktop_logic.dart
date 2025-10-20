@@ -1,10 +1,6 @@
-import 'dart:io';
-
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../routes/app_navigator.dart';
 import '../conversation/conversation_logic.dart';
@@ -15,8 +11,6 @@ class AppItem {
   final String name;
   final IconData? icon;
   final String? assetIconPath;
-  final String? localIconPath;
-  final String? remoteIconUrl;
   final Color color;
   final VoidCallback? onTap;
 
@@ -24,35 +18,11 @@ class AppItem {
     required this.name,
     this.icon,
     this.assetIconPath,
-    this.localIconPath,
-    this.remoteIconUrl,
     required this.color,
     this.onTap,
   }) : assert(
-            icon != null ||
-                assetIconPath != null ||
-                localIconPath != null ||
-                remoteIconUrl != null,
+            icon != null || assetIconPath != null,
             'At least one icon source must be provided');
-
-  AppItem copyWith({
-    IconData? icon,
-    String? assetIconPath,
-    String? localIconPath,
-    String? remoteIconUrl,
-    Color? color,
-    VoidCallback? onTap,
-  }) {
-    return AppItem(
-      name: name,
-      icon: icon ?? this.icon,
-      assetIconPath: assetIconPath ?? this.assetIconPath,
-      localIconPath: localIconPath ?? this.localIconPath,
-      remoteIconUrl: remoteIconUrl ?? this.remoteIconUrl,
-      color: color ?? this.color,
-      onTap: onTap ?? this.onTap,
-    );
-  }
 }
 
 class DesktopLogic extends GetxController {
@@ -114,14 +84,15 @@ class DesktopLogic extends GetxController {
       color: const Color(0xFFFF2D92), // iOS Music Pink
     ),
     AppItem(
-      name: 'WeChat',
-      assetIconPath: 'packages/openim_common/assets/images/WeChat.png',
-      color: const Color(0xFF07C160), // WeChat Green
+      name: 'API 设置',
+      assetIconPath: 'packages/openim_common/assets/images/settings_icon.png',
+      color: const Color(0xFF5856D6),
     ),
     AppItem(
-      name: '文件',
-      assetIconPath: 'packages/openim_common/assets/images/files_icon.png',
-      color: const Color(0xFFFF9500), // iOS Files Orange
+      name: 'WeChat',
+      assetIconPath:
+          'packages/openim_common/assets/images/wechat_desktop_icon.png',
+      color: const Color(0xFF07C160), // WeChat Green
     ),
     AppItem(
       name: '日历',
@@ -168,7 +139,6 @@ class DesktopLogic extends GetxController {
     super.onInit();
     pageController = PageController();
     _initializeAppPositions();
-    _ensureWeChatIcon();
     _loadWeatherData();
   }
 
@@ -196,6 +166,9 @@ class DesktopLogic extends GetxController {
         break;
       case 'WeChat':
         AppNavigator.startWeChatMock();
+        break;
+      case 'API 设置':
+        AppNavigator.startApiSettings();
         break;
       case '天气':
         // 打开天气应用
@@ -267,50 +240,8 @@ class DesktopLogic extends GetxController {
       print('移动到空位: $targetGlobalIndex');
     }
 
-    // 刷新UI
     update([appsUpdateId]);
     print('App位置更新完成');
-  }
-
-  Future<void> _ensureWeChatIcon() async {
-    final index = appList.indexWhere((element) => element.name == 'WeChat');
-    if (index == -1) return;
-    final app = appList[index];
-    if (app.localIconPath != null) {
-      update([appsUpdateId]);
-      return;
-    }
-    final url = app.remoteIconUrl;
-    if (url == null || url.isEmpty) {
-      update([appsUpdateId]);
-      return;
-    }
-    try {
-      final dir = await getApplicationSupportDirectory();
-      final iconFile = File('${dir.path}/wechat_app_icon.png');
-      if (!await iconFile.exists()) {
-        final response = await Dio().get<List<int>>(
-          url,
-          options: Options(responseType: ResponseType.bytes),
-        );
-        final bytes = response.data;
-        if (bytes == null || bytes.isEmpty) {
-          Logger.print('下载微信图标失败: 空数据', onlyConsole: true);
-        } else {
-          await iconFile.create(recursive: true);
-          await iconFile.writeAsBytes(bytes);
-        }
-      }
-      if (await iconFile.exists()) {
-        final updated = app.copyWith(localIconPath: iconFile.path);
-        appList[index] = updated;
-        appPositions.updateAll((key, value) => value == app ? updated : value);
-      }
-    } catch (e) {
-      Logger.print('下载微信图标失败: $e', onlyConsole: true);
-    } finally {
-      update([appsUpdateId]);
-    }
   }
 
   // 切换夜间模式
@@ -351,23 +282,7 @@ class DesktopLogic extends GetxController {
   Future<void> _loadWeatherData() async {
     try {
       isLoadingWeather.value = true;
-
-      // 尝试获取当前位置
-      final position = await _weatherService.getCurrentPosition();
-      WeatherData? weather;
-
-      if (position != null) {
-        // 使用当前位置获取天气
-        weather = await _weatherService.getWeatherByLocation(
-            position.latitude, position.longitude);
-      }
-
-      // 如果获取当前位置失败，使用默认位置（上海）
-      if (weather == null) {
-        weather = await _weatherService.getWeatherByLocation(31.2304, 121.4737);
-      }
-
-      weatherData.value = weather;
+      weatherData.value = await _weatherService.getWeather();
     } catch (e) {
       print('加载天气数据失败: $e');
     } finally {
@@ -429,7 +344,7 @@ class DesktopLogic extends GetxController {
 
   // 获取天气渐变背景颜色
   List<Color> getWeatherGradientColors() => WeatherVisuals.gradient(
-        weatherData.value?.icon,
+        weatherData.value?.iconCode,
         isDarkMode: isDarkMode.value,
       );
 }

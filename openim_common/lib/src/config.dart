@@ -53,27 +53,9 @@ class Config {
   static const webKey = 'webKey';
   static const webServerKey = 'webServerKey';
   static const locationHost = 'http://location.your-domain';
-  static const String _envQWeatherToken =
-      String.fromEnvironment('QWEATHER_API_TOKEN', defaultValue: '');
-  static const String _defaultQWeatherHost =
-      'https://ma4wcmc6h6.re.qweatherapi.com';
+  static const String _defaultWeatherHost = 'https://wttr.in';
 
-  static String get qWeatherToken {
-    if (_envQWeatherToken.isNotEmpty) {
-      return _envQWeatherToken;
-    }
-    return Platform.environment['QWEATHER_API_TOKEN'] ?? '';
-  }
-
-  static String get qWeatherBaseUrl => '$_defaultQWeatherHost/v7';
-
-  static String get qWeatherGeoBaseUrl => '$_defaultQWeatherHost/v2';
-  
-  /// 和风天气JWT认证配置
-  static const String qWeatherCredentialId = 'C5PU3QE2R3';
-  static const String qWeatherProjectId = '2H2CNHDC83';
-  static const String qWeatherApiHost = 'ma4wcmc6h6.re.qweatherapi.com';
-  static const String qWeatherPrivateKeyBase64 = 'MC4CAQAwBQYDK2VwBCIEIMtGiuRndAfjvR1JtObRpiV7g5fCxX6GQmdI9tN7c6xu';
+  static String get weatherBaseUrl => _defaultWeatherHost;
 
   static OfflinePushInfo get offlinePushInfo => OfflinePushInfo(
         title: _appName,

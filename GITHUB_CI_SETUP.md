@@ -35,9 +35,9 @@
 
 | 名称 | 用途 |
 | ---- | ---- |
-| `QWEATHER_API_TOKEN` | 和风天气后端颁发的 Bearer Token（建议定期刷新）。 |
+| `QWEATHER_API_TOKEN` | ~~和风天气后端颁发的 Bearer Token（建议定期刷新）。~~ **已废弃** - 现在使用JWT自动认证 |
 
-> 在 GitHub 仓库的 **Settings → Secrets and variables → Actions** 中新增 `QWEATHER_API_TOKEN`，构建工作流会通过 `--dart-define=QWEATHER_API_TOKEN=...` 自动注入。
+> ~~在 GitHub 仓库的 **Settings → Secrets and variables → Actions** 中新增 `QWEATHER_API_TOKEN`，构建工作流会通过 `--dart-define=QWEATHER_API_TOKEN=...` 自动注入。~~ **已废弃** - 现在使用JWT自动认证，无需配置环境变量。
 
 ### 如果需要签名构建
 

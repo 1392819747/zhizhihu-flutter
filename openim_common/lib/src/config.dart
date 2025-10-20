@@ -68,6 +68,12 @@ class Config {
   static String get qWeatherBaseUrl => '$_defaultQWeatherHost/v7';
 
   static String get qWeatherGeoBaseUrl => '$_defaultQWeatherHost/v2';
+  
+  /// 和风天气JWT认证配置
+  static const String qWeatherCredentialId = 'C5PU3QE2R3';
+  static const String qWeatherProjectId = '2H2CNHDC83';
+  static const String qWeatherApiHost = 'ma4wcmc6h6.re.qweatherapi.com';
+  static const String qWeatherPrivateKeyBase64 = 'MC4CAQAwBQYDK2VwBCIEIMtGiuRndAfjvR1JtObRpiV7g5fCxX6GQmdI9tN7c6xu';
 
   static OfflinePushInfo get offlinePushInfo => OfflinePushInfo(
         title: _appName,

@@ -21,17 +21,10 @@ workflows:
           flutter test || echo "No tests found, continuing..."
       - name: Validate QWeather credentials
         script: |
-          echo "Checking QWEATHER_API_TOKEN presence..."
-          if [ -z "$QWEATHER_API_TOKEN" ]; then
-            echo "❌ QWEATHER_API_TOKEN is empty. Please provide a valid bearer token." >&2
-            exit 1
-          fi
-          echo "✅ QWEATHER_API_TOKEN length: ${#QWEATHER_API_TOKEN}"
-          echo "Token preview: ${QWEATHER_API_TOKEN:0:6}***"
+          echo "✅ QWeather JWT authentication is now automated - no manual token configuration needed"
       - name: Build iOS
         script: |
           flutter build ios --release --no-codesign \
-            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Create iOS IPA
         script: |
           cd build/ios/iphoneos
@@ -254,19 +247,13 @@ workflows:
           flutter test || echo "No tests found, continuing..."
       - name: Validate QWeather credentials
         script: |
-          if [ -z "$QWEATHER_API_TOKEN" ]; then
-            echo "QWEATHER_API_TOKEN is required." >&2
-            exit 1
-          fi
-          echo "Token preview: ${QWEATHER_API_TOKEN:0:6}***"
+          echo "✅ QWeather JWT authentication is automated"
       - name: Build Android APK
         script: |
           flutter build apk --release \
-            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Build Android AAB
         script: |
           flutter build appbundle --release \
-            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Verify builds
         script: |
           echo "Android builds completed successfully"
@@ -485,23 +472,16 @@ workflows:
           flutter test || echo "No tests found, continuing..."
       - name: Validate QWeather credentials
         script: |
-          if [ -z "$QWEATHER_API_TOKEN" ]; then
-            echo "QWEATHER_API_TOKEN is required." >&2
-            exit 1
-          fi
-          echo "Token preview: ${QWEATHER_API_TOKEN:0:6}***"
+          echo "✅ QWeather JWT authentication is automated"
       - name: Build Android APK
         script: |
           flutter build apk --release \
-            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Build Android AAB
         script: |
           flutter build appbundle --release \
-            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Build iOS
         script: |
           flutter build ios --release --no-codesign \
-            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Create iOS IPA
         script: |
           cd build/ios/iphoneos

@@ -93,16 +93,20 @@
 
 ### 配置指南
 
-当前应用已切换为 [和风天气（QWeather）](https://dev.qweather.com/) 实况接口，请准备一个环境变量 `QWEATHER_API_TOKEN`，该值为后端服务颁发的 Bearer Token（建议定期刷新）。
+~~当前应用已切换为 [和风天气（QWeather）](https://dev.qweather.com/) 实况接口，请准备一个环境变量 `QWEATHER_API_TOKEN`，该值为后端服务颁发的 Bearer Token（建议定期刷新）。~~
+
+**已更新**：现在使用JWT自动认证，无需手动配置Token。系统会自动生成JWT Token进行API认证。
 
 ### 推荐配置方式
 
-1. **编译期传参（CI / 本地构建）**
+~~1. **编译期传参（CI / 本地构建）**
    ```bash
    flutter build ... \
      --dart-define=QWEATHER_API_TOKEN='你的BearerToken'
    ```
-   > GitHub Actions / Codemagic 示例请参考 `docs/qweather_setup.md`。
+   > GitHub Actions / Codemagic 示例请参考 `docs/qweather_setup.md`。~~
+
+**已废弃**：现在使用JWT自动认证，无需手动配置Token。
 
 2. **本地开发**
    - 建议将 token 写入 `config/qweather.env.local`（已在 `.gitignore` 中忽略）。

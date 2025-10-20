@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:openim_common/openim_common.dart';
 
 import 'weather_visuals.dart';
+import 'qweather_jwt_generator.dart';
 
 class WeatherService {
   WeatherService({Dio? dio}) : _dio = dio ?? Dio();
@@ -11,6 +12,13 @@ class WeatherService {
   final Dio _dio;
   String get _weatherBaseUrl => Config.qWeatherBaseUrl;
   String get _geoBaseUrl => Config.qWeatherGeoBaseUrl;
+  
+  /// JWT Token生成器
+  late final QWeatherJWTGenerator _jwtGenerator = QWeatherJWTGenerator(
+    credentialId: Config.qWeatherCredentialId,
+    projectId: Config.qWeatherProjectId,
+    privateKeyBase64: Config.qWeatherPrivateKeyBase64,
+  );
 
   /// 获取当前位置
   Future<Position?> getCurrentPosition() async {
@@ -142,12 +150,10 @@ class WeatherService {
     String url,
     Map<String, dynamic> params,
   ) async {
-    final token = Config.qWeatherToken;
-    if (token.isEmpty) {
-      Logger.print('未配置和风天气 API Token，无法获取天气数据', onlyConsole: true);
-      return null;
-    }
     try {
+      // 生成JWT Token
+      final token = await _jwtGenerator.generateToken();
+      
       final response = await _dio.get(
         url,
         queryParameters: params,

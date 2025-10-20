@@ -112,11 +112,19 @@ workflows:
             echo "找到文件: $SCAN_PATH"
             echo "当前scan文件内容:"
             cat "$SCAN_PATH"
-            # 使用更可靠的方法替换
-            sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SCAN_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
-            # 删除重复的compileSdkVersion声明
-            sed -i.bak '/^[[:space:]]*compileSdkVersion[[:space:]]*[0-9]*[[:space:]]*$/d' "$SCAN_PATH"
+            # 检查是否已经有compileSdkVersion
+            if ! grep -q "compileSdkVersion" "$SCAN_PATH"; then
+              echo "添加compileSdkVersion 34..."
+              sed -i.bak 's/android {/android {\n    compileSdkVersion 34/' "$SCAN_PATH"
+            else
+              echo "compileSdkVersion已存在，更新为34..."
+              sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SCAN_PATH"
+            fi
+            # 确保有namespace
+            if ! grep -q "namespace" "$SCAN_PATH"; then
+              echo "添加namespace..."
+              sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
+            fi
             echo "修复后scan文件内容:"
             cat "$SCAN_PATH"
             echo "scan 修复完成"
@@ -131,11 +139,19 @@ workflows:
             echo "找到文件: $SOUND_MODE_PATH"
             echo "当前sound_mode文件内容:"
             cat "$SOUND_MODE_PATH"
-            # 使用更可靠的方法替换
-            sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SOUND_MODE_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"/' "$SOUND_MODE_PATH"
-            # 删除重复的compileSdkVersion声明
-            sed -i.bak '/^[[:space:]]*compileSdkVersion[[:space:]]*[0-9]*[[:space:]]*$/d' "$SOUND_MODE_PATH"
+            # 检查是否已经有compileSdkVersion
+            if ! grep -q "compileSdkVersion" "$SOUND_MODE_PATH"; then
+              echo "添加compileSdkVersion 34..."
+              sed -i.bak 's/android {/android {\n    compileSdkVersion 34/' "$SOUND_MODE_PATH"
+            else
+              echo "compileSdkVersion已存在，更新为34..."
+              sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SOUND_MODE_PATH"
+            fi
+            # 确保有namespace
+            if ! grep -q "namespace" "$SOUND_MODE_PATH"; then
+              echo "添加namespace..."
+              sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"/' "$SOUND_MODE_PATH"
+            fi
             echo "修复后sound_mode文件内容:"
             cat "$SOUND_MODE_PATH"
             echo "sound_mode 修复完成"
@@ -318,11 +334,19 @@ workflows:
             echo "找到文件: $SCAN_PATH"
             echo "当前scan文件内容:"
             cat "$SCAN_PATH"
-            # 使用更可靠的方法替换
-            sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SCAN_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
-            # 删除重复的compileSdkVersion声明
-            sed -i.bak '/^[[:space:]]*compileSdkVersion[[:space:]]*[0-9]*[[:space:]]*$/d' "$SCAN_PATH"
+            # 检查是否已经有compileSdkVersion
+            if ! grep -q "compileSdkVersion" "$SCAN_PATH"; then
+              echo "添加compileSdkVersion 34..."
+              sed -i.bak 's/android {/android {\n    compileSdkVersion 34/' "$SCAN_PATH"
+            else
+              echo "compileSdkVersion已存在，更新为34..."
+              sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SCAN_PATH"
+            fi
+            # 确保有namespace
+            if ! grep -q "namespace" "$SCAN_PATH"; then
+              echo "添加namespace..."
+              sed -i.bak 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$SCAN_PATH"
+            fi
             echo "修复后scan文件内容:"
             cat "$SCAN_PATH"
             echo "scan 修复完成"
@@ -337,11 +361,19 @@ workflows:
             echo "找到文件: $SOUND_MODE_PATH"
             echo "当前sound_mode文件内容:"
             cat "$SOUND_MODE_PATH"
-            # 使用更可靠的方法替换
-            sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SOUND_MODE_PATH"
-            sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"/' "$SOUND_MODE_PATH"
-            # 删除重复的compileSdkVersion声明
-            sed -i.bak '/^[[:space:]]*compileSdkVersion[[:space:]]*[0-9]*[[:space:]]*$/d' "$SOUND_MODE_PATH"
+            # 检查是否已经有compileSdkVersion
+            if ! grep -q "compileSdkVersion" "$SOUND_MODE_PATH"; then
+              echo "添加compileSdkVersion 34..."
+              sed -i.bak 's/android {/android {\n    compileSdkVersion 34/' "$SOUND_MODE_PATH"
+            else
+              echo "compileSdkVersion已存在，更新为34..."
+              sed -i.bak 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$SOUND_MODE_PATH"
+            fi
+            # 确保有namespace
+            if ! grep -q "namespace" "$SOUND_MODE_PATH"; then
+              echo "添加namespace..."
+              sed -i.bak 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"/' "$SOUND_MODE_PATH"
+            fi
             echo "修复后sound_mode文件内容:"
             cat "$SOUND_MODE_PATH"
             echo "sound_mode 修复完成"

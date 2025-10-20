@@ -68,12 +68,19 @@ jobs:
           echo "修复 scan..."
           echo "当前scan文件内容:"
           cat "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
-          # 删除重复的namespace声明
-          sed -i '/^[[:space:]]*namespace[[:space:]]*'\''com\.chavesgu\.scan'\''[[:space:]]*$/d' "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
-          # 删除重复的compileSdkVersion声明
-          sed -i '/^[[:space:]]*compileSdkVersion[[:space:]]*[0-9]*[[:space:]]*$/d' "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
-          # 添加正确的namespace和compileSdkVersion
-          sed -i 's/android {/android {\n    namespace "com.chavesgu.scan"\n    compileSdkVersion 34/' "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
+          # 检查是否已经有compileSdkVersion
+          if ! grep -q "compileSdkVersion" "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"; then
+            echo "添加compileSdkVersion 34..."
+            sed -i 's/android {/android {\n    compileSdkVersion 34/' "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
+          else
+            echo "compileSdkVersion已存在，更新为34..."
+            sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
+          fi
+          # 确保有namespace
+          if ! grep -q "namespace" "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"; then
+            echo "添加namespace..."
+            sed -i 's/android {/android {\n    namespace "com.chavesgu.scan"/' "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
+          fi
           echo "修复后scan文件内容:"
           cat "$HOME/.pub-cache/hosted/pub.dev/scan-1.6.0/android/build.gradle"
         fi
@@ -83,12 +90,19 @@ jobs:
           echo "修复 sound_mode..."
           echo "当前sound_mode文件内容:"
           cat "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
-          # 删除重复的namespace声明
-          sed -i '/^[[:space:]]*namespace[[:space:]]*'\''com\.tryingoutsomething\.soundmode\.sound_mode'\''[[:space:]]*$/d' "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
-          # 删除重复的compileSdkVersion声明
-          sed -i '/^[[:space:]]*compileSdkVersion[[:space:]]*[0-9]*[[:space:]]*$/d' "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
-          # 添加正确的namespace和compileSdkVersion
-          sed -i 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"\n    compileSdkVersion 34/' "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
+          # 检查是否已经有compileSdkVersion
+          if ! grep -q "compileSdkVersion" "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"; then
+            echo "添加compileSdkVersion 34..."
+            sed -i 's/android {/android {\n    compileSdkVersion 34/' "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
+          else
+            echo "compileSdkVersion已存在，更新为34..."
+            sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 34/' "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
+          fi
+          # 确保有namespace
+          if ! grep -q "namespace" "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"; then
+            echo "添加namespace..."
+            sed -i 's/android {/android {\n    namespace "com.tryingoutsomething.soundmode.sound_mode"/' "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
+          fi
           echo "修复后sound_mode文件内容:"
           cat "$HOME/.pub-cache/hosted/pub.dev/sound_mode-2.0.2/android/build.gradle"
         fi

@@ -68,7 +68,8 @@ class Config {
       String.fromEnvironment('QWEATHER_PRIVATE_KEY_PATH', defaultValue: '');
   static const String _envQWeatherApiHost =
       String.fromEnvironment('QWEATHER_API_HOST', defaultValue: '');
-  static const String _defaultQWeatherHost = 'ma4wcmc6h6.re.qweatherapi.com';
+  // 默认请求主机使用官方网关，适用于未配置专用域名的账号
+  static const String _defaultQWeatherHost = 'api.qweather.com';
 
   static QWeatherCredentials? _cachedQWeatherCredentials;
 

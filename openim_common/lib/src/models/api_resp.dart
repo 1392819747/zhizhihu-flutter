@@ -55,5 +55,4 @@ class ApiError {
     '50004': '未知错误',
     '50005': '创建错误',
   };
-  static const _errorEN = {};
 }

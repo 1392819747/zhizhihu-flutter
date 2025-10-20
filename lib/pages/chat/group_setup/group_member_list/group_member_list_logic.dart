@@ -203,7 +203,7 @@ class GroupMemberListLogic extends GetxController {
   }
 
   void confirmSelectedMember() {
-    Get.back(result: checkedList.value);
+    Get.back(result: checkedList.toList());
   }
 
   bool hiddenMember(GroupMembersInfo membersInfo) =>

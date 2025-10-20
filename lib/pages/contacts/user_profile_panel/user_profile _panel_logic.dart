@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:common_utils/common_utils.dart';
-import 'package:extended_image/extended_image.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_openim_sdk/flutter_openim_sdk.dart';
 import 'package:get/get.dart';
 import 'package:zhizhihu/routes/app_navigator.dart';
@@ -211,13 +209,6 @@ class UserProfilePanelLogic extends GetxController {
 
       UserCacheManager().addOrUpdateUserInfo(userID, userInfo.value);
     }
-  }
-
-  void _resetAvatar(String url) async {
-    clearMemoryImageCache(keyToMd5(url));
-    await clearDiskCachedImage(url);
-    PaintingBinding.instance.imageCache.evict(keyToMd5(url));
-    userInfo.refresh();
   }
 
   _queryGroupInfo() async {

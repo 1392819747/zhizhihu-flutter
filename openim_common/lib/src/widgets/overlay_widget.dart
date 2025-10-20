@@ -61,11 +61,12 @@ class OverlayWidget {
   }) async {
     if (_isToastVisible) return;
     var count = 3;
+    _toastTimer?.cancel();
     _toastTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       count--;
 
       if (count == 0) {
-        timer.cancel;
+        timer.cancel();
         hideToast();
         onDelayDismiss?.call();
       }
@@ -101,6 +102,7 @@ class OverlayWidget {
 
   void hideToast() {
     if (!_isToastVisible) return;
+    _toastTimer?.cancel();
     _toastTimer = null;
     _toastOverlayEntry?.remove();
     _toastOverlayEntry = null;
@@ -387,7 +389,6 @@ class OverlayPopupMenuButtonState extends State<OverlayPopupMenuButton> {
         final popupMenuButtonHeight = rect.bottom - rect.top;
         double? left = rect.left + popupMenuButtonWidth / 2 - contentWidth / 2;
         double? top = rect.top + popupMenuButtonHeight;
-        double? right = rect.right - popupMenuButtonWidth / 2;
         double? bottom;
         bool reverse = false;
         if (left < 0) {

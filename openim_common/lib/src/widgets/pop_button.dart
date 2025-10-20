@@ -92,15 +92,6 @@ class PopButton extends StatelessWidget {
     );
   }
 
-  _clickArea(double dy) {
-    for (var i = 0; i < menus.length; i++) {
-      if (dy > i * menuItemHeight! && dy <= (i + 1) * menuItemHeight!) {
-        menus.elementAt(i).onTap?.call();
-        popCtrl?.hideMenu();
-      }
-    }
-  }
-
   Widget _buildPopBgView({Widget? child}) => Container(
         decoration: BoxDecoration(
           color: bgColor ?? Styles.c_FFFFFF,

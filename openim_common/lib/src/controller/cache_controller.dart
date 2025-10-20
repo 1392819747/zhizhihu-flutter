@@ -21,7 +21,7 @@ class CacheController extends GetxController {
 
   void resetCache() {
     if (_isInitCallRecords) {
-      callRecordList.value = [];
+      callRecordList.clear();
       final list = callRecordBox?.get(userID, defaultValue: <CallRecords>[]);
 
       if (list != null) {
@@ -32,12 +32,12 @@ class CacheController extends GetxController {
 
   addCallRecords(CallRecords records) {
     callRecordList.insert(0, records);
-    callRecordBox?.put(userID, callRecordList.value);
+    callRecordBox?.put(userID, callRecordList.toList());
   }
 
   deleteCallRecords(CallRecords records) async {
     callRecordList.removeWhere((element) => element.userID == records.userID && element.date == records.date);
-    await callRecordBox?.put(userID, callRecordList.value);
+    await callRecordBox?.put(userID, callRecordList.toList());
   }
 
   @override

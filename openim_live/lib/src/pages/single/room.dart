@@ -123,6 +123,7 @@ class _SingleRoomViewState extends SignalState<SingleRoomView> {
       } catch (_) {
         Logger.print('Failed to decode: $_');
       }
+      Logger.print('Room data received: $decoded');
     });
 
   void _publish() async {

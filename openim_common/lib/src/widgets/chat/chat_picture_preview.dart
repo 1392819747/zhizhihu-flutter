@@ -19,7 +19,7 @@ class ChatPicturePreview extends StatelessWidget {
   final Function()? onTap;
   final Function(String url)? onLongPress;
   final ExtendedPageController? controller;
-  GlobalKey<ExtendedImageSlidePageState> slidePagekey = GlobalKey<ExtendedImageSlidePageState>();
+  final GlobalKey<ExtendedImageSlidePageState> slidePagekey = GlobalKey<ExtendedImageSlidePageState>();
   @override
   Widget build(BuildContext context) {
     return ExtendedImageSlidePage(

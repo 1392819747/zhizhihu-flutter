@@ -1353,7 +1353,7 @@
     },
     {
       "name": "provider",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/provider-6.1.2",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/provider-6.1.5+1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -2007,15 +2007,15 @@
     },
     {
       "name": "webview_flutter_platform_interface",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/webview_flutter_platform_interface-2.10.0",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/webview_flutter_platform_interface-2.14.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.6"
     },
     {
       "name": "webview_flutter_wkwebview",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.18.4",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.23.1",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.9"
     },
     {
       "name": "wechat_assets_picker",

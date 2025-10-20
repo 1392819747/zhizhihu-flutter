@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:openim_common/openim_common.dart';
 
 enum OperationType { participants, roomSettings, leave, end, setting, onlyClose, kickOff } // case setting for app setting
@@ -149,8 +147,6 @@ extension MxNLayoutViewTypeExt on MxNLayoutViewType {
         return 2;
       case MxNLayoutViewType.threeXthree:
         return 3;
-      default:
-        return 1;
     }
   }
 }

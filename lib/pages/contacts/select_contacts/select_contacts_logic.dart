@@ -197,7 +197,7 @@ class SelectContactsLogic extends GetxController implements OrganizationMultiSel
         });
       }
     } else {
-      Get.back(result: checkedList.value);
+      Get.back(result: Map<String, dynamic>.from(checkedList));
     }
   }
 

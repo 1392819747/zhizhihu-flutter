@@ -143,6 +143,4 @@ class MyInfoLogic extends GetxController {
       });
     }
   }
-
-  static _trimNullStr(String? value) => IMUtils.emptyStrToNull(value);
 }

@@ -9,8 +9,10 @@
       "dependencies": [
         "animated_text_kit",
         "audio_session",
+        "azlistview",
         "azlistview_plus",
         "chat_listview",
+        "collection",
         "common_utils",
         "country_picker",
         "crypto",
@@ -18,6 +20,7 @@
         "cupertino_icons",
         "cupertino_listview",
         "dart_date",
+        "device_info_plus",
         "dio",
         "extended_image",
         "file_picker",
@@ -30,6 +33,7 @@
         "flutter_map",
         "flutter_new_badger",
         "flutter_openim_sdk",
+        "flutter_screen_lock",
         "flutter_screenutil",
         "flutter_spinkit",
         "focus_detector_v2",
@@ -61,6 +65,7 @@
         "photo_manager",
         "pin_code_fields",
         "pull_to_refresh_new",
+        "qr_flutter",
         "rotated_corner_decoration",
         "rxdart",
         "search_keyword_text",
@@ -252,6 +257,7 @@
       "version": "0.0.1",
       "dependencies": [
         "animate_do",
+        "collection",
         "common_utils",
         "device_info_plus",
         "eva_icons_flutter",
@@ -260,7 +266,9 @@
         "flutter_openim_sdk",
         "flutter_screenutil",
         "flutter_svg",
+        "flutter_webrtc",
         "get",
+        "just_audio",
         "livekit_client",
         "lottie",
         "openim_common",
@@ -279,6 +287,7 @@
         "animated_text_kit",
         "azlistview",
         "chewie",
+        "collection",
         "common_utils",
         "country_picker",
         "crypto",
@@ -318,7 +327,10 @@
         "image_picker",
         "intl",
         "just_audio",
+        "latlong2",
         "local_auth",
+        "local_auth_android",
+        "local_auth_darwin",
         "lottie",
         "lpinyin",
         "map_launcher",
@@ -330,9 +342,11 @@
         "package_info_plus",
         "path_provider",
         "path_provider_android",
+        "path_provider_platform_interface",
         "percent_indicator",
         "permission_handler",
         "protobuf",
+        "provider",
         "pull_to_refresh_new",
         "qr_code_scanner_plus",
         "qr_flutter",
@@ -340,6 +354,7 @@
         "rotated_corner_decoration",
         "rxdart",
         "scan",
+        "screen_brightness",
         "scroll_to_index",
         "search_keyword_text",
         "shared_preferences",
@@ -352,11 +367,15 @@
         "uri_to_file",
         "url_launcher",
         "uuid",
+        "vector_math",
         "vibration",
         "video_compress",
         "video_player",
         "visibility_detector",
+        "volume_controller",
         "webview_flutter",
+        "webview_flutter_android",
+        "webview_flutter_wkwebview",
         "wechat_assets_picker",
         "wechat_camera_picker"
       ]
@@ -398,6 +417,14 @@
       ]
     },
     {
+      "name": "qr_flutter",
+      "version": "4.1.0",
+      "dependencies": [
+        "flutter",
+        "qr"
+      ]
+    },
+    {
       "name": "photo_manager",
       "version": "3.6.4",
       "dependencies": [
@@ -422,6 +449,21 @@
       "name": "synchronized",
       "version": "3.3.0+3",
       "dependencies": []
+    },
+    {
+      "name": "device_info_plus",
+      "version": "10.1.2",
+      "dependencies": [
+        "device_info_plus_platform_interface",
+        "ffi",
+        "file",
+        "flutter",
+        "flutter_web_plugins",
+        "meta",
+        "web",
+        "win32",
+        "win32_registry"
+      ]
     },
     {
       "name": "mime",
@@ -588,6 +630,11 @@
       ]
     },
     {
+      "name": "collection",
+      "version": "1.19.1",
+      "dependencies": []
+    },
+    {
       "name": "uri_to_file",
       "version": "1.0.0",
       "dependencies": [
@@ -728,6 +775,13 @@
       ]
     },
     {
+      "name": "flutter_screen_lock",
+      "version": "9.1.1",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
       "name": "flutter_screenutil",
       "version": "5.9.3",
       "dependencies": [
@@ -787,6 +841,14 @@
     {
       "name": "azlistview_plus",
       "version": "3.0.0",
+      "dependencies": [
+        "flutter",
+        "scrollable_positioned_list"
+      ]
+    },
+    {
+      "name": "azlistview",
+      "version": "2.0.0",
       "dependencies": [
         "flutter",
         "scrollable_positioned_list"
@@ -1019,11 +1081,6 @@
         "web",
         "webrtc_interface"
       ]
-    },
-    {
-      "name": "collection",
-      "version": "1.19.1",
-      "dependencies": []
     },
     {
       "name": "video_player_platform_interface",
@@ -1494,21 +1551,6 @@
       ]
     },
     {
-      "name": "device_info_plus",
-      "version": "10.1.2",
-      "dependencies": [
-        "device_info_plus_platform_interface",
-        "ffi",
-        "file",
-        "flutter",
-        "flutter_web_plugins",
-        "meta",
-        "web",
-        "win32",
-        "win32_registry"
-      ]
-    },
-    {
       "name": "animate_do",
       "version": "3.0.2",
       "dependencies": [
@@ -1576,6 +1618,68 @@
       "version": "1.5.0",
       "dependencies": [
         "flutter"
+      ]
+    },
+    {
+      "name": "latlong2",
+      "version": "0.9.1",
+      "dependencies": [
+        "intl"
+      ]
+    },
+    {
+      "name": "webview_flutter_android",
+      "version": "4.3.2",
+      "dependencies": [
+        "flutter",
+        "webview_flutter_platform_interface"
+      ]
+    },
+    {
+      "name": "screen_brightness",
+      "version": "0.2.2+1",
+      "dependencies": [
+        "flutter",
+        "screen_brightness_android",
+        "screen_brightness_ios",
+        "screen_brightness_macos",
+        "screen_brightness_platform_interface",
+        "screen_brightness_windows"
+      ]
+    },
+    {
+      "name": "volume_controller",
+      "version": "2.0.8",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "local_auth_darwin",
+      "version": "1.4.3",
+      "dependencies": [
+        "flutter",
+        "intl",
+        "local_auth_platform_interface"
+      ]
+    },
+    {
+      "name": "local_auth_android",
+      "version": "1.0.47",
+      "dependencies": [
+        "flutter",
+        "flutter_plugin_android_lifecycle",
+        "intl",
+        "local_auth_platform_interface"
+      ]
+    },
+    {
+      "name": "path_provider_platform_interface",
+      "version": "2.1.2",
+      "dependencies": [
+        "flutter",
+        "platform",
+        "plugin_platform_interface"
       ]
     },
     {
@@ -1784,13 +1888,6 @@
       ]
     },
     {
-      "name": "flutter_screen_lock",
-      "version": "9.1.1",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
       "name": "scroll_to_index",
       "version": "3.0.1",
       "dependencies": [
@@ -1815,14 +1912,6 @@
       ]
     },
     {
-      "name": "qr_flutter",
-      "version": "4.1.0",
-      "dependencies": [
-        "flutter",
-        "qr"
-      ]
-    },
-    {
       "name": "qr_code_scanner_plus",
       "version": "2.0.10+1",
       "dependencies": [
@@ -1836,14 +1925,6 @@
       "version": "4.0.1",
       "dependencies": [
         "flutter"
-      ]
-    },
-    {
-      "name": "azlistview",
-      "version": "2.0.0",
-      "dependencies": [
-        "flutter",
-        "scrollable_positioned_list"
       ]
     },
     {
@@ -1886,6 +1967,45 @@
       ]
     },
     {
+      "name": "qr",
+      "version": "3.0.2",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
+      "name": "win32_registry",
+      "version": "1.1.5",
+      "dependencies": [
+        "ffi",
+        "win32"
+      ]
+    },
+    {
+      "name": "win32",
+      "version": "5.10.1",
+      "dependencies": [
+        "ffi"
+      ]
+    },
+    {
+      "name": "file",
+      "version": "7.0.1",
+      "dependencies": [
+        "meta",
+        "path"
+      ]
+    },
+    {
+      "name": "device_info_plus_platform_interface",
+      "version": "7.0.2",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
+      ]
+    },
+    {
       "name": "local_auth_windows",
       "version": "1.0.11",
       "dependencies": [
@@ -1899,25 +2019,6 @@
       "dependencies": [
         "flutter",
         "plugin_platform_interface"
-      ]
-    },
-    {
-      "name": "local_auth_darwin",
-      "version": "1.4.3",
-      "dependencies": [
-        "flutter",
-        "intl",
-        "local_auth_platform_interface"
-      ]
-    },
-    {
-      "name": "local_auth_android",
-      "version": "1.0.47",
-      "dependencies": [
-        "flutter",
-        "flutter_plugin_android_lifecycle",
-        "intl",
-        "local_auth_platform_interface"
       ]
     },
     {
@@ -2017,13 +2118,6 @@
       "name": "logger",
       "version": "2.5.0",
       "dependencies": []
-    },
-    {
-      "name": "latlong2",
-      "version": "0.9.1",
-      "dependencies": [
-        "intl"
-      ]
     },
     {
       "name": "convert",
@@ -2135,13 +2229,6 @@
       "name": "characters",
       "version": "1.4.0",
       "dependencies": []
-    },
-    {
-      "name": "win32",
-      "version": "5.10.1",
-      "dependencies": [
-        "ffi"
-      ]
     },
     {
       "name": "package_info_plus_platform_interface",
@@ -2265,15 +2352,6 @@
       ]
     },
     {
-      "name": "provider",
-      "version": "6.1.2",
-      "dependencies": [
-        "collection",
-        "flutter",
-        "nested"
-      ]
-    },
-    {
       "name": "image_picker_windows",
       "version": "0.2.1+1",
       "dependencies": [
@@ -2349,15 +2427,6 @@
         "flutter",
         "path",
         "path_provider_platform_interface"
-      ]
-    },
-    {
-      "name": "path_provider_platform_interface",
-      "version": "2.1.2",
-      "dependencies": [
-        "flutter",
-        "platform",
-        "plugin_platform_interface"
       ]
     },
     {
@@ -2589,14 +2658,6 @@
       ]
     },
     {
-      "name": "file",
-      "version": "7.0.1",
-      "dependencies": [
-        "meta",
-        "path"
-      ]
-    },
-    {
       "name": "built_value",
       "version": "8.9.5",
       "dependencies": [
@@ -2663,23 +2724,6 @@
       "dependencies": [
         "source_span",
         "string_scanner"
-      ]
-    },
-    {
-      "name": "win32_registry",
-      "version": "1.1.5",
-      "dependencies": [
-        "ffi",
-        "win32"
-      ]
-    },
-    {
-      "name": "device_info_plus_platform_interface",
-      "version": "7.0.2",
-      "dependencies": [
-        "flutter",
-        "meta",
-        "plugin_platform_interface"
       ]
     },
     {
@@ -2752,6 +2796,51 @@
         "nm",
         "web"
       ]
+    },
+    {
+      "name": "screen_brightness_windows",
+      "version": "0.1.3",
+      "dependencies": [
+        "flutter",
+        "screen_brightness_platform_interface"
+      ]
+    },
+    {
+      "name": "screen_brightness_macos",
+      "version": "0.1.0+1",
+      "dependencies": [
+        "flutter",
+        "screen_brightness_platform_interface"
+      ]
+    },
+    {
+      "name": "screen_brightness_ios",
+      "version": "0.1.0",
+      "dependencies": [
+        "flutter",
+        "screen_brightness_platform_interface"
+      ]
+    },
+    {
+      "name": "screen_brightness_android",
+      "version": "0.1.0+2",
+      "dependencies": [
+        "flutter",
+        "screen_brightness_platform_interface"
+      ]
+    },
+    {
+      "name": "screen_brightness_platform_interface",
+      "version": "0.1.0",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "platform",
+      "version": "3.1.6",
+      "dependencies": []
     },
     {
       "name": "google_api_availability_platform_interface",
@@ -2866,25 +2955,6 @@
       "name": "universal_platform",
       "version": "1.1.0",
       "dependencies": []
-    },
-    {
-      "name": "volume_controller",
-      "version": "2.0.8",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
-      "name": "screen_brightness",
-      "version": "0.2.2+1",
-      "dependencies": [
-        "flutter",
-        "screen_brightness_android",
-        "screen_brightness_ios",
-        "screen_brightness_macos",
-        "screen_brightness_platform_interface",
-        "screen_brightness_windows"
-      ]
     },
     {
       "name": "safe_local_storage",
@@ -3032,39 +3102,6 @@
       ]
     },
     {
-      "name": "webview_flutter_wkwebview",
-      "version": "3.18.4",
-      "dependencies": [
-        "flutter",
-        "path",
-        "webview_flutter_platform_interface"
-      ]
-    },
-    {
-      "name": "webview_flutter_platform_interface",
-      "version": "2.10.0",
-      "dependencies": [
-        "flutter",
-        "meta",
-        "plugin_platform_interface"
-      ]
-    },
-    {
-      "name": "webview_flutter_android",
-      "version": "4.3.2",
-      "dependencies": [
-        "flutter",
-        "webview_flutter_platform_interface"
-      ]
-    },
-    {
-      "name": "qr",
-      "version": "3.0.2",
-      "dependencies": [
-        "meta"
-      ]
-    },
-    {
       "name": "talker",
       "version": "4.6.14",
       "dependencies": [
@@ -3129,13 +3166,6 @@
       ]
     },
     {
-      "name": "nested",
-      "version": "1.0.0",
-      "dependencies": [
-        "flutter"
-      ]
-    },
-    {
       "name": "file_selector_windows",
       "version": "0.9.3+4",
       "dependencies": [
@@ -3171,11 +3201,6 @@
         "file_selector_platform_interface",
         "flutter"
       ]
-    },
-    {
-      "name": "platform",
-      "version": "3.1.6",
-      "dependencies": []
     },
     {
       "name": "vm_service",
@@ -3215,46 +3240,6 @@
         "firebase_core_platform_interface",
         "flutter",
         "meta"
-      ]
-    },
-    {
-      "name": "screen_brightness_windows",
-      "version": "0.1.3",
-      "dependencies": [
-        "flutter",
-        "screen_brightness_platform_interface"
-      ]
-    },
-    {
-      "name": "screen_brightness_macos",
-      "version": "0.1.0+1",
-      "dependencies": [
-        "flutter",
-        "screen_brightness_platform_interface"
-      ]
-    },
-    {
-      "name": "screen_brightness_ios",
-      "version": "0.1.0",
-      "dependencies": [
-        "flutter",
-        "screen_brightness_platform_interface"
-      ]
-    },
-    {
-      "name": "screen_brightness_android",
-      "version": "0.1.0+2",
-      "dependencies": [
-        "flutter",
-        "screen_brightness_platform_interface"
-      ]
-    },
-    {
-      "name": "screen_brightness_platform_interface",
-      "version": "0.1.0",
-      "dependencies": [
-        "flutter",
-        "plugin_platform_interface"
       ]
     },
     {
@@ -3317,6 +3302,41 @@
       "version": "1.0.1",
       "dependencies": [
         "meta"
+      ]
+    },
+    {
+      "name": "provider",
+      "version": "6.1.5+1",
+      "dependencies": [
+        "collection",
+        "flutter",
+        "nested"
+      ]
+    },
+    {
+      "name": "nested",
+      "version": "1.0.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "webview_flutter_platform_interface",
+      "version": "2.14.0",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "plugin_platform_interface"
+      ]
+    },
+    {
+      "name": "webview_flutter_wkwebview",
+      "version": "3.23.1",
+      "dependencies": [
+        "flutter",
+        "meta",
+        "path",
+        "webview_flutter_platform_interface"
       ]
     }
   ],

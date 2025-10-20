@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:openim_common/openim_common.dart';
-
-void main() {}
+void main() {
+  test('placeholder test', () {
+    expect(1 + 1, equals(2));
+  });
+}

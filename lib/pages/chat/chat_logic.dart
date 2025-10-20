@@ -81,7 +81,6 @@ class ChatLogic extends SuperController {
 
   final showCallingMember = false.obs;
 
-  bool _isReceivedMessageWhenSyncing = false;
   bool _isStartSyncing = false;
   bool _isFirstLoad = true;
 
@@ -172,7 +171,6 @@ class ChatLogic extends SuperController {
         if (message.contentType == MessageType.typing) {
         } else {
           if (!messageList.contains(message) && !scrollingCacheMessageList.contains(message)) {
-            _isReceivedMessageWhenSyncing = true;
             if (scrollController.offset != 0) {
               scrollingCacheMessageList.add(message);
             } else {
@@ -1033,14 +1031,12 @@ class ChatLogic extends SuperController {
       if (value.status == IMSdkStatus.syncStart) {
         _isStartSyncing = true;
       } else if (value.status == IMSdkStatus.syncEnded) {
-        if (/*_isReceivedMessageWhenSyncing &&*/ _isStartSyncing) {
-          _isReceivedMessageWhenSyncing = false;
+        if (_isStartSyncing) {
           _isStartSyncing = false;
           _isFirstLoad = true;
           _loadHistoryForSyncEnd();
         }
       } else if (value.status == IMSdkStatus.syncFailed) {
-        _isReceivedMessageWhenSyncing = false;
         _isStartSyncing = false;
       }
     });

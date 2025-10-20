@@ -69,14 +69,14 @@ class Config {
   static const String _envQWeatherApiHost =
       String.fromEnvironment('QWEATHER_API_HOST', defaultValue: '');
   // 默认请求主机使用官方网关，适用于未配置专用域名的账号
-  static const String _defaultQWeatherHost = 'api.qweather.com';
+  static const String _defaultQWeatherHost = 'https://api.qweather.com';
 
   static QWeatherCredentials? _cachedQWeatherCredentials;
 
   static QWeatherCredentials? get qWeatherCredentials =>
       _cachedQWeatherCredentials ??= _loadQWeatherCredentials();
 
-  static String get qWeatherBaseUrl {
+  static String get _resolvedQWeatherHost {
     final creds = qWeatherCredentials;
     final host = creds?.apiHost ??
         _resolveCredentialString(
@@ -87,10 +87,14 @@ class Config {
         ? _defaultQWeatherHost
         : host.trim();
     if (resolved.startsWith('http://') || resolved.startsWith('https://')) {
-      return resolved.endsWith('/v7') ? resolved : '$resolved/v7';
+      return resolved.endsWith('/') ? resolved.substring(0, resolved.length - 1) : resolved;
     }
-    return 'https://$resolved/v7';
+    return 'https://$resolved';
   }
+
+  static String get qWeatherBaseUrl => '$_resolvedQWeatherHost/v7';
+
+  static String get qWeatherGeoBaseUrl => '$_resolvedQWeatherHost/v2';
 
   static QWeatherCredentials? _loadQWeatherCredentials() {
     final combined = _resolveCredentialString(

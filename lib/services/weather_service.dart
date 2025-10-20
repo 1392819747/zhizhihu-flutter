@@ -15,7 +15,7 @@ class WeatherService {
   final _QWeatherJwtProvider _jwtProvider = _QWeatherJwtProvider();
 
   String get _weatherBaseUrl => Config.qWeatherBaseUrl;
-  static const _geoBaseUrl = 'https://geoapi.qweather.com/v2';
+  String get _geoBaseUrl => Config.qWeatherGeoBaseUrl;
 
   /// 获取当前位置
   Future<Position?> getCurrentPosition() async {

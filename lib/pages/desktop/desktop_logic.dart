@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../routes/app_navigator.dart';
 import '../conversation/conversation_logic.dart';
@@ -10,21 +14,50 @@ import '../../services/weather_visuals.dart';
 class AppItem {
   final String name;
   final IconData? icon;
-  final String? iconPath;
+  final String? assetIconPath;
+  final String? localIconPath;
+  final String? remoteIconUrl;
   final Color color;
   final VoidCallback? onTap;
 
-  AppItem({
+  const AppItem({
     required this.name,
     this.icon,
-    this.iconPath,
+    this.assetIconPath,
+    this.localIconPath,
+    this.remoteIconUrl,
     required this.color,
     this.onTap,
-  }) : assert(icon != null || iconPath != null,
-            'Either icon or iconPath must be provided');
+  }) : assert(
+            icon != null ||
+                assetIconPath != null ||
+                localIconPath != null ||
+                remoteIconUrl != null,
+            'At least one icon source must be provided');
+
+  AppItem copyWith({
+    IconData? icon,
+    String? assetIconPath,
+    String? localIconPath,
+    String? remoteIconUrl,
+    Color? color,
+    VoidCallback? onTap,
+  }) {
+    return AppItem(
+      name: name,
+      icon: icon ?? this.icon,
+      assetIconPath: assetIconPath ?? this.assetIconPath,
+      localIconPath: localIconPath ?? this.localIconPath,
+      remoteIconUrl: remoteIconUrl ?? this.remoteIconUrl,
+      color: color ?? this.color,
+      onTap: onTap ?? this.onTap,
+    );
+  }
 }
 
 class DesktopLogic extends GetxController {
+  static const appsUpdateId = 'desktopApps';
+
   // 夜间模式状态
   final isDarkMode = false.obs;
 
@@ -42,62 +75,65 @@ class DesktopLogic extends GetxController {
   final List<AppItem> appList = [
     AppItem(
       name: '社区',
-      iconPath: 'packages/openim_common/assets/images/wechat_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/wechat_icon.png',
       color: const Color(0xFF007AFF), // iOS Messages Blue
     ),
     AppItem(
       name: '通讯录',
-      iconPath: 'packages/openim_common/assets/images/phone_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/phone_icon.png',
       color: const Color(0xFF34C759), // iOS Contacts Green
     ),
     AppItem(
       name: '发现',
-      iconPath: 'packages/openim_common/assets/images/browser_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/browser_icon.png',
       color: const Color(0xFFFF9500), // iOS Safari Orange
     ),
     AppItem(
       name: '我的',
-      iconPath: 'packages/openim_common/assets/images/mail_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/mail_icon.png',
       color: const Color(0xFF5856D6), // iOS Settings Purple
     ),
     AppItem(
       name: '设置',
-      iconPath: 'packages/openim_common/assets/images/settings_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/settings_icon.png',
       color: const Color(0xFF8E8E93), // iOS Settings Gray
     ),
     AppItem(
       name: '相册',
-      iconPath: 'packages/openim_common/assets/images/photos_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/photos_icon.png',
       color: const Color(0xFFFF3B30), // iOS Photos Red
     ),
     AppItem(
       name: '相机',
-      iconPath: 'packages/openim_common/assets/images/camera_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/camera_icon.png',
       color: const Color(0xFF32D74B), // iOS Camera Green
     ),
     AppItem(
       name: '音乐',
-      iconPath: 'packages/openim_common/assets/images/music_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/music_icon.png',
       color: const Color(0xFFFF2D92), // iOS Music Pink
     ),
     AppItem(
-      name: '视频',
-      iconPath: 'packages/openim_common/assets/images/video_icon.png',
-      color: const Color(0xFF007AFF), // iOS Camera Blue
+      name: 'WeChat',
+      assetIconPath: 'packages/openim_common/assets/images/wechat_icon.png',
+      remoteIconUrl:
+          // 开发环境使用 Icons8 提供的 PNG 图标，生产请确认授权或替换
+          'https://img.icons8.com/color/200/weixing.png',
+      color: const Color(0xFF07C160), // WeChat Green
     ),
     AppItem(
       name: '文件',
-      iconPath: 'packages/openim_common/assets/images/files_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/files_icon.png',
       color: const Color(0xFFFF9500), // iOS Files Orange
     ),
     AppItem(
       name: '日历',
-      iconPath: 'packages/openim_common/assets/images/calendar_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/calendar_icon.png',
       color: const Color(0xFF5856D6), // iOS Calendar Purple
     ),
     AppItem(
       name: '备忘录',
-      iconPath: 'packages/openim_common/assets/images/notes_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/notes_icon.png',
       color: const Color(0xFFFFCC00), // iOS Notes Yellow
     ),
     AppItem(
@@ -110,22 +146,22 @@ class DesktopLogic extends GetxController {
   final List<AppItem> dockApps = [
     AppItem(
       name: '社区',
-      iconPath: 'packages/openim_common/assets/images/wechat_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/wechat_icon.png',
       color: const Color(0xFF007AFF), // iOS Messages Blue
     ),
     AppItem(
       name: '通讯录',
-      iconPath: 'packages/openim_common/assets/images/phone_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/phone_icon.png',
       color: const Color(0xFF34C759), // iOS Contacts Green
     ),
     AppItem(
       name: '发现',
-      iconPath: 'packages/openim_common/assets/images/browser_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/browser_icon.png',
       color: const Color(0xFFFF9500), // iOS Safari Orange
     ),
     AppItem(
       name: '我的',
-      iconPath: 'packages/openim_common/assets/images/mail_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/mail_icon.png',
       color: const Color(0xFF5856D6), // iOS Settings Purple
     ),
   ];
@@ -135,6 +171,7 @@ class DesktopLogic extends GetxController {
     super.onInit();
     pageController = PageController();
     _initializeAppPositions();
+    _ensureWeChatIcon();
     _loadWeatherData();
   }
 
@@ -159,6 +196,9 @@ class DesktopLogic extends GetxController {
         final conversations =
             await ConversationLogic.getConversationFirstPage();
         AppNavigator.startMain(conversations: conversations);
+        break;
+      case 'WeChat':
+        AppNavigator.startWeChatMock();
         break;
       case '天气':
         // 打开天气应用
@@ -231,8 +271,49 @@ class DesktopLogic extends GetxController {
     }
 
     // 刷新UI
-    update();
+    update([appsUpdateId]);
     print('App位置更新完成');
+  }
+
+  Future<void> _ensureWeChatIcon() async {
+    final index = appList.indexWhere((element) => element.name == 'WeChat');
+    if (index == -1) return;
+    final app = appList[index];
+    if (app.localIconPath != null) {
+      update([appsUpdateId]);
+      return;
+    }
+    final url = app.remoteIconUrl;
+    if (url == null || url.isEmpty) {
+      update([appsUpdateId]);
+      return;
+    }
+    try {
+      final dir = await getApplicationSupportDirectory();
+      final iconFile = File('${dir.path}/wechat_app_icon.png');
+      if (!await iconFile.exists()) {
+        final response = await Dio().get<List<int>>(
+          url,
+          options: Options(responseType: ResponseType.bytes),
+        );
+        final bytes = response.data;
+        if (bytes == null || bytes.isEmpty) {
+          Logger.print('下载微信图标失败: 空数据', onlyConsole: true);
+        } else {
+          await iconFile.create(recursive: true);
+          await iconFile.writeAsBytes(bytes);
+        }
+      }
+      if (await iconFile.exists()) {
+        final updated = app.copyWith(localIconPath: iconFile.path);
+        appList[index] = updated;
+        appPositions.updateAll((key, value) => value == app ? updated : value);
+      }
+    } catch (e) {
+      Logger.print('下载微信图标失败: $e', onlyConsole: true);
+    } finally {
+      update([appsUpdateId]);
+    }
   }
 
   // 切换夜间模式

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,12 +32,17 @@ class DesktopPage extends StatelessWidget {
 
             // 桌面页面内容区域
             Expanded(
-              child: PageView.builder(
-                controller: logic.pageController,
-                itemCount: logic.getPageCount(),
-                physics: const BouncingScrollPhysics(), // 添加iOS风格的滑动物理效果
-                itemBuilder: (context, pageIndex) {
-                  return _buildDesktopPage(pageIndex);
+              child: GetBuilder<DesktopLogic>(
+                id: DesktopLogic.appsUpdateId,
+                builder: (_) {
+                  return PageView.builder(
+                    controller: logic.pageController,
+                    itemCount: logic.getPageCount(),
+                    physics: const BouncingScrollPhysics(), // 添加iOS风格的滑动物理效果
+                    itemBuilder: (context, pageIndex) {
+                      return _buildDesktopPage(pageIndex);
+                    },
+                  );
                 },
               ),
             ),
@@ -355,34 +361,7 @@ class DesktopPage extends StatelessWidget {
               ),
             ],
           ),
-          child: app.iconPath != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(18.r),
-                  child: Image.asset(
-                    app.iconPath!,
-                    width: 60.w,
-                    height: 60.w,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        app.color,
-                        app.color.withOpacity(0.8),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
-                  child: Icon(
-                    app.icon ?? Icons.error_outline,
-                    color: Colors.white,
-                    size: 30.w,
-                  ),
-                ),
+          child: _buildAppIconBody(app, 60.w),
         ),
       ),
       childWhenDragging: Container(
@@ -432,34 +411,7 @@ class DesktopPage extends StatelessWidget {
                 ),
               ],
             ),
-            child: app.iconPath != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(18.r),
-                    child: Image.asset(
-                      app.iconPath!,
-                      width: 60.w,
-                      height: 60.w,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          app.color,
-                          app.color.withOpacity(0.8),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(18.r),
-                    ),
-                    child: Icon(
-                      app.icon ?? Icons.error_outline,
-                      color: Colors.white,
-                      size: 30.w,
-                    ),
-                  ),
+            child: _buildAppIconBody(app, 60.w),
           ),
           8.verticalSpace,
           Text(
@@ -476,6 +428,62 @@ class DesktopPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildAppIconBody(AppItem app, double dimension) {
+    final borderRadius = BorderRadius.circular(18.r);
+    final image = _resolveAppImage(app, dimension);
+    if (image != null) {
+      return ClipRRect(
+        borderRadius: borderRadius,
+        child: image,
+      );
+    }
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            app.color,
+            app.color.withOpacity(0.8),
+          ],
+        ),
+        borderRadius: borderRadius,
+      ),
+      child: Icon(
+        app.icon ?? Icons.apps,
+        color: Colors.white,
+        size: dimension * 0.5,
+      ),
+    );
+  }
+
+  Widget? _resolveAppImage(AppItem app, double dimension) {
+    final localPath = app.localIconPath;
+    if (localPath != null && localPath.isNotEmpty) {
+      final file = File(localPath);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          width: dimension,
+          height: dimension,
+          fit: BoxFit.cover,
+        );
+      }
+    }
+
+    final assetPath = app.assetIconPath;
+    if (assetPath != null && assetPath.isNotEmpty) {
+      return Image.asset(
+        assetPath,
+        width: dimension,
+        height: dimension,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return null;
   }
 
   Widget _buildDockBar() {
@@ -527,34 +535,7 @@ class DesktopPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: app.iconPath != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(18.r),
-                            child: Image.asset(
-                              app.iconPath!,
-                              width: 60.w,
-                              height: 60.w,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  app.color,
-                                  app.color.withOpacity(0.8),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(18.r),
-                            ),
-                            child: Icon(
-                              app.icon ?? Icons.error_outline,
-                              color: Colors.white,
-                              size: 30.w,
-                            ),
-                          ),
+                    child: _buildAppIconBody(app, 60.w),
                   ),
                 );
               }).toList(),

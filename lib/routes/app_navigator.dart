@@ -36,6 +36,10 @@ class AppNavigator {
     Get.toNamed(AppRoutes.weather);
   }
 
+  static void startWeChatMock() {
+    Get.toNamed(AppRoutes.wechatMock);
+  }
+
   static void startSplashToMain({bool isAutoLogin = false, List<ConversationInfo>? conversations}) {
     Get.offAndToNamed(
       AppRoutes.home,

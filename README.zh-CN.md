@@ -74,9 +74,11 @@ OpenIM 为开发者提供开源即时通讯 SDK，作为 Twilio、Sendbird 等�
 
   > 如果没有修改过服务端默认端口，则只需要修改[_host](https://github.com/openimsdk/open-im-flutter-demo/blob/a309f25fdbc143e49d5ca852171ce57970871c85/openim_common/lib/src/config.dart#L59)为您的服务器 ip 即可。
 
-  ```dart
-    static const _host = "your-server-ip or your-domain";
-  ```
+ ```dart
+   static const _host = "your-server-ip or your-domain";
+ ```
+
+  - 桌面天气小组件需配置和风天气密钥，请参考 [`docs/qweather_setup.md`](docs/qweather_setup.md) 管理本地 `QWEATHER_API_KEY` / `QWEATHER_API_HOST` 并同步到 Codemagic。
 
 4. 通过终端执行 `flutter run` 或者IDE的启动菜单来运行iOS/Android应用程序。
 

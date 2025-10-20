@@ -1,7 +1,4 @@
-import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
-import 'package:cryptography/cryptography.dart';
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:openim_common/openim_common.dart';
@@ -12,8 +9,6 @@ class WeatherService {
   WeatherService({Dio? dio}) : _dio = dio ?? Dio();
 
   final Dio _dio;
-  final _QWeatherJwtProvider _jwtProvider = _QWeatherJwtProvider();
-
   String get _weatherBaseUrl => Config.qWeatherBaseUrl;
   String get _geoBaseUrl => Config.qWeatherGeoBaseUrl;
 
@@ -147,14 +142,9 @@ class WeatherService {
     String url,
     Map<String, dynamic> params,
   ) async {
-    final creds = Config.qWeatherCredentials;
-    if (creds == null) {
-      Logger.print('未配置和风天气凭据，无法获取天气数据', onlyConsole: true);
-      return null;
-    }
-    final token = await _jwtProvider.obtainToken();
-    if (token == null) {
-      Logger.print('生成和风天气 JWT Token 失败', onlyConsole: true);
+    final token = Config.qWeatherToken;
+    if (token.isEmpty) {
+      Logger.print('未配置和风天气 API Token，无法获取天气数据', onlyConsole: true);
       return null;
     }
     try {
@@ -191,76 +181,6 @@ class WeatherService {
 
   String _formatDouble(double value) =>
       value.toStringAsFixed(min(value.abs() >= 1 ? 4 : 6, 6));
-}
-
-class _QWeatherJwtProvider {
-  final Ed25519 _algorithm = Ed25519();
-  SimpleKeyPair? _keyPair;
-  String? _cachedToken;
-  int? _cachedExp;
-
-  Future<String?> obtainToken() async {
-    final creds = Config.qWeatherCredentials;
-    if (creds == null) {
-      Logger.print('未配置和风天气凭据', onlyConsole: true);
-      return null;
-    }
-
-    final nowSeconds = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
-    if (_cachedToken != null &&
-        _cachedExp != null &&
-        nowSeconds < (_cachedExp! - 30)) {
-      return _cachedToken;
-    }
-
-    final iat = nowSeconds - 30;
-    final exp = iat + 900;
-
-    final header = jsonEncode({
-      'alg': 'EdDSA',
-      'kid': creds.credentialId,
-    });
-    final payload = jsonEncode({
-      'sub': creds.projectId,
-      'iat': iat,
-      'exp': exp,
-    });
-
-    final headerEncoded = _base64UrlEncode(utf8.encode(header));
-    final payloadEncoded = _base64UrlEncode(utf8.encode(payload));
-    final signingInput = '$headerEncoded.$payloadEncoded';
-
-    final keyPair = await _ensureKeyPair(creds.privateKeySeed);
-    if (keyPair == null) {
-      Logger.print('初始化和风天气签名密钥失败', onlyConsole: true);
-      return null;
-    }
-
-    final signature = await _algorithm.sign(
-      utf8.encode(signingInput),
-      keyPair: keyPair,
-    );
-    final signatureEncoded = _base64UrlEncode(signature.bytes);
-
-    final token = '$signingInput.$signatureEncoded';
-    _cachedToken = token;
-    _cachedExp = exp;
-    return token;
-  }
-
-  Future<SimpleKeyPair?> _ensureKeyPair(Uint8List seed) async {
-    if (_keyPair != null) return _keyPair;
-    try {
-      _keyPair = await _algorithm.newKeyPairFromSeed(seed);
-      return _keyPair;
-    } catch (e) {
-      Logger.print('生成 Ed25519 密钥失败: $e', onlyConsole: true);
-      return null;
-    }
-  }
-
-  String _base64UrlEncode(List<int> bytes) =>
-      base64Url.encode(bytes).replaceAll('=', '');
 }
 
 class WeatherData {

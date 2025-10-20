@@ -35,9 +35,9 @@
 
 | 名称 | 用途 |
 | ---- | ---- |
-| `QWEATHER_API_KEY` | 格式为 `凭据ID|项目ID|[API_HOST|]私钥Base64`。若提供 `API_HOST`（例如 `ma4wcmc6h6.re.qweatherapi.com`），会优先使用该域名；私钥可通过 `base64 -w0 ed25519-private.pem` 生成。 |
+| `QWEATHER_API_TOKEN` | 和风天气后端颁发的 Bearer Token（建议定期刷新）。 |
 
-> 在 GitHub 仓库的 **Settings → Secrets and variables → Actions** 中新增 `QWEATHER_API_KEY`，构建工作流会通过 `--dart-define=QWEATHER_API_KEY=...` 自动注入。
+> 在 GitHub 仓库的 **Settings → Secrets and variables → Actions** 中新增 `QWEATHER_API_TOKEN`，构建工作流会通过 `--dart-define=QWEATHER_API_TOKEN=...` 自动注入。
 
 ### 如果需要签名构建
 

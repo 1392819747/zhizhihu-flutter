@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -54,263 +53,21 @@ class Config {
   static const webKey = 'webKey';
   static const webServerKey = 'webServerKey';
   static const locationHost = 'http://location.your-domain';
-  static const String _envQWeatherCombined =
-      String.fromEnvironment('QWEATHER_API_KEY', defaultValue: '');
-  static const String _envQWeatherCredentialId =
-      String.fromEnvironment('QWEATHER_CREDENTIAL_ID', defaultValue: '');
-  static const String _envQWeatherProjectId =
-      String.fromEnvironment('QWEATHER_PROJECT_ID', defaultValue: '');
-  static const String _envQWeatherPrivateKeyB64 =
-      String.fromEnvironment('QWEATHER_PRIVATE_KEY_B64', defaultValue: '');
-  static const String _envQWeatherPrivateKey =
-      String.fromEnvironment('QWEATHER_PRIVATE_KEY', defaultValue: '');
-  static const String _envQWeatherPrivateKeyPath =
-      String.fromEnvironment('QWEATHER_PRIVATE_KEY_PATH', defaultValue: '');
-  static const String _envQWeatherApiHost =
-      String.fromEnvironment('QWEATHER_API_HOST', defaultValue: '');
-  // 默认请求主机使用官方网关，适用于未配置专用域名的账号
-  static const String _defaultQWeatherHost = 'https://api.qweather.com';
+  static const String _envQWeatherToken =
+      String.fromEnvironment('QWEATHER_API_TOKEN', defaultValue: '');
+  static const String _defaultQWeatherHost =
+      'https://ma4wcmc6h6.re.qweatherapi.com';
 
-  static QWeatherCredentials? _cachedQWeatherCredentials;
-
-  static QWeatherCredentials? get qWeatherCredentials =>
-      _cachedQWeatherCredentials ??= _loadQWeatherCredentials();
-
-  static String get _resolvedQWeatherHost {
-    final creds = qWeatherCredentials;
-    final host = creds?.apiHost ??
-        _resolveCredentialString(
-          compileTime: _envQWeatherApiHost,
-          runtimeKey: 'QWEATHER_API_HOST',
-        );
-    final resolved = (host == null || host.trim().isEmpty)
-        ? _defaultQWeatherHost
-        : host.trim();
-    if (resolved.startsWith('http://') || resolved.startsWith('https://')) {
-      return resolved.endsWith('/') ? resolved.substring(0, resolved.length - 1) : resolved;
+  static String get qWeatherToken {
+    if (_envQWeatherToken.isNotEmpty) {
+      return _envQWeatherToken;
     }
-    return 'https://$resolved';
+    return Platform.environment['QWEATHER_API_TOKEN'] ?? '';
   }
 
-  static String get qWeatherBaseUrl => '$_resolvedQWeatherHost/v7';
+  static String get qWeatherBaseUrl => '$_defaultQWeatherHost/v7';
 
-  static String get qWeatherGeoBaseUrl => '$_resolvedQWeatherHost/v2';
-
-  static QWeatherCredentials? _loadQWeatherCredentials() {
-    final combined = _resolveCredentialString(
-      compileTime: _envQWeatherCombined,
-      runtimeKey: 'QWEATHER_API_KEY',
-    );
-    if (combined != null && combined.isNotEmpty) {
-      final parsed = _parseCombinedCredential(combined);
-      if (parsed != null) {
-        return parsed;
-      }
-    }
-
-    final credentialId = _resolveCredentialString(
-      compileTime: _envQWeatherCredentialId,
-      runtimeKey: 'QWEATHER_CREDENTIAL_ID',
-    );
-    final projectId = _resolveCredentialString(
-      compileTime: _envQWeatherProjectId,
-      runtimeKey: 'QWEATHER_PROJECT_ID',
-    );
-    final privateKeySeed = _loadPrivateKeySeed();
-    final apiHost = _resolveCredentialString(
-      compileTime: _envQWeatherApiHost,
-      runtimeKey: 'QWEATHER_API_HOST',
-    );
-
-    if (credentialId == null ||
-        credentialId.isEmpty ||
-        projectId == null ||
-        projectId.isEmpty ||
-        privateKeySeed == null) {
-      return null;
-    }
-    return QWeatherCredentials(
-      credentialId: credentialId,
-      projectId: projectId,
-      privateKeySeed: privateKeySeed,
-      apiHost: apiHost,
-    );
-  }
-
-  static QWeatherCredentials? _parseCombinedCredential(String source) {
-    final trimmed = source.trim();
-    if (trimmed.isEmpty) return null;
-
-    // JSON format support: {"kid":"..","sub":"..","key":".."}
-    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-      try {
-        final decoded = jsonDecode(trimmed);
-        if (decoded is Map<String, dynamic>) {
-          final kid = decoded['kid'] ?? decoded['credentialId'] ?? decoded['id'];
-          final sub = decoded['sub'] ?? decoded['projectId'] ?? decoded['project'];
-          final host = decoded['host'] ?? decoded['apiHost'];
-          final key = decoded['key'] ??
-              decoded['privateKey'] ??
-              decoded['privateKeyB64'] ??
-              decoded['seed'];
-          final seed = _decodePrivateKeyBase64(key?.toString()) ??
-              _decodePrivateKeyString(key?.toString());
-          if (kid != null &&
-              kid.toString().isNotEmpty &&
-              sub != null &&
-              sub.toString().isNotEmpty &&
-              seed != null) {
-            return QWeatherCredentials(
-              credentialId: kid.toString(),
-              projectId: sub.toString(),
-              privateKeySeed: seed,
-              apiHost: host?.toString(),
-            );
-          }
-        }
-      } catch (_) {}
-    }
-
-    // Pipe separated format: kid|projectId|[apiHost|]base64PrivateKey
-    final parts = trimmed.split('|');
-    if (parts.length >= 3) {
-      final credentialId = parts[0].trim();
-      final projectId = parts[1].trim();
-      final hasHost = parts.length >= 4;
-      final host = hasHost ? parts[2].trim() : null;
-      final keyPart = parts.sublist(hasHost ? 3 : 2).join('|').trim();
-      final seed = _decodePrivateKeyBase64(keyPart) ?? _decodePrivateKeyString(keyPart);
-      if (credentialId.isNotEmpty && projectId.isNotEmpty && seed != null) {
-        return QWeatherCredentials(
-          credentialId: credentialId,
-          projectId: projectId,
-          privateKeySeed: seed,
-          apiHost: host,
-        );
-      }
-    }
-
-    return null;
-  }
-
-  static String? _resolveCredentialString({
-    required String compileTime,
-    required String runtimeKey,
-  }) {
-    if (compileTime.isNotEmpty) {
-      return compileTime;
-    }
-    return Platform.environment[runtimeKey];
-  }
-
-  static Uint8List? _loadPrivateKeySeed() {
-    final candidates = <Uint8List?>[
-      _decodePrivateKeyBase64(_envQWeatherPrivateKeyB64),
-      _decodePrivateKeyString(_envQWeatherPrivateKey),
-      _decodePrivateKeyBase64(Platform.environment['QWEATHER_PRIVATE_KEY_B64']),
-      _decodePrivateKeyString(Platform.environment['QWEATHER_PRIVATE_KEY']),
-      _decodePrivateKeyFromPath(_envQWeatherPrivateKeyPath),
-      _decodePrivateKeyFromPath(
-          Platform.environment['QWEATHER_PRIVATE_KEY_PATH']),
-      _decodePrivateKeyFromDefaultPaths(),
-    ];
-    for (final candidate in candidates) {
-      if (candidate != null && candidate.isNotEmpty) {
-        return candidate;
-      }
-    }
-    return null;
-  }
-
-  static Uint8List? _decodePrivateKeyBase64(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    try {
-      final normalized = value.replaceAll('\n', '').replaceAll(' ', '');
-      final decoded = base64.decode(normalized);
-      final seed = _parsePrivateKeyBytes(decoded);
-      if (seed != null) return seed;
-      final text = utf8.decode(decoded, allowMalformed: true);
-      return _parsePrivateKeyText(text);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  static Uint8List? _decodePrivateKeyString(String? value) {
-    if (value == null || value.trim().isEmpty) return null;
-    return _parsePrivateKeyText(value);
-  }
-
-  static Uint8List? _decodePrivateKeyFromPath(String? path) {
-    if (path == null || path.trim().isEmpty) return null;
-    final file = File(path.trim());
-    if (!file.existsSync()) return null;
-    try {
-      final content = file.readAsStringSync();
-      return _parsePrivateKeyText(content);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  static Uint8List? _decodePrivateKeyFromDefaultPaths() {
-    final home = Platform.environment['HOME'];
-    final candidates = <String>[
-      if (home != null) '$home/hefeng/ed25519-private.pem',
-      if (home != null) '$home/hefeng/zhizhihu',
-      '/Users/lizhiyin/hefeng/ed25519-private.pem',
-      '/Users/lizhiyin/hefeng/zhizhihu',
-    ];
-    for (final path in candidates) {
-      final seed = _decodePrivateKeyFromPath(path);
-      if (seed != null) return seed;
-    }
-    return null;
-  }
-
-  static Uint8List? _parsePrivateKeyText(String text) {
-    final sanitized = text
-        .replaceAll('\r', '\n')
-        .split('\n')
-        .where((line) => !line.startsWith('---') && line.trim().isNotEmpty)
-        .join();
-    if (sanitized.isEmpty) {
-      try {
-        return _parsePrivateKeyBytes(
-          Uint8List.fromList(utf8.encode(text)),
-        );
-      } catch (_) {
-        return null;
-      }
-    }
-    try {
-      final pkcs8Bytes = base64.decode(sanitized);
-      return _parsePrivateKeyBytes(pkcs8Bytes);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  static Uint8List? _parsePrivateKeyBytes(Uint8List? bytes) {
-    if (bytes == null || bytes.isEmpty) return null;
-    if (bytes.length == 32) {
-      return Uint8List.fromList(bytes);
-    }
-    final seed = _extractEd25519Seed(bytes);
-    if (seed != null) {
-      return seed;
-    }
-    return null;
-  }
-
-  static Uint8List? _extractEd25519Seed(Uint8List pkcs8Bytes) {
-    for (var i = 0; i < pkcs8Bytes.length - 34; i++) {
-      if (pkcs8Bytes[i] == 0x04 && pkcs8Bytes[i + 1] == 0x20) {
-        return Uint8List.fromList(pkcs8Bytes.sublist(i + 2, i + 34));
-      }
-    }
-    return null;
-  }
+  static String get qWeatherGeoBaseUrl => '$_defaultQWeatherHost/v2';
 
   static OfflinePushInfo get offlinePushInfo => OfflinePushInfo(
         title: _appName,
@@ -381,19 +138,4 @@ class Config {
     }
     return level == null ? 5 : int.parse(level);
   }
-}
-
-class QWeatherCredentials {
-  QWeatherCredentials({
-    required this.credentialId,
-    required this.projectId,
-    required Uint8List privateKeySeed,
-    String? apiHost,
-  })  : privateKeySeed = Uint8List.fromList(privateKeySeed),
-        apiHost = apiHost?.trim().isEmpty ?? true ? null : apiHost?.trim();
-
-  final String credentialId;
-  final String projectId;
-  final Uint8List privateKeySeed;
-  final String? apiHost;
 }

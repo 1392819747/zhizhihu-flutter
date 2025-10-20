@@ -79,7 +79,7 @@ Follow the steps below to set up your local development environment:
    static const _host = "your-server-ip or your-domain";
    ```
 
-   - For the desktop weather widget, follow [`docs/qweather_setup.md`](docs/qweather_setup.md) to manage `QWEATHER_API_KEY` / `QWEATHER_API_HOST` locally and in Codemagic.
+   - For the desktop weather widget, follow [`docs/qweather_setup.md`](docs/qweather_setup.md) to manage `QWEATHER_API_TOKEN` locally and in Codemagic.
 
 4. Run the application using `flutter run` from the terminal or through your IDE.
 

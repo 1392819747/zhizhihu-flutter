@@ -93,37 +93,19 @@
 
 ### 配置指南
 
-当前应用已切换为 [和风天气（QWeather）](https://dev.qweather.com/) 实况接口，请准备一个环境变量 `QWEATHER_API_KEY`，内容格式：
-
-```
-凭据ID|项目ID|[API_HOST|]私钥Base64
-```
-
-- **凭据 ID（kid）**：和风控制台“凭据”列表中的 ID。
-- **项目 ID（sub）**：和风控制台“项目”详情中的 Project ID。
-- **API_HOST（可选）**：控制台显示的 API Host。若不填写，则默认使用 `ma4wcmc6h6.re.qweatherapi.com`。
-- **私钥 Base64**：Ed25519 私钥（PKCS#8）主体内容的单行 base64，可在私钥目录执行：
-
-  ```bash
-  base64 -w0 ed25519-private.pem
-  ```
-
-  如果私钥文件已是单行 Base64（无头尾），可直接使用该字符串。
+当前应用已切换为 [和风天气（QWeather）](https://dev.qweather.com/) 实况接口，请准备一个环境变量 `QWEATHER_API_TOKEN`，该值为后端服务颁发的 Bearer Token（建议定期刷新）。
 
 ### 推荐配置方式
 
 1. **编译期传参（CI / 本地构建）**
    ```bash
    flutter build ... \
-     --dart-define=QWEATHER_API_KEY='凭据ID|项目ID|API_HOST|私钥Base64'
+     --dart-define=QWEATHER_API_TOKEN='你的BearerToken'
    ```
-   > GitHub Actions / Codemagic 已示例如何通过 Secrets 注入以上变量。
+   > GitHub Actions / Codemagic 示例请参考 `docs/qweather_setup.md`。
 
-2. **备用路径读取（仅桌面调试）**
-   - 若未传入 `--dart-define`，应用会尝试读取以下文件：
-     - `${HOME}/hefeng/ed25519-private.pem`
-     - `${HOME}/hefeng/zhizhihu`
-     - `/Users/lizhiyin/hefeng/ed25519-private.pem`
-     - `/Users/lizhiyin/hefeng/zhizhihu`
+2. **本地开发**
+   - 建议将 token 写入 `config/qweather.env.local`（已在 `.gitignore` 中忽略）。
+   - 构建或运行前执行 `source config/qweather.env.local`。
 
-> 请勿将真实私钥提交至版本库；建议将密钥文件加入 `.gitignore` 并仅在安全环境下维护。
+和风 API Host 已固定为 `ma4wcmc6h6.re.qweatherapi.com`，无需额外配置。

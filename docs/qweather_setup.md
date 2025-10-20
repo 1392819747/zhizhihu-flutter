@@ -4,18 +4,17 @@
 
 1. **本地开发**
    - 复制 `config/qweather.env.example` 为 `config/qweather.env.local`。
-   - 将实际的 `QWEATHER_API_KEY`（格式 `credentialId|projectId|[apiHost|]base64PrivateKey`）以及可选的 `QWEATHER_API_HOST` 写入 `.local` 文件。
+   - 将最新的 `QWEATHER_API_TOKEN` 写入 `.local` 文件（该 token 由后端服务颁发，建议定期刷新）。
    - 运行本地构建时，通过命令行导入，例如：
      ```bash
      source config/qweather.env.local
-     flutter run --dart-define=QWEATHER_API_KEY="$QWEATHER_API_KEY" \
-                 --dart-define=QWEATHER_API_HOST="$QWEATHER_API_HOST"
+     flutter run --dart-define=QWEATHER_API_TOKEN="$QWEATHER_API_TOKEN"
      ```
    - `.gitignore` 已忽略 `config/qweather.env.local`，确保密钥不会被提交。
 
 2. **Codemagic**
-   - 项目已在 `zhiyin` 变量组中配置 `QWEATHER_API_KEY`（安全存储）和 `QWEATHER_API_HOST=ma4wcmc6h6.re.qweatherapi.com`。
+   - 使用 API Token 管理后台，将 `QWEATHER_API_TOKEN`（Secret）添加到 `zhiyin` 变量组。
    - 每个 workflow 的 `environment.groups` 已引用 `zhiyin`，构建时会自动加载。
-   - “Validate QWeather credentials” 步骤会输出掩码后的 Credential/Project ID，方便确认变量是否注入成功。
+   - “Validate QWeather credentials” 步骤会输出 token 长度及打码摘要，方便确认变量是否注入成功。
 
-如需更换密钥或域名，记得同时更新本地 `.local` 文件和 Codemagic 变量组。***
+和风天气域名现已固定为 `ma4wcmc6h6.re.qweatherapi.com`，无需再在环境变量中配置。如需更换 token，请同步更新本地 `.local` 文件及 Codemagic 变量组。***

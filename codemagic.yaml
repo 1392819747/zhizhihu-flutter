@@ -21,26 +21,17 @@ workflows:
           flutter test || echo "No tests found, continuing..."
       - name: Validate QWeather credentials
         script: |
-          echo "Checking QWEATHER_API_KEY presence..."
-          if [ -z "$QWEATHER_API_KEY" ]; then
-            echo "❌ QWEATHER_API_KEY is empty. Expected format: credentialId|projectId|[apiHost|]base64PrivateKey" >&2
+          echo "Checking QWEATHER_API_TOKEN presence..."
+          if [ -z "$QWEATHER_API_TOKEN" ]; then
+            echo "❌ QWEATHER_API_TOKEN is empty. Please provide a valid bearer token." >&2
             exit 1
           fi
-          echo "✅ QWEATHER_API_KEY length: ${#QWEATHER_API_KEY}"
-          credential_id=$(echo "$QWEATHER_API_KEY" | cut -d'|' -f1)
-          project_id=$(echo "$QWEATHER_API_KEY" | cut -d'|' -f2)
-          remaining=$(echo "$QWEATHER_API_KEY" | cut -d'|' -f3-)
-          echo "Credential ID: ${credential_id:0:4}***"
-          echo "Project ID   : ${project_id:0:4}***"
-          if [ -z "$remaining" ]; then
-            echo "❌ QWEATHER_API_KEY missing private key segment." >&2
-            exit 1
-          fi
-          echo "Private key segment preview: ${remaining:0:6}***"
+          echo "✅ QWEATHER_API_TOKEN length: ${#QWEATHER_API_TOKEN}"
+          echo "Token preview: ${QWEATHER_API_TOKEN:0:6}***"
       - name: Build iOS
         script: |
           flutter build ios --release --no-codesign \
-            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
+            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Create iOS IPA
         script: |
           cd build/ios/iphoneos
@@ -263,18 +254,19 @@ workflows:
           flutter test || echo "No tests found, continuing..."
       - name: Validate QWeather credentials
         script: |
-          if [ -z "$QWEATHER_API_KEY" ]; then
-            echo "QWEATHER_API_KEY is required (format: credentialId|projectId|base64PrivateKey)." >&2
+          if [ -z "$QWEATHER_API_TOKEN" ]; then
+            echo "QWEATHER_API_TOKEN is required." >&2
             exit 1
           fi
+          echo "Token preview: ${QWEATHER_API_TOKEN:0:6}***"
       - name: Build Android APK
         script: |
           flutter build apk --release \
-            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
+            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Build Android AAB
         script: |
           flutter build appbundle --release \
-            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
+            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Verify builds
         script: |
           echo "Android builds completed successfully"
@@ -493,22 +485,23 @@ workflows:
           flutter test || echo "No tests found, continuing..."
       - name: Validate QWeather credentials
         script: |
-          if [ -z "$QWEATHER_API_KEY" ]; then
-            echo "QWEATHER_API_KEY is required (format: credentialId|projectId|base64PrivateKey)." >&2
+          if [ -z "$QWEATHER_API_TOKEN" ]; then
+            echo "QWEATHER_API_TOKEN is required." >&2
             exit 1
           fi
+          echo "Token preview: ${QWEATHER_API_TOKEN:0:6}***"
       - name: Build Android APK
         script: |
           flutter build apk --release \
-            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
+            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Build Android AAB
         script: |
           flutter build appbundle --release \
-            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
+            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Build iOS
         script: |
           flutter build ios --release --no-codesign \
-            --dart-define=QWEATHER_API_KEY=$QWEATHER_API_KEY
+            --dart-define=QWEATHER_API_TOKEN=$QWEATHER_API_TOKEN
       - name: Create iOS IPA
         script: |
           cd build/ios/iphoneos

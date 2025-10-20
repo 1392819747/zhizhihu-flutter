@@ -52,7 +52,12 @@ class WeatherService {
       );
 
       if (response.statusCode == 200) {
-        return WeatherData.fromJson(response.data);
+        final weather = WeatherData.fromJson(response.data);
+        final resolvedCityName = await _fetchCityName(lat, lon);
+        if (resolvedCityName != null && resolvedCityName.isNotEmpty) {
+          return weather.withCityName(resolvedCityName);
+        }
+        return weather;
       }
     } catch (e) {
       print('获取天气数据失败: $e');
@@ -87,6 +92,38 @@ class WeatherService {
     final position = await getCurrentPosition();
     if (position != null) {
       return await getWeatherByLocation(position.latitude, position.longitude);
+    }
+    return null;
+  }
+
+  Future<String?> _fetchCityName(double lat, double lon) async {
+    try {
+      final response = await _dio.get(
+        'https://api.openweathermap.org/geo/1.0/reverse',
+        queryParameters: {
+          'lat': lat,
+          'lon': lon,
+          'appid': _apiKey,
+          'limit': 1,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data is List) {
+        final List<dynamic> payload = response.data as List<dynamic>;
+        if (payload.isEmpty) {
+          return null;
+        }
+        final locationInfo = payload.first;
+        if (locationInfo is! Map<String, dynamic>) {
+          return null;
+        }
+        final localNames = locationInfo['local_names'] as Map<String, dynamic>?;
+        return (localNames != null && localNames['zh'] is String && (localNames['zh'] as String).isNotEmpty)
+            ? localNames['zh'] as String
+            : locationInfo['name'] as String?;
+      }
+    } catch (e) {
+      print('解析城市名称失败: $e');
     }
     return null;
   }
@@ -141,6 +178,23 @@ class WeatherData {
   String get iconUrl => 'https://openweathermap.org/img/wn/$icon@2x.png';
   
   String get temperatureText => '${temperature.round()}°';
-  
+
   String get minMaxTemp => '高${maxTemp.round()}° 低${minTemp.round()}°';
+
+  WeatherData withCityName(String newCityName) {
+    return WeatherData(
+      cityName: newCityName,
+      temperature: temperature,
+      description: description,
+      icon: icon,
+      humidity: humidity,
+      windSpeed: windSpeed,
+      pressure: pressure,
+      feelsLike: feelsLike,
+      minTemp: minTemp,
+      maxTemp: maxTemp,
+      sunrise: sunrise,
+      sunset: sunset,
+    );
+  }
 }

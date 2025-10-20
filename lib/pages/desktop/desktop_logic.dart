@@ -350,9 +350,9 @@ class DesktopLogic extends GetxController {
   // 获取天气图标路径
   String getWeatherIconPath() {
     if (weatherData.value != null) {
-      return 'packages/openim_common/weather_assets/icons/${weatherData.value!.icon}.png';
+      return 'weather_assets/icons/${weatherData.value!.icon}.png';
     }
-    return 'packages/openim_common/weather_assets/icons/02d.png';
+    return 'weather_assets/icons/02d.png';
   }
 
   // 获取天气渐变背景颜色

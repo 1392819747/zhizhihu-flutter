@@ -41,7 +41,8 @@ class WeatherPage extends StatelessWidget {
           decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage(
-                "packages/openim_common/weather_assets/images/${weather.icon}.jpeg"
+                'weather_assets/images/${weather.icon}.jpeg',
+                package: 'openim_common',
               ),
               fit: BoxFit.cover,
             ),
@@ -63,13 +64,21 @@ class WeatherPage extends StatelessWidget {
                         children: [
                           Padding(
                             padding: EdgeInsets.only(top: 48.h),
-                            child: Image(
-                              image: AssetImage(
-                                'packages/openim_common/weather_assets/icons/${weather.icon}.png'
-                              ),
+                            child: Image.asset(
+                              'weather_assets/icons/${weather.icon}.png',
+                              package: 'openim_common',
                               fit: BoxFit.none,
                               width: 120.w,
                               height: 120.w,
+                              errorBuilder: (_, __, ___) {
+                                return Image.asset(
+                                  'weather_assets/icons/02d.png',
+                                  package: 'openim_common',
+                                  fit: BoxFit.none,
+                                  width: 120.w,
+                                  height: 120.w,
+                                );
+                              },
                             ),
                           ),
                           Text(

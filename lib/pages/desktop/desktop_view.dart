@@ -184,9 +184,19 @@ class DesktopPage extends StatelessWidget {
                       child: Center(
                         child: Image.asset(
                           logic.getWeatherIconPath(),
+                          package: 'openim_common',
                           width: 40.w,
                           height: 40.w,
                           fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) {
+                            return Image.asset(
+                              'weather_assets/icons/02d.png',
+                              package: 'openim_common',
+                              width: 40.w,
+                              height: 40.w,
+                              fit: BoxFit.contain,
+                            );
+                          },
                         ),
                       ),
                     ),

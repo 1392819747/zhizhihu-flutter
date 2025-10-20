@@ -115,10 +115,7 @@ class DesktopLogic extends GetxController {
     ),
     AppItem(
       name: 'WeChat',
-      assetIconPath: 'packages/openim_common/assets/images/wechat_icon.png',
-      remoteIconUrl:
-          // 开发环境使用 Icons8 提供的 PNG 图标，生产请确认授权或替换
-          'https://img.icons8.com/color/200/weixing.png',
+      assetIconPath: 'packages/openim_common/assets/images/WeChat.png',
       color: const Color(0xFF07C160), // WeChat Green
     ),
     AppItem(

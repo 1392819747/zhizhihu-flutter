@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:openim_common/openim_common.dart';
 
 import '../../services/api_settings_service.dart';
-import '../../routes/app_routes.dart';
+import '../../routes/app_navigator.dart';
 import 'wechat_mock_logic.dart';
 
 class WeChatMockPage extends GetView<WeChatMockLogic> {
@@ -25,7 +25,7 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
           centerTitle: true,
           actions: [
             IconButton(
-              onPressed: () => Get.toNamed(AppRoutes.apiSettings),
+              onPressed: AppNavigator.startApiSettings,
               icon: const Icon(Icons.tune),
               color: Colors.white,
               tooltip: 'API 设置',

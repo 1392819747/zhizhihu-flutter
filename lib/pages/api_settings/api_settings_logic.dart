@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
 
+import '../../data/models/api_provider.dart';
+import '../../domain/entities/api_entities.dart';
 import '../../services/api_settings_service.dart';
 
 class ApiSettingsLogic extends GetxController {
@@ -23,11 +25,16 @@ class ApiSettingsLogic extends GetxController {
 
   Future<void> addOrEditEndpoint({ApiEndpoint? endpoint}) async {
     final nameCtrl = TextEditingController(text: endpoint?.name ?? '');
-    final baseUrlCtrl = TextEditingController(text: endpoint?.baseUrl ?? _defaultBaseUrl(endpoint?.type));
-    final apiKeyCtrl = TextEditingController(text: endpoint?.apiKey ?? '');
-    final modelCtrl = TextEditingController(text: endpoint?.model ?? 'gpt-4o-mini');
+    final baseUrlCtrl = TextEditingController(
+        text: endpoint?.baseUrl ?? _defaultBaseUrl(endpoint?.type));
+    final keyLabelCtrl = TextEditingController(
+        text: endpoint?.keyLabel ?? 'API_KEY_${service.endpoints.length + 1}');
+    final apiKeyCtrl = TextEditingController();
+    final modelCtrl =
+        TextEditingController(text: endpoint?.model ?? 'gpt-4o-mini');
     final notesCtrl = TextEditingController(text: endpoint?.notes ?? '');
     var providerType = endpoint?.type ?? ApiProviderType.openai;
+    final isNew = endpoint == null;
 
     final confirmed = await Get.dialog<bool>(
       StatefulBuilder(
@@ -37,13 +44,18 @@ class ApiSettingsLogic extends GetxController {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildTextField(nameCtrl, label: '名称', hint: '例如：公司专用 OpenAI 网关'),
+                _buildTextField(nameCtrl,
+                    label: '名称', hint: '例如：公司专用 OpenAI 网关'),
                 const SizedBox(height: 12),
                 _buildDropdown<ApiProviderType>(
                   value: providerType,
                   items: const [
-                    DropdownMenuItem(value: ApiProviderType.openai, child: Text('OpenAI 兼容接口')),
-                    DropdownMenuItem(value: ApiProviderType.gemini, child: Text('Google Gemini')),
+                    DropdownMenuItem(
+                        value: ApiProviderType.openai,
+                        child: Text('OpenAI 兼容接口')),
+                    DropdownMenuItem(
+                        value: ApiProviderType.gemini,
+                        child: Text('Google Gemini')),
                   ],
                   onChanged: (value) {
                     if (value == null) return;
@@ -58,17 +70,30 @@ class ApiSettingsLogic extends GetxController {
                 const SizedBox(height: 12),
                 _buildTextField(baseUrlCtrl, label: 'Base URL'),
                 const SizedBox(height: 12),
-                _buildTextField(apiKeyCtrl, label: 'API Key', obscure: true),
+                _buildTextField(keyLabelCtrl,
+                    label: '密钥标记', hint: '用于在列表中辨识此密钥'),
+                const SizedBox(height: 12),
+                _buildTextField(
+                  apiKeyCtrl,
+                  label: 'API Key',
+                  hint: endpoint == null ? null : '留空表示保持现有密钥',
+                  obscure: true,
+                ),
                 const SizedBox(height: 12),
                 _buildTextField(modelCtrl, label: '默认模型/Version'),
                 const SizedBox(height: 12),
-                _buildTextField(notesCtrl, label: '备注', maxLines: 3, hint: '用途说明、速率限制等'),
+                _buildTextField(notesCtrl,
+                    label: '备注', maxLines: 3, hint: '用途说明、速率限制等'),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('取消')),
-            ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('保存')),
+            TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('取消')),
+            ElevatedButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('保存')),
           ],
         ),
       ),
@@ -76,30 +101,42 @@ class ApiSettingsLogic extends GetxController {
 
     if (confirmed != true) return;
 
-    if (nameCtrl.text.trim().isEmpty || apiKeyCtrl.text.trim().isEmpty) {
-      IMViews.showToast('名称与 API Key 不能为空');
+    if (nameCtrl.text.trim().isEmpty) {
+      IMViews.showToast('名称不能为空');
+      return;
+    }
+    if (keyLabelCtrl.text.trim().isEmpty) {
+      IMViews.showToast('请填写密钥标记');
+      return;
+    }
+    if (isNew && apiKeyCtrl.text.trim().isEmpty) {
+      IMViews.showToast('新增接口需要填写 API Key');
       return;
     }
 
-    final updated = (endpoint ?? ApiEndpoint(
-          id: service.generateEndpointId(),
-          name: nameCtrl.text.trim(),
-          type: providerType,
-          baseUrl: baseUrlCtrl.text.trim(),
-          apiKey: apiKeyCtrl.text.trim(),
-          model: modelCtrl.text.trim(),
-          notes: notesCtrl.text.trim(),
-        ))
+    final updated = (endpoint ??
+            ApiEndpoint(
+              id: service.generateEndpointId(),
+              name: nameCtrl.text.trim(),
+              type: providerType,
+              baseUrl: baseUrlCtrl.text.trim(),
+              keyLabel: keyLabelCtrl.text.trim(),
+              model: modelCtrl.text.trim(),
+              notes: notesCtrl.text.trim(),
+            ))
         .copyWith(
       name: nameCtrl.text.trim(),
       baseUrl: baseUrlCtrl.text.trim(),
-      apiKey: apiKeyCtrl.text.trim(),
       model: modelCtrl.text.trim(),
       type: providerType,
       notes: notesCtrl.text.trim(),
+      keyLabel: keyLabelCtrl.text.trim(),
     );
 
-    await service.addOrUpdateEndpoint(updated);
+    await service.addOrUpdateEndpoint(
+      updated,
+      apiKey: apiKeyCtrl.text.trim().isEmpty ? null : apiKeyCtrl.text.trim(),
+    );
     IMViews.showToast('保存成功');
   }
 
@@ -108,9 +145,12 @@ class ApiSettingsLogic extends GetxController {
     final tempCtrl = TextEditingController(text: config.temperature.toString());
     final topPCtrl = TextEditingController(text: config.topP.toString());
     final topKCtrl = TextEditingController(text: config.topK.toString());
-    final maxTokensCtrl = TextEditingController(text: config.maxTokens.toString());
-    final presenceCtrl = TextEditingController(text: config.presencePenalty.toString());
-    final frequencyCtrl = TextEditingController(text: config.frequencyPenalty.toString());
+    final maxTokensCtrl =
+        TextEditingController(text: config.maxTokens.toString());
+    final presenceCtrl =
+        TextEditingController(text: config.presencePenalty.toString());
+    final frequencyCtrl =
+        TextEditingController(text: config.frequencyPenalty.toString());
     var stream = config.stream;
 
     final confirmed = await Get.dialog<bool>(
@@ -121,13 +161,15 @@ class ApiSettingsLogic extends GetxController {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildTextField(tempCtrl, label: 'temperature', hint: '0.0 - 2.0'),
+                _buildTextField(tempCtrl,
+                    label: 'temperature', hint: '0.0 - 2.0'),
                 const SizedBox(height: 12),
                 _buildTextField(topPCtrl, label: 'top_p', hint: '通常 0.7 - 1.0'),
                 const SizedBox(height: 12),
                 _buildTextField(topKCtrl, label: 'top_k', hint: '采样词表大小'),
                 const SizedBox(height: 12),
-                _buildTextField(maxTokensCtrl, label: 'max_tokens', hint: '单次输出长度'),
+                _buildTextField(maxTokensCtrl,
+                    label: 'max_tokens', hint: '单次输出长度'),
                 const SizedBox(height: 12),
                 _buildTextField(presenceCtrl, label: 'presence_penalty'),
                 const SizedBox(height: 12),
@@ -142,8 +184,12 @@ class ApiSettingsLogic extends GetxController {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('取消')),
-            ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('保存')),
+            TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('取消')),
+            ElevatedButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('保存')),
           ],
         ),
       ),
@@ -207,8 +253,11 @@ class ApiSettingsLogic extends GetxController {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('取消')),
-          ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('保存')),
+          TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('取消')),
+          ElevatedButton(
+              onPressed: () => Get.back(result: true), child: const Text('保存')),
         ],
       ),
     );
@@ -252,8 +301,11 @@ class ApiSettingsLogic extends GetxController {
               onPressed: () => Get.back(result: null),
               child: const Text('清除'),
             ),
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('取消')),
-          ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('保存')),
+          TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('取消')),
+          ElevatedButton(
+              onPressed: () => Get.back(result: true), child: const Text('保存')),
         ],
       ),
     );
@@ -276,9 +328,11 @@ class ApiSettingsLogic extends GetxController {
 
   Future<void> addOrEditWorldInfo({WorldInfoEntry? entry}) async {
     final titleCtrl = TextEditingController(text: entry?.title ?? '');
-    final keywordsCtrl = TextEditingController(text: entry?.keywords.join(', ') ?? '');
+    final keywordsCtrl =
+        TextEditingController(text: entry?.keywords.join(', ') ?? '');
     final contentCtrl = TextEditingController(text: entry?.content ?? '');
-    final priorityCtrl = TextEditingController(text: entry?.priority.toString() ?? '0');
+    final priorityCtrl =
+        TextEditingController(text: entry?.priority.toString() ?? '0');
     var enabled = entry?.enabled ?? true;
 
     final confirmed = await Get.dialog<bool>(
@@ -310,8 +364,12 @@ class ApiSettingsLogic extends GetxController {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('取消')),
-            ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('保存')),
+            TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('取消')),
+            ElevatedButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('保存')),
           ],
         ),
       ),
@@ -325,7 +383,8 @@ class ApiSettingsLogic extends GetxController {
         .where((element) => element.isNotEmpty)
         .toList();
 
-    final priority = int.tryParse(priorityCtrl.text.trim()) ?? (entry?.priority ?? 0);
+    final priority =
+        int.tryParse(priorityCtrl.text.trim()) ?? (entry?.priority ?? 0);
 
     final updated = (entry ??
             WorldInfoEntry(
@@ -354,8 +413,11 @@ class ApiSettingsLogic extends GetxController {
         title: const Text('删除确认'),
         content: Text('确认删除 ${entry.title} 吗？'),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('取消')),
-          ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('删除')),
+          TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('取消')),
+          ElevatedButton(
+              onPressed: () => Get.back(result: true), child: const Text('删除')),
         ],
       ),
     );
@@ -464,8 +526,9 @@ class ApiSettingsLogic extends GetxController {
         return;
       }
 
-      final endpointId =
-          service.selectedEndpointId.value.isNotEmpty ? service.selectedEndpointId.value : service.endpoints.first.id;
+      final endpointId = service.selectedEndpointId.value.isNotEmpty
+          ? service.selectedEndpointId.value
+          : service.endpoints.first.id;
 
       int imported = 0;
       for (final data in cards) {
@@ -527,10 +590,14 @@ class ApiSettingsLogic extends GetxController {
 
   List<Map<String, dynamic>> _extractCharacterCards(dynamic decoded) {
     if (decoded is List) {
-      return decoded.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+      return decoded
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
     }
     if (decoded is Map<String, dynamic>) {
-      if (decoded['spec'] == 'chara_card_v2' || decoded['spec'] == 'chara_card_v1') {
+      if (decoded['spec'] == 'chara_card_v2' ||
+          decoded['spec'] == 'chara_card_v1') {
         final data = decoded['data'];
         if (data is Map) return [Map<String, dynamic>.from(data)];
       }
@@ -551,11 +618,13 @@ class ApiSettingsLogic extends GetxController {
     return const [];
   }
 
-  AiCharacter? _convertCharacterCard(Map<String, dynamic> card, String endpointId) {
+  AiCharacter? _convertCharacterCard(
+      Map<String, dynamic> card, String endpointId) {
     String asText(dynamic value) =>
         value is String ? value.trim() : value?.toString().trim() ?? '';
 
-    final name = asText(card['name']).isNotEmpty ? asText(card['name']) : '未命名角色';
+    final name =
+        asText(card['name']).isNotEmpty ? asText(card['name']) : '未命名角色';
     final greeting = [
       asText(card['first_mes']),
       asText(card['greeting']),
@@ -584,9 +653,7 @@ class ApiSettingsLogic extends GetxController {
       );
     } else if (rawExample is List) {
       examples.addAll(
-        rawExample
-            .map((e) => asText(e))
-            .where((element) => element.isNotEmpty),
+        rawExample.map((e) => asText(e)).where((element) => element.isNotEmpty),
       );
     }
 
@@ -617,7 +684,8 @@ class ApiSettingsLogic extends GetxController {
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
       }
-      if (decoded['lorebook'] is Map && decoded['lorebook']['entries'] is List) {
+      if (decoded['lorebook'] is Map &&
+          decoded['lorebook']['entries'] is List) {
         return (decoded['lorebook']['entries'] as List)
             .whereType<Map>()
             .map((e) => Map<String, dynamic>.from(e))
@@ -630,7 +698,10 @@ class ApiSettingsLogic extends GetxController {
             .toList();
       }
     } else if (decoded is List) {
-      return decoded.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+      return decoded
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
     }
     return const [];
   }
@@ -642,7 +713,10 @@ class ApiSettingsLogic extends GetxController {
     final keywords = <String>{};
     void addKeywords(dynamic value) {
       if (value is String && value.trim().isNotEmpty) {
-        keywords.addAll(value.split(RegExp(r'[，,\n]')).map((e) => e.trim()).where((e) => e.isNotEmpty));
+        keywords.addAll(value
+            .split(RegExp(r'[，,\n]'))
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty));
       } else if (value is List) {
         keywords.addAll(value.map((e) => asText(e)).where((e) => e.isNotEmpty));
       }
@@ -654,7 +728,9 @@ class ApiSettingsLogic extends GetxController {
     addKeywords(entry['secondary_keys']);
 
     final content = asText(entry['content']) +
-        (asText(entry['commentary']).isNotEmpty ? '\n${asText(entry['commentary'])}' : '');
+        (asText(entry['commentary']).isNotEmpty
+            ? '\n${asText(entry['commentary'])}'
+            : '');
 
     if (content.trim().isEmpty) return null;
 
@@ -692,8 +768,11 @@ class ApiSettingsLogic extends GetxController {
         title: const Text('删除确认'),
         content: Text('确认删除 ${endpoint.name} 吗？\n关联的角色将解除绑定。'),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('取消')),
-          ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('删除')),
+          TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('取消')),
+          ElevatedButton(
+              onPressed: () => Get.back(result: true), child: const Text('删除')),
         ],
       ),
     );
@@ -710,13 +789,16 @@ class ApiSettingsLogic extends GetxController {
     }
     final nameCtrl = TextEditingController(text: character?.name ?? '');
     final personaCtrl = TextEditingController(text: character?.persona ?? '');
-    final greetingCtrl = TextEditingController(text: character?.greeting ?? '你好，很高兴再次与您相遇。');
+    final greetingCtrl =
+        TextEditingController(text: character?.greeting ?? '你好，很高兴再次与您相遇。');
     final repliesCtrl = TextEditingController(
-        text: character?.sampleReplies.join('\n') ?? '这听起来很棒，我们可以深入聊聊。\n让我来总结一下目前的要点。');
+        text: character?.sampleReplies.join('\n') ??
+            '这听起来很棒，我们可以深入聊聊。\n让我来总结一下目前的要点。');
     var endpointId = character?.endpointId.isNotEmpty == true
         ? character!.endpointId
         : service.selectedEndpoint?.id ?? service.endpoints.first.id;
-    String colorHex = character?.avatarColorHex ?? service.randomAvatarColorHex();
+    String colorHex =
+        character?.avatarColorHex ?? service.randomAvatarColorHex();
 
     final confirmed = await Get.dialog<bool>(
       StatefulBuilder(
@@ -731,7 +813,8 @@ class ApiSettingsLogic extends GetxController {
                 _buildDropdown<String>(
                   value: endpointId,
                   items: service.endpoints
-                      .map((e) => DropdownMenuItem(value: e.id, child: Text(e.name)))
+                      .map((e) =>
+                          DropdownMenuItem(value: e.id, child: Text(e.name)))
                       .toList(),
                   onChanged: (value) {
                     if (value != null) {
@@ -740,14 +823,13 @@ class ApiSettingsLogic extends GetxController {
                   },
                 ),
                 const SizedBox(height: 12),
-                _buildTextField(personaCtrl, label: '角色设定', maxLines: 3, hint: '性格、说话风格、背景故事等'),
+                _buildTextField(personaCtrl,
+                    label: '角色设定', maxLines: 3, hint: '性格、说话风格、背景故事等'),
                 const SizedBox(height: 12),
                 _buildTextField(greetingCtrl, label: '见面问候语', maxLines: 2),
                 const SizedBox(height: 12),
                 _buildTextField(repliesCtrl,
-                    label: '示例回复',
-                    maxLines: 4,
-                    hint: '每行一个示例，用于离线对话预览'),
+                    label: '示例回复', maxLines: 4, hint: '每行一个示例，用于离线对话预览'),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -761,7 +843,9 @@ class ApiSettingsLogic extends GetxController {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: Color(int.parse(colorHex.substring(1), radix: 16) + 0xFF000000),
+                          color: Color(
+                              int.parse(colorHex.substring(1), radix: 16) +
+                                  0xFF000000),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -774,8 +858,12 @@ class ApiSettingsLogic extends GetxController {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Get.back(result: false), child: const Text('取消')),
-            ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('保存')),
+            TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('取消')),
+            ElevatedButton(
+                onPressed: () => Get.back(result: true),
+                child: const Text('保存')),
           ],
         ),
       ),
@@ -794,15 +882,16 @@ class ApiSettingsLogic extends GetxController {
         .where((element) => element.isNotEmpty)
         .toList();
 
-    final updated = (character ?? AiCharacter(
-          id: service.generateCharacterId(),
-          name: nameCtrl.text.trim(),
-          persona: personaCtrl.text.trim(),
-          greeting: greetingCtrl.text.trim(),
-          endpointId: endpointId,
-          avatarColorHex: colorHex,
-          sampleReplies: sampleReplies,
-        ))
+    final updated = (character ??
+            AiCharacter(
+              id: service.generateCharacterId(),
+              name: nameCtrl.text.trim(),
+              persona: personaCtrl.text.trim(),
+              greeting: greetingCtrl.text.trim(),
+              endpointId: endpointId,
+              avatarColorHex: colorHex,
+              sampleReplies: sampleReplies,
+            ))
         .copyWith(
       name: nameCtrl.text.trim(),
       persona: personaCtrl.text.trim(),
@@ -822,8 +911,11 @@ class ApiSettingsLogic extends GetxController {
         title: const Text('删除确认'),
         content: Text('确认删除 ${character.name} 吗？'),
         actions: [
-          TextButton(onPressed: () => Get.back(result: false), child: const Text('取消')),
-          ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('删除')),
+          TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('取消')),
+          ElevatedButton(
+              onPressed: () => Get.back(result: true), child: const Text('删除')),
         ],
       ),
     );
@@ -847,7 +939,10 @@ class ApiSettingsLogic extends GetxController {
   }
 
   TextField _buildTextField(TextEditingController controller,
-      {required String label, String? hint, bool obscure = false, int maxLines = 1}) {
+      {required String label,
+      String? hint,
+      bool obscure = false,
+      int maxLines = 1}) {
     return TextField(
       controller: controller,
       maxLines: maxLines,

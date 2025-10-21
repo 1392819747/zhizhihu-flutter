@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
 
+import '../../data/models/api_provider.dart';
+import '../../domain/entities/api_entities.dart';
 import '../../services/api_settings_service.dart';
 import 'api_settings_logic.dart';
 
@@ -13,7 +15,8 @@ class ApiSettingsPage extends StatefulWidget {
   State<ApiSettingsPage> createState() => _ApiSettingsPageState();
 }
 
-class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProviderStateMixin {
+class _ApiSettingsPageState extends State<ApiSettingsPage>
+    with SingleTickerProviderStateMixin {
   late final ApiSettingsLogic controller;
   late final ApiSettingsService service;
   late final TabController _tabController;
@@ -24,7 +27,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
     super.initState();
     controller = Get.find<ApiSettingsLogic>();
     service = controller.service;
-    _tabController = TabController(length: 3, vsync: this, initialIndex: controller.selectedSection.value);
+    _tabController = TabController(
+        length: 3, vsync: this, initialIndex: controller.selectedSection.value);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
       controller.switchSection(_tabController.index);
@@ -66,7 +70,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                 TDNavBarItem(
                   icon: TDIcons.add,
                   iconColor: theme.brandColor8,
-                  action: () => controller.handleSectionAction(controller.selectedSection.value),
+                  action: () => controller
+                      .handleSectionAction(controller.selectedSection.value),
                 ),
               ],
               useDefaultBack: false,
@@ -178,13 +183,23 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                         runSpacing: 6.h,
                         children: [
                           TDTag(
-                            endpoint.type == ApiProviderType.openai ? 'OpenAI 兼容' : 'Google Gemini',
+                            endpoint.type == ApiProviderType.openai
+                                ? 'OpenAI 兼容'
+                                : 'Google Gemini',
                             theme: TDTagTheme.primary,
                             size: TDTagSize.small,
                             isLight: true,
                           ),
                           TDTag(
                             endpoint.model.isEmpty ? '未指定模型' : endpoint.model,
+                            theme: TDTagTheme.defaultTheme,
+                            size: TDTagSize.small,
+                            isLight: true,
+                          ),
+                          TDTag(
+                            endpoint.keyLabel.isEmpty
+                                ? '未命名密钥'
+                                : 'Key: ${endpoint.keyLabel}',
                             theme: TDTagTheme.defaultTheme,
                             size: TDTagSize.small,
                             isLight: true,
@@ -210,7 +225,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                       children: [
                         Text(
                           endpoint.baseUrl,
-                          style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                          style: TextStyle(
+                              fontSize: 12.sp, color: theme.fontGyColor3),
                         ),
                         SizedBox(height: 10.h),
                         Wrap(
@@ -222,14 +238,16 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                           SizedBox(height: 10.h),
                           Text(
                             endpoint.notes,
-                            style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                            style: TextStyle(
+                                fontSize: 12.sp, color: theme.fontGyColor2),
                           ),
                         ],
                       ],
                     ),
                   ),
                   arrow: true,
-                  onClick: (_) => _showEndpointActions(context, endpoint, isSelected),
+                  onClick: (_) =>
+                      _showEndpointActions(context, endpoint, isSelected),
                 ),
               ],
             ),
@@ -265,7 +283,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                 bordered: false,
                 titleWidget: Row(
                   children: [
-                    Icon(TDIcons.user_circle, color: theme.brandColor8, size: 28.w),
+                    Icon(TDIcons.user_circle,
+                        color: theme.brandColor8, size: 28.w),
                     12.horizontalSpace,
                     Expanded(
                       child: Column(
@@ -273,14 +292,18 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                         children: [
                           Text(
                             persona.displayName,
-                            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor1),
+                            style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: theme.fontGyColor1),
                           ),
                           if (persona.style.isNotEmpty)
                             Padding(
                               padding: EdgeInsets.only(top: 4.h),
                               child: Text(
                                 persona.style,
-                                style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                                style: TextStyle(
+                                    fontSize: 12.sp, color: theme.fontGyColor3),
                               ),
                             ),
                         ],
@@ -303,7 +326,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                         padding: EdgeInsets.only(top: 12.h),
                         child: Text(
                           persona.description,
-                          style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                          style: TextStyle(
+                              fontSize: 12.sp, color: theme.fontGyColor2),
                         ),
                       ),
                     if (persona.goals.isNotEmpty)
@@ -311,7 +335,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                         padding: EdgeInsets.only(top: 8.h),
                         child: Text(
                           '目标：${persona.goals}',
-                          style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                          style: TextStyle(
+                              fontSize: 12.sp, color: theme.fontGyColor3),
                         ),
                       ),
                     if (worldCount > 0)
@@ -333,7 +358,10 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
             SizedBox(height: 16.h),
             Text(
               '默认 AI 角色',
-              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor3),
+              style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: theme.fontGyColor3),
             ),
             SizedBox(height: 8.h),
             TDCellGroup(
@@ -349,7 +377,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                         backgroundColor: defaultCharacter.avatarColor,
                         child: Text(
                           defaultCharacter.name.characters.first,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ),
                       12.horizontalSpace,
@@ -359,12 +388,19 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                           children: [
                             Text(
                               defaultCharacter.name,
-                              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor1),
+                              style: TextStyle(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.fontGyColor1),
                             ),
                             4.verticalSpace,
                             Text(
-                              service.ensureEndpointForCharacter(defaultCharacter).name,
-                              style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                              service
+                                      .endpointForCharacter(defaultCharacter)
+                                      ?.name ??
+                                  '未绑定接口',
+                              style: TextStyle(
+                                  fontSize: 12.sp, color: theme.fontGyColor3),
                             ),
                           ],
                         ),
@@ -379,10 +415,12 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                             defaultCharacter.persona,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                            style: TextStyle(
+                                fontSize: 12.sp, color: theme.fontGyColor2),
                           ),
                         ),
-                  onClick: (_) => controller.addOrEditCharacter(character: defaultCharacter),
+                  onClick: (_) => controller.addOrEditCharacter(
+                      character: defaultCharacter),
                 ),
               ],
             ),
@@ -408,7 +446,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
       return ReorderableListView.builder(
         padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 24.h),
         itemCount: entries.length,
-        onReorder: (oldIndex, newIndex) => controller.service.reorderWorldInfos(oldIndex, newIndex),
+        onReorder: (oldIndex, newIndex) =>
+            controller.service.reorderWorldInfos(oldIndex, newIndex),
         itemBuilder: (context, index) {
           final entry = entries[index];
           return Padding(
@@ -425,7 +464,10 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                       Expanded(
                         child: Text(
                           entry.title,
-                          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor1),
+                          style: TextStyle(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w600,
+                              color: theme.fontGyColor1),
                         ),
                       ),
                       TDSwitch(
@@ -437,13 +479,16 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                       ),
                       8.horizontalSpace,
                       GestureDetector(
-                        onTap: () => controller.addOrEditWorldInfo(entry: entry),
-                        child: Icon(TDIcons.edit_1, size: 20.w, color: theme.fontGyColor2),
+                        onTap: () =>
+                            controller.addOrEditWorldInfo(entry: entry),
+                        child: Icon(TDIcons.edit_1,
+                            size: 20.w, color: theme.fontGyColor2),
                       ),
                       12.horizontalSpace,
                       GestureDetector(
                         onTap: () => controller.removeWorldInfo(entry),
-                        child: Icon(TDIcons.delete, size: 20.w, color: theme.errorColor6),
+                        child: Icon(TDIcons.delete,
+                            size: 20.w, color: theme.errorColor6),
                       ),
                       12.horizontalSpace,
                       Icon(TDIcons.move, size: 20.w, color: theme.fontGyColor3),
@@ -470,12 +515,14 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
                       SizedBox(height: 8.h),
                       Text(
                         entry.content,
-                        style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                        style: TextStyle(
+                            fontSize: 12.sp, color: theme.fontGyColor2),
                       ),
                       SizedBox(height: 8.h),
                       Text(
                         '优先级：${entry.priority}',
-                        style: TextStyle(fontSize: 11.sp, color: theme.fontGyColor3),
+                        style: TextStyle(
+                            fontSize: 11.sp, color: theme.fontGyColor3),
                       ),
                     ],
                   ),
@@ -499,7 +546,9 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
       child: TDEmpty(
         image: Icon(icon, size: 72.w, color: TDTheme.of(context).fontGyColor3),
         emptyText: description,
-        type: actionLabel != null && onAction != null ? TDEmptyType.operation : TDEmptyType.plain,
+        type: actionLabel != null && onAction != null
+            ? TDEmptyType.operation
+            : TDEmptyType.plain,
         operationText: actionLabel,
         onTapEvent: onAction,
         operationTheme: TDButtonTheme.primary,
@@ -521,7 +570,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProv
     );
   }
 
-  void _showEndpointActions(BuildContext context, ApiEndpoint endpoint, bool isSelected) {
+  void _showEndpointActions(
+      BuildContext context, ApiEndpoint endpoint, bool isSelected) {
     final items = <TDActionSheetItem>[
       if (!isSelected) TDActionSheetItem(label: '设为当前接口'),
       TDActionSheetItem(label: '编辑'),

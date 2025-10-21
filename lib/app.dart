@@ -7,6 +7,7 @@ import 'package:openim_common/openim_common.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
 
 import 'core/controller/im_controller.dart';
+import 'data/app_database.dart';
 import 'routes/app_pages.dart';
 import 'widgets/app_view.dart';
 
@@ -108,6 +109,9 @@ class ChatApp extends StatelessWidget {
 class InitBinding extends Bindings {
   @override
   void dependencies() {
+    if (!Get.isRegistered<AppDatabase>()) {
+      Get.put<AppDatabase>(AppDatabase.instance, permanent: true);
+    }
     Get.put<IMController>(IMController());
     Get.put<PushController>(PushController());
     Get.put<CacheController>(CacheController());

@@ -440,7 +440,7 @@ class ApiSettingsService extends GetxService {
       const Color(0xFF5AC8FA),
     ];
     final color = colors[rand.nextInt(colors.length)];
-    final argb = color.toARGB32();
+    final argb = (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue;
     return '#${argb.toRadixString(16).padLeft(8, '0').substring(2)}';
   }
 

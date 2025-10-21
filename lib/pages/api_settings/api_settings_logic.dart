@@ -519,7 +519,7 @@ class ApiSettingsLogic extends GetxController {
     required ValueChanged<T?> onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      initialValue: value,
+      value: value,
       items: items,
       onChanged: onChanged,
       decoration: const InputDecoration(border: OutlineInputBorder()),

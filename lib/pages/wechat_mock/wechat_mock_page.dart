@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:openim_common/openim_common.dart';
+import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 
 import '../../services/api_settings_service.dart';
 import '../../routes/app_navigator.dart';
@@ -15,44 +16,131 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
 
   ApiSettingsLogic get _apiLogic => Get.find<ApiSettingsLogic>();
 
+  List<PersistentTabConfig> _tabs() => [
+        PersistentTabConfig(
+          screen: _buildChatsScreen(),
+          item: ItemConfig(
+            icon: const Icon(CupertinoIcons.chat_bubble_fill),
+            inactiveIcon: const Icon(CupertinoIcons.chat_bubble),
+            title: '微信',
+            textStyle: Styles.ts_0089FF_10sp_semibold,
+          ),
+        ),
+        PersistentTabConfig(
+          screen: _buildContactsScreen(),
+          item: ItemConfig(
+            icon: const Icon(CupertinoIcons.person_2_fill),
+            inactiveIcon: const Icon(CupertinoIcons.person_2),
+            title: '通讯录',
+            textStyle: Styles.ts_0089FF_10sp_semibold,
+          ),
+        ),
+        PersistentTabConfig(
+          screen: _buildDiscoverScreen(),
+          item: ItemConfig(
+            icon: const Icon(CupertinoIcons.compass_fill),
+            inactiveIcon: const Icon(CupertinoIcons.compass),
+            title: '发现',
+            textStyle: Styles.ts_0089FF_10sp_semibold,
+          ),
+        ),
+        PersistentTabConfig(
+          screen: _buildProfileScreen(),
+          item: ItemConfig(
+            icon: const Icon(CupertinoIcons.person_crop_circle_fill),
+            inactiveIcon: const Icon(CupertinoIcons.person_crop_circle),
+            title: '我',
+            textStyle: Styles.ts_0089FF_10sp_semibold,
+          ),
+        ),
+      ];
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFEDEDED),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF07C160),
-          elevation: 0,
-          title: const Text('微信'),
-          centerTitle: true,
-          actions: const [
-            IconButton(
-              onPressed: AppNavigator.startApiSettings,
-              icon: Icon(Icons.tune),
-              color: Colors.white,
-              tooltip: 'API 设置',
-            ),
-          ],
-          bottom: const TabBar(
-            indicatorColor: Colors.white,
-            tabs: [
-              Tab(text: '微信'),
-              Tab(text: '通讯录'),
-              Tab(text: '发现'),
-              Tab(text: '我'),
+    return Scaffold(
+      backgroundColor: Styles.c_FFFFFF,
+      body: PersistentTabView(
+        tabs: _tabs(),
+        navBarBuilder: (navBarConfig) => Style1BottomNavBar(
+          navBarConfig: navBarConfig,
+          navBarDecoration: const NavBarDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(color: Colors.black12, blurRadius: 0.5, spreadRadius: 0.5),
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildChatsTab(),
-            _buildContactsTab(),
-            _buildPlaceholder('探索更多玩法，未来将接入 SillyTavern 式扩展。'),
-            _buildPlaceholder('个人中心正在开发中，敬请期待。'),
-          ],
-        ),
+        navBarOverlap: const NavBarOverlap.none(),
+        screenTransitionAnimation: const ScreenTransitionAnimation.none(),
       ),
+    );
+  }
+
+  Widget _buildChatsScreen() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFEDEDED),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF07C160),
+        elevation: 0,
+        title: const Text('微信'),
+        centerTitle: true,
+        actions: const [
+          IconButton(
+            onPressed: AppNavigator.startApiSettings,
+            icon: Icon(Icons.tune),
+            color: Colors.white,
+            tooltip: 'API 设置',
+          ),
+        ],
+      ),
+      body: _buildChatsTab(),
+    );
+  }
+
+  Widget _buildContactsScreen() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFEDEDED),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF07C160),
+        elevation: 0,
+        title: const Text('通讯录'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: AppNavigator.startApiSettings,
+            icon: const Icon(Icons.person_outline),
+            color: Colors.white,
+            tooltip: '管理角色',
+          ),
+        ],
+      ),
+      body: _buildContactsTab(),
+    );
+  }
+
+  Widget _buildDiscoverScreen() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFEDEDED),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF07C160),
+        elevation: 0,
+        title: const Text('发现'),
+        centerTitle: true,
+      ),
+      body: _buildPlaceholder('探索更多玩法，未来将接入 SillyTavern 式扩展。'),
+    );
+  }
+
+  Widget _buildProfileScreen() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFEDEDED),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF07C160),
+        elevation: 0,
+        title: const Text('我'),
+        centerTitle: true,
+      ),
+      body: _buildPlaceholder('个人中心正在开发中，敬请期待。'),
     );
   }
 

@@ -268,6 +268,9 @@ class WeatherPage extends StatelessWidget {
   }
 
   String _formatTime(int timestamp) {
+    if (timestamp <= 0) {
+      return '--:--';
+    }
     final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     return DateFormat('HH:mm').format(dateTime);
   }

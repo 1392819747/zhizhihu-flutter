@@ -88,6 +88,8 @@ class WeatherData {
     required this.feelsLike,
     required this.minTemp,
     required this.maxTemp,
+    required this.sunrise,
+    required this.sunset,
   });
 
   final String cityName;
@@ -100,6 +102,8 @@ class WeatherData {
   final double feelsLike;
   final double minTemp;
   final double maxTemp;
+  final int sunrise;
+  final int sunset;
 
   factory WeatherData.fromWttr(Map<String, dynamic> data) {
     final nearestArea = (data['nearest_area'] as List?)?.first;
@@ -120,6 +124,10 @@ class WeatherData {
 
     final maxTemp = double.tryParse((weather?['maxtempC'] ?? '').toString()) ?? double.tryParse((weather?['maxtempF'] ?? '').toString()) ?? 0;
     final minTemp = double.tryParse((weather?['mintempC'] ?? '').toString()) ?? double.tryParse((weather?['mintempF'] ?? '').toString()) ?? 0;
+    final astronomy = (weather?['astronomy'] as List?)?.first;
+    final date = (weather?['date'] ?? '').toString();
+    final sunrise = _parseSunTime(date, astronomy?['sunrise']?.toString());
+    final sunset = _parseSunTime(date, astronomy?['sunset']?.toString());
 
     return WeatherData(
       cityName: city,
@@ -137,6 +145,8 @@ class WeatherData {
       feelsLike: double.tryParse((current['FeelsLikeC'] ?? '').toString()) ?? 0,
       minTemp: minTemp,
       maxTemp: maxTemp,
+      sunrise: sunrise,
+      sunset: sunset,
     );
   }
 
@@ -144,4 +154,50 @@ class WeatherData {
   String get backgroundAsset => WeatherVisuals.backgroundAsset(iconCode);
   String get temperatureText => '${temperature.round()}°';
   String get minMaxTemp => '高${maxTemp.round()}° 低${minTemp.round()}°';
+
+  static int _parseSunTime(String? date, String? time) {
+    if (date == null || date.isEmpty || time == null || time.isEmpty) {
+      return 0;
+    }
+
+    DateTime? baseDate;
+    try {
+      baseDate = DateTime.tryParse(date);
+    } catch (_) {
+      baseDate = null;
+    }
+    baseDate ??= DateTime.now();
+
+    final match = RegExp(r'^(\d{1,2}):(\d{2})(?:\s*([aApP][mM]))?$').firstMatch(time.trim());
+    if (match == null) {
+      return 0;
+    }
+
+    var hour = int.tryParse(match.group(1) ?? '');
+    final minute = int.tryParse(match.group(2) ?? '');
+    if (hour == null || minute == null) {
+      return 0;
+    }
+
+    final meridian = match.group(3)?.toLowerCase();
+    if (meridian != null) {
+      if (meridian == 'pm' && hour < 12) {
+        hour += 12;
+      } else if (meridian == 'am' && hour == 12) {
+        hour = 0;
+      }
+    }
+
+    final safeHour = hour.clamp(0, 23);
+    final safeMinute = minute.clamp(0, 59);
+
+    final dateTime = DateTime(
+      baseDate.year,
+      baseDate.month,
+      baseDate.day,
+      safeHour.toInt(),
+      safeMinute.toInt(),
+    );
+    return dateTime.millisecondsSinceEpoch ~/ 1000;
+  }
 }

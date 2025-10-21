@@ -47,11 +47,24 @@ class WeatherPage extends StatelessWidget {
                 backgroundAsset,
                 package: 'openim_common',
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) {
+                errorBuilder: (context, error, stackTrace) {
+                  print('天气背景图片加载失败: $backgroundAsset, 错误: $error');
                   return Image.asset(
                     fallbackBackgroundAsset,
                     package: 'openim_common',
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      print('备用背景图片也加载失败: $fallbackBackgroundAsset, 错误: $error');
+                      return Container(
+                        color: Colors.blue.shade300,
+                        child: const Center(
+                          child: Text(
+                            '背景图片加载失败',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
@@ -85,13 +98,30 @@ class WeatherPage extends StatelessWidget {
                                   fit: BoxFit.none,
                                   width: 120.w,
                                   height: 120.w,
-                                  errorBuilder: (_, __, ___) {
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print('天气图标加载失败: $iconAsset, 错误: $error');
                                     return Image.asset(
                                       fallbackIconAsset,
                                       package: 'openim_common',
                                       fit: BoxFit.none,
                                       width: 120.w,
                                       height: 120.w,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        print('备用图标也加载失败: $fallbackIconAsset, 错误: $error');
+                                        return Container(
+                                          width: 120.w,
+                                          height: 120.w,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(60.r),
+                                          ),
+                                          child: const Icon(
+                                            Icons.wb_sunny,
+                                            color: Colors.white,
+                                            size: 60,
+                                          ),
+                                        );
+                                      },
                                     );
                                   },
                                 ),

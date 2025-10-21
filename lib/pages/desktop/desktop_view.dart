@@ -19,8 +19,7 @@ class DesktopPage extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-                'packages/openim_common/assets/images/background.png'),
+            image: AssetImage('packages/openim_common/assets/images/background.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -198,13 +197,22 @@ class DesktopPage extends StatelessWidget {
                               width: 40.w,
                               height: 40.w,
                               fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) {
+                              errorBuilder: (context, error, stackTrace) {
+                                print('桌面天气图标加载失败: ${logic.getWeatherIconPath()}, 错误: $error');
                                 return Image.asset(
                                   WeatherVisuals.iconAsset(null),
                                   package: 'openim_common',
                                   width: 40.w,
                                   height: 40.w,
                                   fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    print('备用天气图标也加载失败: ${WeatherVisuals.iconAsset(null)}, 错误: $error');
+                                    return Icon(
+                                      Icons.wb_sunny,
+                                      color: Colors.white.withOpacity(0.8),
+                                      size: 30.w,
+                                    );
+                                  },
                                 );
                               },
                             ),

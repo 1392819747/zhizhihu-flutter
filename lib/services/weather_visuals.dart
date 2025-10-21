@@ -176,10 +176,10 @@ class WeatherVisuals {
   }
 
   static String iconAsset(String? code) =>
-      'weather_assets/icons/${normalize(code)}.png';
+      'packages/openim_common/weather_assets/icons/${normalize(code)}.png';
 
   static String backgroundAsset(String? code) =>
-      'weather_assets/images/${normalize(code)}.jpeg';
+      'packages/openim_common/weather_assets/images/${normalize(code)}.jpeg';
 
   static List<Color> gradient(String? code, {required bool isDarkMode}) {
     if (isDarkMode) {

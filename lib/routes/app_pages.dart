@@ -9,6 +9,8 @@ import '../pages/weather/weather_binding.dart';
 import '../pages/weather/weather_view.dart';
 import '../pages/wechat_mock/wechat_mock_binding.dart';
 import '../pages/wechat_mock/wechat_mock_page.dart';
+import '../pages/search/search_binding.dart';
+import '../pages/search/search_page.dart';
 import '../pages/chat/chat_setup/chat_setup_binding.dart';
 import '../pages/chat/chat_setup/chat_setup_view.dart';
 import '../pages/chat/chat_view.dart';
@@ -90,6 +92,8 @@ import '../pages/register/verify_phone/verify_phone_binding.dart';
 import '../pages/register/verify_phone/verify_phone_view.dart';
 import '../pages/splash/splash_binding.dart';
 import '../pages/splash/splash_view.dart';
+import '../pages/cover/cover_binding.dart';
+import '../pages/cover/cover_page.dart';
 
 part 'app_routes.dart';
 
@@ -117,6 +121,11 @@ class AppPages {
       binding: SplashBinding(),
     ),
     _pageBuilder(
+      name: AppRoutes.cover,
+      page: () => const CoverPage(),
+      binding: CoverBinding(),
+    ),
+    _pageBuilder(
       name: AppRoutes.login,
       page: () => LoginPage(),
       binding: LoginBinding(),
@@ -140,6 +149,11 @@ class AppPages {
       name: AppRoutes.wechatMock,
       page: () => const WeChatMockPage(),
       binding: WeChatMockBinding(),
+    ),
+    _pageBuilder(
+      name: AppRoutes.search,
+      page: () => const SearchPage(),
+      binding: SearchBinding(),
     ),
     _pageBuilder(
       name: AppRoutes.home,

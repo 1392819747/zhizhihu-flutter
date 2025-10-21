@@ -21,52 +21,39 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: _gradientColors,
-            ),
-          ),
-          child: SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                _buildStatusBar(),
-                _buildHeader(),
-                Expanded(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(28)),
-                    ),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.w),
-                            child: _buildChatsSection(),
-                          ),
+        backgroundColor: const Color(0xFFF5F7FA),
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          child: _buildChatsSection(),
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            left: 16.w,
-                            right: 16.w,
-                            bottom:
-                                12.h + MediaQuery.of(context).padding.bottom,
-                            top: 8.h,
-                          ),
-                          child: _buildBottomNavigation(context),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: 16.w,
+                          right: 16.w,
+                          bottom: 12.h + MediaQuery.of(context).padding.bottom,
+                          top: 8.h,
                         ),
-                      ],
-                    ),
+                        child: _buildBottomNavigation(context),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -74,19 +61,38 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
   }
 
   Widget _buildHeader() {
-    return Padding(
+    return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: _gradientColors,
+        ),
+      ),
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              'Chats',
-              style: TextStyle(
-                fontSize: 28.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-                height: 1,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Chats',
+                  style: TextStyle(
+                    fontSize: 28.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    height: 1,
+                  ),
+                ),
+                Text(
+                  '与AI伙伴畅聊',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              ],
             ),
           ),
           Container(
@@ -106,45 +112,20 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
     );
   }
 
-  Widget _buildStatusBar() {
-    return Padding(
-      padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 12.h),
-      child: Row(
-        children: [
-          Text(
-            '9:41',
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              height: 1,
-            ),
-          ),
-          const Spacer(),
-          Icon(Icons.signal_cellular_alt, size: 16.w, color: Colors.white),
-          6.horizontalSpace,
-          Icon(Icons.wifi, size: 16.w, color: Colors.white),
-          6.horizontalSpace,
-          Icon(Icons.battery_full, size: 18.w, color: Colors.white),
-        ],
-      ),
-    );
-  }
 
   Widget _buildChatsSection() {
     return Obx(() {
       final items = controller.conversations;
       if (items.isEmpty) {
-        return _buildPlaceholder('还没有配置 AI 伙伴，点击右上角「API 设置」去创建吧。');
+        return _buildEmptyState();
       }
       return ListView.separated(
         padding: EdgeInsets.only(top: 16.h, bottom: 16.h),
         itemCount: items.length,
-        separatorBuilder: (_, __) =>
-            Divider(height: 1.h, thickness: 1, color: const Color(0xFFEAEAF5)),
+        separatorBuilder: (_, __) => SizedBox(height: 8.h),
         itemBuilder: (context, index) {
           final conversation = items[index];
-          return _ConversationTile(
+          return _ConversationCard(
             conversation: conversation,
             onTap: () => _openConversation(conversation),
           );
@@ -153,15 +134,57 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
     });
   }
 
-  Widget _buildPlaceholder(String text) {
+  Widget _buildEmptyState() {
     return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 32.w),
-        child: Text(
-          text,
-          style: TextStyle(fontSize: 16.sp, color: const Color(0xFF646B7C)),
-          textAlign: TextAlign.center,
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 120.w,
+            height: 120.w,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F7FA),
+              borderRadius: BorderRadius.circular(60.r),
+            ),
+            child: Icon(
+              Icons.chat_bubble_outline,
+              size: 60.w,
+              color: const Color(0xFF9CA3AF),
+            ),
+          ),
+          24.verticalSpace,
+          Text(
+            '还没有AI伙伴',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF374151),
+            ),
+          ),
+          8.verticalSpace,
+          Text(
+            '点击右上角「API 设置」去创建你的第一个AI伙伴吧',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: const Color(0xFF6B7280),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          32.verticalSpace,
+          ElevatedButton.icon(
+            onPressed: AppNavigator.startApiSettings,
+            icon: const Icon(Icons.add),
+            label: const Text('创建AI伙伴'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5D6CF5),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24.r),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -169,32 +192,47 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
   Widget _buildBottomNavigation(BuildContext context) {
     return Obx(() {
       final conversationCount = controller.conversations.length;
-      return Row(
-        children: [
-          Expanded(
-            child: _NavItem.primary(
-              icon: Icons.chat_bubble,
-              label: 'Chats',
-              badge: conversationCount > 0
-                  ? conversationCount.clamp(0, 99).toString()
-                  : null,
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
             ),
-          ),
-          12.horizontalSpace,
-          Expanded(
-            child: _NavItem.secondary(
-              icon: Icons.search,
-              label: 'Search',
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _NavItem.primary(
+                icon: Icons.chat_bubble,
+                label: 'Chats',
+                badge: conversationCount > 0
+                    ? conversationCount.clamp(0, 99).toString()
+                    : null,
+              ),
             ),
-          ),
-          12.horizontalSpace,
-          Expanded(
-            child: _NavItem.profile(
-              label: 'Profile',
-              character: controller.defaultCharacter,
+            16.horizontalSpace,
+            Expanded(
+              child: _NavItem.secondary(
+                icon: Icons.search,
+                label: 'Search',
+                onTap: () => AppNavigator.startSearch(),
+              ),
             ),
-          ),
-        ],
+            16.horizontalSpace,
+            Expanded(
+              child: _NavItem.profile(
+                label: 'Profile',
+                character: controller.defaultCharacter,
+              ),
+            ),
+          ],
+        ),
       );
     });
   }
@@ -210,8 +248,8 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
   }
 }
 
-class _ConversationTile extends StatelessWidget {
-  const _ConversationTile({required this.conversation, required this.onTap});
+class _ConversationCard extends StatelessWidget {
+  const _ConversationCard({required this.conversation, required this.onTap});
 
   final WeChatConversation conversation;
   final VoidCallback onTap;
@@ -220,16 +258,30 @@ class _ConversationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: SizedBox(
-        height: 76.h,
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: const Color(0xFFE5E7EB),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _Avatar(character: conversation.character, size: 48.w),
-            12.horizontalSpace,
+            _Avatar(character: conversation.character, size: 56.w),
+            16.horizontalSpace,
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
@@ -238,19 +290,17 @@ class _ConversationTile extends StatelessWidget {
                         child: Text(
                           conversation.character.name,
                           style: TextStyle(
-                            fontSize: 23.sp,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                            height: 1,
+                            color: const Color(0xFF111827),
                           ),
                         ),
                       ),
                       Text(
                         _formatTime(conversation.preview.lastTime),
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0x99000000),
+                          fontSize: 12.sp,
+                          color: const Color(0xFF6B7280),
                         ),
                       ),
                     ],
@@ -258,13 +308,12 @@ class _ConversationTile extends StatelessWidget {
                   4.verticalSpace,
                   Text(
                     conversation.preview.lastMessage,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 21.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF1F2432),
-                      height: 1,
+                      fontSize: 14.sp,
+                      color: const Color(0xFF6B7280),
+                      height: 1.4,
                     ),
                   ),
                 ],
@@ -285,18 +334,33 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(size / 2),
-      child: Container(
-        width: size,
-        height: size,
-        color: character.avatarColor,
-        alignment: Alignment.center,
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            character.avatarColor,
+            character.avatarColor.withOpacity(0.8),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(size / 2),
+        boxShadow: [
+          BoxShadow(
+            color: character.avatarColor.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
         child: Text(
           character.name.characters.first,
           style: TextStyle(
             color: Colors.white,
-            fontSize: size * 0.45,
+            fontSize: size * 0.4,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -311,6 +375,7 @@ class _NavItem extends StatelessWidget {
     this.icon,
     this.badge,
     this.character,
+    this.onTap,
     required this.active,
   });
 
@@ -318,11 +383,13 @@ class _NavItem extends StatelessWidget {
     required IconData icon,
     required String label,
     String? badge,
+    VoidCallback? onTap,
   }) {
     return _NavItem._(
       icon: icon,
       label: label,
       badge: badge,
+      onTap: onTap,
       active: true,
     );
   }
@@ -330,10 +397,12 @@ class _NavItem extends StatelessWidget {
   factory _NavItem.secondary({
     required IconData icon,
     required String label,
+    VoidCallback? onTap,
   }) {
     return _NavItem._(
       icon: icon,
       label: label,
+      onTap: onTap,
       active: false,
     );
   }
@@ -354,45 +423,35 @@ class _NavItem extends StatelessWidget {
   final AiCharacter? character;
   final String label;
   final bool active;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    const Color inactiveColor = Color(0x99000000);
+    final Color activeColor = const Color(0xFF5D6CF5);
+    final Color inactiveColor = const Color(0xFF9CA3AF);
+    
     final Widget circleContent;
 
     if (character != null) {
-      circleContent = _Avatar(character: character!, size: 40.w);
+      circleContent = _Avatar(character: character!, size: 32.w);
     } else {
       final IconData iconData = icon ?? Icons.person;
       circleContent = Icon(
         iconData,
-        size: 24.w,
-        color: active ? Colors.black : inactiveColor,
+        size: 20.w,
+        color: active ? activeColor : inactiveColor,
       );
     }
 
-    final double circleSize = 56.w;
+    final double circleSize = 48.w;
     final Widget decorated = Container(
       height: circleSize,
       width: circleSize,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.r),
-        gradient: active
-            ? const LinearGradient(
-                colors: WeChatMockPage._gradientColors,
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        color: active ? null : const Color(0xFFF4F5FF),
-        boxShadow: active
-            ? [
-                BoxShadow(
-                  color: const Color(0x405D6CF5),
-                  blurRadius: 20.r,
-                  offset: Offset(0, 8.h),
-                ),
-              ]
+        borderRadius: BorderRadius.circular(16.r),
+        color: active ? activeColor.withOpacity(0.1) : const Color(0xFFF9FAFB),
+        border: active 
+            ? Border.all(color: activeColor.withOpacity(0.2), width: 1)
             : null,
       ),
       child: badge == null
@@ -402,27 +461,19 @@ class _NavItem extends StatelessWidget {
               children: [
                 Center(child: circleContent),
                 Positioned(
-                  top: 6.h,
+                  top: 4.h,
                   right: 4.w,
                   child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF5D6CF5),
-                      borderRadius: BorderRadius.circular(12.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0x405D6CF5),
-                          blurRadius: 12.r,
-                          offset: Offset(0, 6.h),
-                        ),
-                      ],
+                      color: activeColor,
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
                       badge!,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 14.sp,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -435,14 +486,17 @@ class _NavItem extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        decorated,
-        8.verticalSpace,
+        GestureDetector(
+          onTap: onTap,
+          child: decorated,
+        ),
+        6.verticalSpace,
         Text(
           label,
           style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: active ? Colors.black : inactiveColor,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+            color: active ? activeColor : inactiveColor,
           ),
         ),
       ],

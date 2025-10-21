@@ -49,6 +49,7 @@ class ApiSettingsPage extends GetView<ApiSettingsLogic> {
                 height: 36.w,
                 child: CupertinoButton(
                   padding: EdgeInsets.zero,
+                  minSize: 0,
                   onPressed: onPressed,
                   child: Icon(
                     icon,
@@ -207,7 +208,7 @@ class ApiSettingsPage extends GetView<ApiSettingsLogic> {
                     ),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
+                  minSize: 0,
                       onPressed: () => controller.editPersona(),
                       child: const Icon(CupertinoIcons.pencil_ellipsis_rectangle, color: Color(0xFF007AFF)),
                     ),

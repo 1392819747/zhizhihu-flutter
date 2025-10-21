@@ -238,7 +238,7 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
                 ),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
+                  minSize: 0,
                   onPressed: AppNavigator.startApiSettings,
                   child: const Icon(CupertinoIcons.chevron_forward, color: Color(0xFF8E8E93)),
                 ),
@@ -849,7 +849,7 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
           ),
           CupertinoButton(
             padding: EdgeInsets.zero,
-            minimumSize: Size.zero,
+            minSize: 0,
             onPressed: _showPromptContextSheet,
             child: const Icon(CupertinoIcons.chevron_forward, color: Color(0xFF8E8E93)),
           ),

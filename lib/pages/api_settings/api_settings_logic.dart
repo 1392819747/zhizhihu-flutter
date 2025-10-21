@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
+import 'package:tdesign_flutter/tdesign_flutter.dart';
 
 import '../../services/api_settings_service.dart';
 
@@ -364,6 +369,321 @@ class ApiSettingsLogic extends GetxController {
 
   Future<void> toggleWorldInfo(WorldInfoEntry entry, bool enabled) async {
     await service.addOrUpdateWorldInfo(entry.copyWith(enabled: enabled));
+  }
+
+  Future<void> handleSectionAction(int section) async {
+    final context = Get.context;
+    if (context == null) return;
+    switch (section) {
+      case 0:
+        await addOrEditEndpoint();
+        return;
+      case 1:
+        _showPersonaSheet(context);
+        return;
+      case 2:
+        _showWorldInfoSheet(context);
+        return;
+    }
+  }
+
+  void _showPersonaSheet(BuildContext context) {
+    final hasPersona = service.persona.value != null;
+    final items = <TDActionSheetItem>[
+      TDActionSheetItem(label: '编辑个性'),
+      TDActionSheetItem(label: '导入角色卡'),
+      if (hasPersona)
+        TDActionSheetItem(
+          label: '清除个性',
+          textStyle: TextStyle(color: TDTheme.of(context).errorColor6),
+        ),
+    ];
+    TDActionSheet.showListActionSheet(
+      context,
+      items: items,
+      onSelected: (item, index) {
+        switch (index) {
+          case 0:
+            editPersona();
+            break;
+          case 1:
+            importCharacterCard();
+            break;
+          case 2:
+            service.setPersona(null);
+            IMViews.showToast('已清除个人设定');
+            break;
+        }
+      },
+    );
+  }
+
+  void _showWorldInfoSheet(BuildContext context) {
+    TDActionSheet.showListActionSheet(
+      context,
+      items: [
+        TDActionSheetItem(label: '新增世界信息'),
+        TDActionSheetItem(label: '导入世界书'),
+      ],
+      onSelected: (item, index) {
+        switch (index) {
+          case 0:
+            addOrEditWorldInfo();
+            break;
+          case 1:
+            importWorldInfo();
+            break;
+        }
+      },
+    );
+  }
+
+  Future<void> importCharacterCard() async {
+    if (service.endpoints.isEmpty) {
+      IMViews.showToast('请先配置至少一个 API 接入');
+      return;
+    }
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowMultiple: false,
+        allowedExtensions: const ['json'],
+      );
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      final content = file.bytes != null
+          ? utf8.decode(file.bytes!)
+          : await File(file.path!).readAsString();
+
+      final decoded = jsonDecode(content);
+      final cards = _extractCharacterCards(decoded);
+
+      if (cards.isEmpty) {
+        IMViews.showToast('未识别到有效的角色卡');
+        return;
+      }
+
+      final endpointId =
+          service.selectedEndpointId.value.isNotEmpty ? service.selectedEndpointId.value : service.endpoints.first.id;
+
+      int imported = 0;
+      for (final data in cards) {
+        final character = _convertCharacterCard(data, endpointId);
+        if (character != null) {
+          await service.addOrUpdateCharacter(character);
+          imported++;
+        }
+      }
+      if (imported > 0) {
+        IMViews.showToast('已导入 $imported 个角色');
+      } else {
+        IMViews.showToast('角色卡内容为空，未导入');
+      }
+    } catch (e) {
+      IMViews.showToast('导入失败：$e');
+    }
+  }
+
+  Future<void> importWorldInfo() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowMultiple: false,
+        allowedExtensions: const ['json'],
+      );
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      final content = file.bytes != null
+          ? utf8.decode(file.bytes!)
+          : await File(file.path!).readAsString();
+
+      final decoded = jsonDecode(content);
+      final entries = _extractWorldInfoEntries(decoded);
+
+      if (entries.isEmpty) {
+        IMViews.showToast('未识别到世界书条目');
+        return;
+      }
+
+      int imported = 0;
+      for (final map in entries) {
+        final entry = _convertWorldInfoEntry(map);
+        if (entry != null) {
+          await service.addOrUpdateWorldInfo(entry);
+          imported++;
+        }
+      }
+      if (imported > 0) {
+        IMViews.showToast('已导入 $imported 条世界信息');
+      } else {
+        IMViews.showToast('世界书内容为空，未导入');
+      }
+    } catch (e) {
+      IMViews.showToast('导入失败：$e');
+    }
+  }
+
+  List<Map<String, dynamic>> _extractCharacterCards(dynamic decoded) {
+    if (decoded is List) {
+      return decoded.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+    }
+    if (decoded is Map<String, dynamic>) {
+      if (decoded['spec'] == 'chara_card_v2' || decoded['spec'] == 'chara_card_v1') {
+        final data = decoded['data'];
+        if (data is Map) return [Map<String, dynamic>.from(data)];
+      }
+      if (decoded['data'] is Map && decoded.containsKey('description')) {
+        return [Map<String, dynamic>.from(decoded['data'] as Map)];
+      }
+      if (decoded['character_card'] is Map) {
+        return [Map<String, dynamic>.from(decoded['character_card'] as Map)];
+      }
+      if (decoded['cards'] is List) {
+        return (decoded['cards'] as List)
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+      }
+      return [decoded];
+    }
+    return const [];
+  }
+
+  AiCharacter? _convertCharacterCard(Map<String, dynamic> card, String endpointId) {
+    String asText(dynamic value) =>
+        value is String ? value.trim() : value?.toString().trim() ?? '';
+
+    final name = asText(card['name']).isNotEmpty ? asText(card['name']) : '未命名角色';
+    final greeting = [
+      asText(card['first_mes']),
+      asText(card['greeting']),
+      asText(card['first_message']),
+    ].firstWhere((element) => element.isNotEmpty, orElse: () => '你好，我是$name。');
+
+    final personaSegments = <String>[
+      asText(card['personality']),
+      asText(card['description']),
+      asText(card['scenario']),
+      asText(card['creator_notes']),
+      asText(card['system_prompt']),
+      asText(card['post_history_instructions']),
+    ].where((element) => element.isNotEmpty).toList();
+
+    final persona = personaSegments.join('\n\n');
+
+    final examples = <String>[];
+    final rawExample = card['mes_example'] ?? card['example_dialogue'];
+    if (rawExample is String && rawExample.trim().isNotEmpty) {
+      examples.addAll(
+        rawExample
+            .split(RegExp(r'(?:(?:\r?\n){2,}|###)'))
+            .map((e) => e.trim())
+            .where((element) => element.isNotEmpty),
+      );
+    } else if (rawExample is List) {
+      examples.addAll(
+        rawExample
+            .map((e) => asText(e))
+            .where((element) => element.isNotEmpty),
+      );
+    }
+
+    final id = service.generateCharacterId();
+    final avatarColor = service.randomAvatarColorHex();
+
+    return AiCharacter(
+      id: id,
+      name: name,
+      persona: persona,
+      greeting: greeting,
+      endpointId: endpointId,
+      avatarColorHex: avatarColor,
+      sampleReplies: examples.isEmpty
+          ? const [
+              '这听起来很有意思，我们继续聊聊吧。',
+              '让我整理一下思路，再为你提供建议。',
+            ]
+          : examples,
+    );
+  }
+
+  List<Map<String, dynamic>> _extractWorldInfoEntries(dynamic decoded) {
+    if (decoded is Map<String, dynamic>) {
+      if (decoded['entries'] is List) {
+        return (decoded['entries'] as List)
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+      }
+      if (decoded['lorebook'] is Map && decoded['lorebook']['entries'] is List) {
+        return (decoded['lorebook']['entries'] as List)
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+      }
+      if (decoded['book'] is Map && decoded['book']['entries'] is List) {
+        return (decoded['book']['entries'] as List)
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+      }
+    } else if (decoded is List) {
+      return decoded.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+    }
+    return const [];
+  }
+
+  WorldInfoEntry? _convertWorldInfoEntry(Map<String, dynamic> entry) {
+    String asText(dynamic value) =>
+        value is String ? value.trim() : value?.toString().trim() ?? '';
+
+    final keywords = <String>{};
+    void addKeywords(dynamic value) {
+      if (value is String && value.trim().isNotEmpty) {
+        keywords.addAll(value.split(RegExp(r'[，,\n]')).map((e) => e.trim()).where((e) => e.isNotEmpty));
+      } else if (value is List) {
+        keywords.addAll(value.map((e) => asText(e)).where((e) => e.isNotEmpty));
+      }
+    }
+
+    addKeywords(entry['key']);
+    addKeywords(entry['keys']);
+    addKeywords(entry['keywords']);
+    addKeywords(entry['secondary_keys']);
+
+    final content = asText(entry['content']) +
+        (asText(entry['commentary']).isNotEmpty ? '\n${asText(entry['commentary'])}' : '');
+
+    if (content.trim().isEmpty) return null;
+
+    final title = asText(entry['display_name']).isNotEmpty
+        ? asText(entry['display_name'])
+        : keywords.isNotEmpty
+            ? keywords.first
+            : '未命名条目';
+
+    final priority = entry['priority'] is num
+        ? (entry['priority'] as num).toInt()
+        : entry['position'] is num
+            ? (entry['position'] as num).toInt()
+            : 0;
+
+    final enabled = entry['enabled'] is bool
+        ? entry['enabled'] as bool
+        : entry['disabled'] is bool
+            ? !(entry['disabled'] as bool)
+            : true;
+
+    return WorldInfoEntry(
+      id: service.generateEndpointId(),
+      title: title,
+      content: content,
+      keywords: keywords.isEmpty ? const [] : keywords.toList(),
+      priority: priority,
+      enabled: enabled,
+    );
   }
 
   Future<void> removeEndpoint(ApiEndpoint endpoint) async {

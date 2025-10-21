@@ -1,95 +1,110 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:tdesign_flutter/tdesign_flutter.dart';
 
 import '../../services/api_settings_service.dart';
 import 'api_settings_logic.dart';
 
-class ApiSettingsPage extends GetView<ApiSettingsLogic> {
+class ApiSettingsPage extends StatefulWidget {
   const ApiSettingsPage({super.key});
 
-  ApiSettingsService get _service => controller.service;
+  @override
+  State<ApiSettingsPage> createState() => _ApiSettingsPageState();
+}
+
+class _ApiSettingsPageState extends State<ApiSettingsPage> with SingleTickerProviderStateMixin {
+  late final ApiSettingsLogic controller;
+  late final ApiSettingsService service;
+  late final TabController _tabController;
+  late final Worker _sectionWorker;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<ApiSettingsLogic>();
+    service = controller.service;
+    _tabController = TabController(length: 3, vsync: this, initialIndex: controller.selectedSection.value);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) return;
+      controller.switchSection(_tabController.index);
+    });
+    _sectionWorker = ever<int>(controller.selectedSection, (index) {
+      if (_tabController.index != index) {
+        _tabController.animateTo(index);
+      }
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _sectionWorker.dispose();
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = TDTheme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: const Color(0xFFF2F2F7),
-        surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'API 设置',
-          style: TextStyle(color: Color(0xFF1C1C1E)),
-        ),
-        actions: [
-          Obx(() {
-            final section = controller.selectedSection.value;
-            late final VoidCallback onPressed;
-            late final IconData icon;
-            switch (section) {
-              case 0:
-                onPressed = () => controller.addOrEditEndpoint();
-                icon = CupertinoIcons.add_circled;
-                break;
-              case 1:
-                onPressed = () => controller.editPersona();
-                icon = CupertinoIcons.person_crop_circle_badge_plus;
-                break;
-              default:
-                onPressed = () => controller.addOrEditWorldInfo();
-                icon = CupertinoIcons.doc_append;
-            }
-            return Padding(
-              padding: EdgeInsets.only(right: 12.w),
-              child: SizedBox(
-                width: 36.w,
-                height: 36.w,
-                child: CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  minSize: 0,
-                  onPressed: onPressed,
-                  child: Icon(
-                    icon,
-                    color: const Color(0xFF007AFF),
-                    size: 26,
-                  ),
-                ),
-              ),
-            );
-          }),
-        ],
-      ),
+      backgroundColor: theme.grayColor1,
       body: SafeArea(
         child: Column(
           children: [
+            TDNavBar(
+              title: 'API 设置',
+              centerTitle: true,
+              leftBarItems: [
+                TDNavBarItem(
+                  icon: TDIcons.arrow_left,
+                  iconColor: theme.fontGyColor1,
+                  action: () => Get.back(),
+                ),
+              ],
+              rightBarItems: [
+                TDNavBarItem(
+                  icon: TDIcons.add,
+                  iconColor: theme.brandColor8,
+                  action: () => controller.handleSectionAction(controller.selectedSection.value),
+                ),
+              ],
+              useDefaultBack: false,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              height: 60,
+              boxShadow: theme.shadowsTop,
+              backgroundColor: theme.whiteColor1,
+            ),
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
-              child: Obx(
-                () => CupertinoSlidingSegmentedControl<int>(
-                  groupValue: controller.selectedSection.value,
-                  children: const {
-                    0: Text('接口'),
-                    1: Text('个性'),
-                    2: Text('世界信息'),
-                  },
-                  onValueChanged: (value) {
-                    if (value != null) controller.switchSection(value);
-                  },
-                ),
+              child: TDTabBar(
+                controller: _tabController,
+                outlineType: TDTabBarOutlineType.capsule,
+                backgroundColor: theme.grayColor1,
+                selectedBgColor: theme.brandColor1,
+                unSelectedBgColor: theme.grayColor1,
+                showIndicator: false,
+                labelColor: theme.brandColor8,
+                unselectedLabelColor: theme.fontGyColor2,
+                labelPadding: EdgeInsets.symmetric(horizontal: 12.w),
+                height: 44,
+                tabs: const [
+                  TDTab(icon: Icon(TDIcons.api, size: 20), text: '接口'),
+                  TDTab(icon: Icon(TDIcons.user_1, size: 20), text: '个性'),
+                  TDTab(icon: Icon(TDIcons.book, size: 20), text: '世界信息'),
+                ],
+                onTap: (index) => controller.switchSection(index),
               ),
             ),
             Expanded(
               child: Obx(() {
                 switch (controller.selectedSection.value) {
                   case 0:
-                    return _buildEndpointSection();
+                    return _buildEndpointSection(context);
                   case 1:
-                    return _buildPersonaSection();
+                    return _buildPersonaSection(context);
                   default:
-                    return _buildWorldInfoSection();
+                    return _buildWorldInfoSection(context);
                 }
               }),
             ),
@@ -99,96 +114,158 @@ class ApiSettingsPage extends GetView<ApiSettingsLogic> {
     );
   }
 
-  Widget _buildEndpointSection() {
+  Widget _buildEndpointSection(BuildContext context) {
+    final theme = TDTheme.of(context);
     return Obx(() {
-      final endpoints = _service.endpoints;
+      final endpoints = service.endpoints;
+      final selectedId = service.selectedEndpointId.value;
       if (endpoints.isEmpty) {
-        return _buildEmptyHint();
+        return _buildEmpty(
+          context,
+          icon: TDIcons.api,
+          description: '尚未配置接口，立即创建一个 OpenAI 或 Gemini 网关吧。',
+          actionLabel: '新增接口',
+          onAction: controller.addOrEditEndpoint,
+        );
       }
-      return ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        itemCount: endpoints.length,
-        itemBuilder: (context, index) {
-          final endpoint = endpoints[index];
-          final isSelected = _service.selectedEndpointId.value == endpoint.id;
+      return ListView(
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 24.h),
+        children: endpoints.map((endpoint) {
+          final isSelected = selectedId == endpoint.id;
+          final generation = endpoint.generationConfig;
+          final chips = [
+            _buildInfoChip('Temp', generation.temperature.toStringAsFixed(2)),
+            _buildInfoChip('TopP', generation.topP.toStringAsFixed(2)),
+            _buildInfoChip('TopK', '${generation.topK}'),
+            _buildInfoChip('Max', '${generation.maxTokens}'),
+            _buildInfoChip('Stream', generation.stream ? 'ON' : 'OFF'),
+          ];
           return Padding(
-            padding: EdgeInsets.only(bottom: index == endpoints.length - 1 ? 0 : 12.h),
-            child: _EndpointCard(
-              endpoint: endpoint,
-              isSelected: isSelected,
-              onTap: () => _showEndpointActions(endpoint, isSelected),
+            padding: EdgeInsets.only(bottom: 12.h),
+            child: TDCellGroup(
+              theme: TDCellGroupTheme.cardTheme,
+              bordered: false,
+              cells: [
+                TDCell(
+                  bordered: false,
+                  titleWidget: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              endpoint.name,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: theme.fontGyColor1,
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            TDTag(
+                              '当前使用',
+                              theme: TDTagTheme.success,
+                              size: TDTagSize.small,
+                              isLight: true,
+                            ),
+                        ],
+                      ),
+                      6.verticalSpace,
+                      Wrap(
+                        spacing: 6.w,
+                        runSpacing: 6.h,
+                        children: [
+                          TDTag(
+                            endpoint.type == ApiProviderType.openai ? 'OpenAI 兼容' : 'Google Gemini',
+                            theme: TDTagTheme.primary,
+                            size: TDTagSize.small,
+                            isLight: true,
+                          ),
+                          TDTag(
+                            endpoint.model.isEmpty ? '未指定模型' : endpoint.model,
+                            theme: TDTagTheme.defaultTheme,
+                            size: TDTagSize.small,
+                            isLight: true,
+                          ),
+                          ...endpoint.enabledFunctions
+                              .map<Widget>(
+                                (feature) => TDTag(
+                                  feature.toUpperCase(),
+                                  theme: TDTagTheme.defaultTheme,
+                                  size: TDTagSize.small,
+                                  isLight: true,
+                                ),
+                              )
+                              .toList(),
+                        ],
+                      ),
+                    ],
+                  ),
+                  descriptionWidget: Padding(
+                    padding: EdgeInsets.only(top: 12.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          endpoint.baseUrl,
+                          style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                        ),
+                        SizedBox(height: 10.h),
+                        Wrap(
+                          spacing: 6.w,
+                          runSpacing: 6.h,
+                          children: chips,
+                        ),
+                        if (endpoint.notes.isNotEmpty) ...[
+                          SizedBox(height: 10.h),
+                          Text(
+                            endpoint.notes,
+                            style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  arrow: true,
+                  onClick: (_) => _showEndpointActions(context, endpoint, isSelected),
+                ),
+              ],
             ),
           );
-        },
+        }).toList(),
       );
     });
   }
 
-  Widget _buildPersonaSection() {
+  Widget _buildPersonaSection(BuildContext context) {
+    final theme = TDTheme.of(context);
     return Obx(() {
-      final persona = _service.persona.value;
-      final defaultCharacter = _service.selectedCharacter;
-
+      final persona = service.persona.value;
+      final defaultCharacter = service.selectedCharacter;
+      final worldCount = service.worldInfos.length;
       if (persona == null) {
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(CupertinoIcons.person_crop_circle_badge_plus, size: 48, color: Color(0xFF8E8E93)),
-                SizedBox(height: 16.h),
-                Text(
-                  '还没有配置用户个性',
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  '设置自己的语气、目标和写作风格，在对话中更像“你”。',
-                  style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 16.h),
-                CupertinoButton.filled(
-                  onPressed: () => controller.editPersona(),
-                  child: const Text('创建我的 Persona'),
-                ),
-              ],
-            ),
-          ),
+        return _buildEmpty(
+          context,
+          icon: TDIcons.user_circle,
+          description: '还没有配置用户个性。设置语气、目标、说话风格，让 AI 更懂你。',
+          actionLabel: '创建 Persona',
+          onAction: controller.editPersona,
         );
       }
-
       return ListView(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 24.h),
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18.r),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0F000000),
-                  blurRadius: 18,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          TDCellGroup(
+            theme: TDCellGroupTheme.cardTheme,
+            bordered: false,
+            cells: [
+              TDCell(
+                bordered: false,
+                titleWidget: Row(
                   children: [
-                    Container(
-                      width: 44.w,
-                      height: 44.w,
-                      decoration: BoxDecoration(
-                        color: const Color(0x2E34C759),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(CupertinoIcons.person, color: Color(0xFF34C759)),
-                    ),
+                    Icon(TDIcons.user_circle, color: theme.brandColor8, size: 28.w),
                     12.horizontalSpace,
                     Expanded(
                       child: Column(
@@ -196,178 +273,214 @@ class ApiSettingsPage extends GetView<ApiSettingsLogic> {
                         children: [
                           Text(
                             persona.displayName,
-                            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+                            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor1),
                           ),
                           if (persona.style.isNotEmpty)
-                            Text(
-                              persona.style,
-                              style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+                            Padding(
+                              padding: EdgeInsets.only(top: 4.h),
+                              child: Text(
+                                persona.style,
+                                style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                              ),
                             ),
                         ],
                       ),
                     ),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                  minSize: 0,
-                      onPressed: () => controller.editPersona(),
-                      child: const Icon(CupertinoIcons.pencil_ellipsis_rectangle, color: Color(0xFF007AFF)),
+                    TDButton(
+                      text: '管理',
+                      size: TDButtonSize.small,
+                      theme: TDButtonTheme.primary,
+                      type: TDButtonType.outline,
+                      onTap: () => controller.handleSectionAction(1),
                     ),
                   ],
                 ),
-                SizedBox(height: 16.h),
-                if (persona.description.isNotEmpty)
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: Text(
-                      persona.description,
-                      style: TextStyle(fontSize: 14.sp, color: const Color(0xFF1C1C1E)),
-                    ),
-                  ),
-                if (persona.goals.isNotEmpty)
-                  _buildPersonaSectionRow(
-                    icon: CupertinoIcons.scope,
-                    label: '目标',
-                    content: persona.goals,
-                  ),
-                if (persona.style.isNotEmpty)
-                  _buildPersonaSectionRow(
-                    icon: CupertinoIcons.waveform_path,
-                    label: '写作/语气',
-                    content: persona.style,
-                  ),
-              ],
-            ),
+                descriptionWidget: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (persona.description.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 12.h),
+                        child: Text(
+                          persona.description,
+                          style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                        ),
+                      ),
+                    if (persona.goals.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 8.h),
+                        child: Text(
+                          '目标：${persona.goals}',
+                          style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                        ),
+                      ),
+                    if (worldCount > 0)
+                      Padding(
+                        padding: EdgeInsets.only(top: 8.h),
+                        child: TDTag(
+                          '世界信息 $worldCount',
+                          theme: TDTagTheme.warning,
+                          size: TDTagSize.small,
+                          isLight: true,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
           if (defaultCharacter != null) ...[
             SizedBox(height: 16.h),
             Text(
               '默认 AI 角色',
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor3),
             ),
             SizedBox(height: 8.h),
-            _CharacterSummaryTile(character: defaultCharacter, onTap: () => controller.addOrEditCharacter(character: defaultCharacter)),
+            TDCellGroup(
+              theme: TDCellGroupTheme.cardTheme,
+              bordered: false,
+              cells: [
+                TDCell(
+                  bordered: false,
+                  titleWidget: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 24.w,
+                        backgroundColor: defaultCharacter.avatarColor,
+                        child: Text(
+                          defaultCharacter.name.characters.first,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      12.horizontalSpace,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              defaultCharacter.name,
+                              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor1),
+                            ),
+                            4.verticalSpace,
+                            Text(
+                              service.ensureEndpointForCharacter(defaultCharacter).name,
+                              style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  descriptionWidget: defaultCharacter.persona.isEmpty
+                      ? null
+                      : Padding(
+                          padding: EdgeInsets.only(top: 12.h),
+                          child: Text(
+                            defaultCharacter.persona,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                          ),
+                        ),
+                  onClick: (_) => controller.addOrEditCharacter(character: defaultCharacter),
+                ),
+              ],
+            ),
           ],
         ],
       );
     });
   }
 
-  Widget _buildWorldInfoSection() {
+  Widget _buildWorldInfoSection(BuildContext context) {
+    final theme = TDTheme.of(context);
     return Obx(() {
-      final entries = _service.worldInfos;
+      final entries = service.worldInfos;
       if (entries.isEmpty) {
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(CupertinoIcons.book, size: 48, color: Color(0xFF8E8E93)),
-                SizedBox(height: 16.h),
-                Text('世界信息为空', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
-                SizedBox(height: 8.h),
-                Text(
-                  '世界信息用于在对话中自动补充设定。添加关键词，当消息命中时插入设定片段。',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
-                ),
-                SizedBox(height: 16.h),
-                CupertinoButton.filled(
-                  onPressed: () => controller.addOrEditWorldInfo(),
-                  child: const Text('新增世界信息'),
-                ),
-              ],
-            ),
-          ),
+        return _buildEmpty(
+          context,
+          icon: TDIcons.book,
+          description: '世界书为空。导入 SillyTavern Lorebook，或手动新增设定片段。',
+          actionLabel: '新增世界信息',
+          onAction: controller.addOrEditWorldInfo,
         );
       }
-
       return ReorderableListView.builder(
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 32.h),
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 24.h),
         itemCount: entries.length,
         onReorder: (oldIndex, newIndex) => controller.service.reorderWorldInfos(oldIndex, newIndex),
-        buildDefaultDragHandles: false,
         itemBuilder: (context, index) {
           final entry = entries[index];
-          return ReorderableDelayedDragStartListener(
+          return Padding(
             key: ValueKey(entry.id),
-            index: index,
-            child: Container(
-              margin: EdgeInsets.only(bottom: 12.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x0F000000),
-                    blurRadius: 16,
-                    offset: Offset(0, 6),
+            padding: EdgeInsets.only(bottom: 12.h),
+            child: TDCellGroup(
+              theme: TDCellGroupTheme.cardTheme,
+              bordered: false,
+              cells: [
+                TDCell(
+                  bordered: false,
+                  titleWidget: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          entry.title,
+                          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor1),
+                        ),
+                      ),
+                      TDSwitch(
+                        isOn: entry.enabled,
+                        onChanged: (value) {
+                          controller.toggleWorldInfo(entry, value);
+                          return true;
+                        },
+                      ),
+                      8.horizontalSpace,
+                      GestureDetector(
+                        onTap: () => controller.addOrEditWorldInfo(entry: entry),
+                        child: Icon(TDIcons.edit_1, size: 20.w, color: theme.fontGyColor2),
+                      ),
+                      12.horizontalSpace,
+                      GestureDetector(
+                        onTap: () => controller.removeWorldInfo(entry),
+                        child: Icon(TDIcons.delete, size: 20.w, color: theme.errorColor6),
+                      ),
+                      12.horizontalSpace,
+                      Icon(TDIcons.move, size: 20.w, color: theme.fontGyColor3),
+                    ],
                   ),
-                ],
-              ),
-              child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                title: Text(
-                  entry.title,
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 6.h),
-                    Wrap(
-                      spacing: 6.w,
-                      runSpacing: 6.h,
-                      children: entry.keywords
-                          .map((keyword) => Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE5E5EA),
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
-                                child: Text(
+                  descriptionWidget: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (entry.keywords.isNotEmpty)
+                        Wrap(
+                          spacing: 6.w,
+                          runSpacing: 6.h,
+                          children: entry.keywords
+                              .map<Widget>(
+                                (keyword) => TDTag(
                                   '#$keyword',
-                                  style: TextStyle(fontSize: 11.sp, color: const Color(0xFF3C3C43)),
+                                  theme: TDTagTheme.defaultTheme,
+                                  size: TDTagSize.small,
+                                  isLight: true,
                                 ),
-                              ))
-                          .toList(),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      entry.content,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF1C1C1E)),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      '优先级：${entry.priority}',
-                      style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-                    ),
-                  ],
+                              )
+                              .toList(),
+                        ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        entry.content,
+                        style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        '优先级：${entry.priority}',
+                        style: TextStyle(fontSize: 11.sp, color: theme.fontGyColor3),
+                      ),
+                    ],
+                  ),
                 ),
-                leading: Switch(
-                  value: entry.enabled,
-                  onChanged: (value) => controller.toggleWorldInfo(entry, value),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(CupertinoIcons.pencil, size: 20),
-                      color: const Color(0xFF007AFF),
-                      onPressed: () => controller.addOrEditWorldInfo(entry: entry),
-                    ),
-                    IconButton(
-                      icon: const Icon(CupertinoIcons.trash, size: 20),
-                      color: const Color(0xFFFF3B30),
-                      onPressed: () => controller.removeWorldInfo(entry),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(CupertinoIcons.line_horizontal_3, color: Color(0xFF8E8E93)),
-                  ],
-                ),
-              ),
+              ],
             ),
           );
         },
@@ -375,358 +488,78 @@ class ApiSettingsPage extends GetView<ApiSettingsLogic> {
     });
   }
 
-  void _showEndpointActions(ApiEndpoint endpoint, bool isSelected) {
-    final theme = CupertinoTheme.of(Get.context!);
-    showCupertinoModalPopup(
-      context: Get.context!,
-      builder: (_) => CupertinoActionSheet(
-        title: Text(endpoint.name, style: theme.textTheme.textStyle),
-        message: Text(endpoint.baseUrl, style: theme.textTheme.textStyle.copyWith(fontSize: 13)),
-        actions: [
-          if (!isSelected)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Get.back();
-                controller.setDefaultEndpoint(endpoint.id);
-              },
-              child: const Text('设为当前接口'),
-            ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Get.back();
-              controller.editGenerationConfig(endpoint);
-            },
-            child: const Text('生成参数'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Get.back();
-              controller.editEnabledFunctions(endpoint);
-            },
-            child: const Text('功能开关'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Get.back();
-              controller.addOrEditEndpoint(endpoint: endpoint);
-            },
-            child: const Text('编辑'),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Get.back();
-              controller.removeEndpoint(endpoint);
-            },
-            child: const Text('删除'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Get.back(),
-          child: const Text('取消'),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyHint() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(CupertinoIcons.cloud, size: 56.w, color: Colors.grey.shade400),
-            SizedBox(height: 16.h),
-            Text('尚未配置接口', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
-            SizedBox(height: 8.h),
-            Text(
-              '点击右上角 “+” 即可添加 OpenAI / Gemini 网关，接入自建代理或官方服务。',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPersonaSectionRow({
+  Widget _buildEmpty(
+    BuildContext context, {
     required IconData icon,
-    required String label,
-    required String content,
+    required String description,
+    String? actionLabel,
+    VoidCallback? onAction,
   }) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 10.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: Colors.grey.shade500),
-          8.horizontalSpace,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  content,
-                  style: TextStyle(fontSize: 13.sp, color: const Color(0xFF1C1C1E)),
-                ),
-              ],
-            ),
-          ),
-        ],
+    return Center(
+      child: TDEmpty(
+        image: Icon(icon, size: 72.w, color: TDTheme.of(context).fontGyColor3),
+        emptyText: description,
+        type: actionLabel != null && onAction != null ? TDEmptyType.operation : TDEmptyType.plain,
+        operationText: actionLabel,
+        onTapEvent: onAction,
+        operationTheme: TDButtonTheme.primary,
       ),
     );
   }
 
-}
-
-
-Widget buildGenerationSummary(GenerationConfig config) {
-  final items = <MapEntry<String, String>>[
-    MapEntry('Temp', config.temperature.toStringAsFixed(2)),
-    MapEntry('TopP', config.topP.toStringAsFixed(2)),
-    MapEntry('TopK', config.topK.toString()),
-    MapEntry('Max', config.maxTokens.toString()),
-  ];
-  return Wrap(
-    spacing: 12.w,
-    runSpacing: 8.h,
-    children: [
-      ...items.map(
-        (item) => RichText(
-          text: TextSpan(
-            text: '${item.key} ',
-            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-            children: [
-              TextSpan(
-                text: item.value,
-                style: TextStyle(fontSize: 13.sp, color: const Color(0xFF1C1C1E), fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        ),
-      ),
-      RichText(
-        text: TextSpan(
-          text: '流式 ',
-          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-          children: [
-            TextSpan(
-              text: config.stream ? '开启' : '关闭',
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: config.stream ? const Color(0xFF34C759) : Colors.grey.shade500,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
-class _EndpointCard extends StatelessWidget {
-  const _EndpointCard({
-    required this.endpoint,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final ApiEndpoint endpoint;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0A000000),
-              blurRadius: 12,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    endpoint.name,
-                    style: TextStyle(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1C1C1E),
-                    ),
-                  ),
-                ),
-                if (isSelected)
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: const Color(0x1F34C759),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.check_mark_circled_solid, size: 16, color: Color(0xFF34C759)),
-                        4.horizontalSpace,
-                        Text(
-                          '当前使用',
-                          style: TextStyle(fontSize: 12.sp, color: const Color(0xFF34C759)),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            Wrap(
-              spacing: 8.w,
-              runSpacing: 8.h,
-              children: [
-                _buildTag(endpoint.type == ApiProviderType.openai ? 'OpenAI 兼容' : 'Google Gemini'),
-                _buildTag(endpoint.model.isEmpty ? '未指定模型' : endpoint.model),
-                if (endpoint.enabledFunctions.isNotEmpty)
-                  ...endpoint.enabledFunctions
-                      .map((item) => _buildTag(item.toUpperCase())),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              endpoint.baseUrl,
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
-            ),
-            if (endpoint.notes.isNotEmpty) ...[
-              SizedBox(height: 8.h),
-              Text(
-                endpoint.notes,
-                style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700),
-              ),
-            ],
-            SizedBox(height: 12.h),
-            buildGenerationSummary(endpoint.generationConfig),
-            SizedBox(height: 12.h),
-            Container(
-              height: 1,
-              color: Colors.grey.shade200,
-            ),
-            SizedBox(height: 12.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildFootnote('轻点查看操作', CupertinoIcons.hand_point_right),
-                Icon(CupertinoIcons.chevron_down, size: 18.w, color: Colors.grey.shade500),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTag(String text) {
+  Widget _buildInfoChip(String label, String value) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFFE5E5EA),
-        borderRadius: BorderRadius.circular(10.r),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        text,
-        style: TextStyle(fontSize: 11.sp, color: const Color(0xFF3C3C43)),
+        '$label = $value',
+        style: const TextStyle(fontSize: 11, color: Color(0xFF3C3C43)),
       ),
     );
   }
 
-  Widget _buildFootnote(String text, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.grey.shade500),
-        6.horizontalSpace,
-        Text(
-          text,
-          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500),
-        ),
-      ],
-    );
-  }
-}
-
-class _CharacterSummaryTile extends StatelessWidget {
-  const _CharacterSummaryTile({
-    required this.character,
-    required this.onTap,
-  });
-
-  final AiCharacter character;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0F000000),
-              blurRadius: 12,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: EdgeInsets.all(14.w),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 24.w,
-              backgroundColor: character.avatarColor,
-              child: Text(
-                character.name.characters.first,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-            12.horizontalSpace,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    character.name,
-                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    character.persona.isEmpty ? '尚未设置角色设定' : character.persona,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(CupertinoIcons.chevron_forward, color: Color(0xFF8E8E93)),
-          ],
-        ),
+  void _showEndpointActions(BuildContext context, ApiEndpoint endpoint, bool isSelected) {
+    final items = <TDActionSheetItem>[
+      if (!isSelected) TDActionSheetItem(label: '设为当前接口'),
+      TDActionSheetItem(label: '编辑'),
+      TDActionSheetItem(label: '生成参数'),
+      TDActionSheetItem(label: '功能开关'),
+      TDActionSheetItem(
+        label: '删除接口',
+        textStyle: TextStyle(color: TDTheme.of(context).errorColor6),
       ),
+    ];
+    TDActionSheet.showListActionSheet(
+      context,
+      items: items,
+      onSelected: (item, index) {
+        var offset = 0;
+        if (!isSelected) {
+          if (index == 0) {
+            controller.setDefaultEndpoint(endpoint.id);
+            return;
+          }
+        } else {
+          offset = 1;
+        }
+        switch (index - offset) {
+          case 0:
+            controller.addOrEditEndpoint(endpoint: endpoint);
+            break;
+          case 1:
+            controller.editGenerationConfig(endpoint);
+            break;
+          case 2:
+            controller.editEnabledFunctions(endpoint);
+            break;
+          case 3:
+            controller.removeEndpoint(endpoint);
+            break;
+        }
+      },
     );
   }
 }

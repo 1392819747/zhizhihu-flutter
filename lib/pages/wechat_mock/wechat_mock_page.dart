@@ -1,515 +1,567 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:openim_common/openim_common.dart';
-import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
+import 'package:tdesign_flutter/tdesign_flutter.dart';
 
-import '../../services/api_settings_service.dart';
 import '../../routes/app_navigator.dart';
+import '../../services/api_settings_service.dart';
 import '../api_settings/api_settings_logic.dart';
 import 'wechat_mock_logic.dart';
 
-class WeChatMockPage extends GetView<WeChatMockLogic> {
+class WeChatMockPage extends StatefulWidget {
   const WeChatMockPage({super.key});
 
-  ApiSettingsLogic get _apiLogic => Get.find<ApiSettingsLogic>();
+  @override
+  State<WeChatMockPage> createState() => _WeChatMockPageState();
+}
 
-  List<PersistentTabConfig> _tabs() => [
-        PersistentTabConfig(
-          screen: _buildChatsScreen(),
-          item: ItemConfig(
-            icon: const Icon(CupertinoIcons.chat_bubble_fill),
-            inactiveIcon: const Icon(CupertinoIcons.chat_bubble),
-            title: '微信',
-            textStyle: Styles.ts_0089FF_10sp_semibold,
-          ),
-        ),
-        PersistentTabConfig(
-          screen: _buildContactsScreen(),
-          item: ItemConfig(
-            icon: const Icon(CupertinoIcons.person_2_fill),
-            inactiveIcon: const Icon(CupertinoIcons.person_2),
-            title: '通讯录',
-            textStyle: Styles.ts_0089FF_10sp_semibold,
-          ),
-        ),
-        PersistentTabConfig(
-          screen: _buildDiscoverScreen(),
-          item: ItemConfig(
-            icon: const Icon(CupertinoIcons.compass_fill),
-            inactiveIcon: const Icon(CupertinoIcons.compass),
-            title: '发现',
-            textStyle: Styles.ts_0089FF_10sp_semibold,
-          ),
-        ),
-        PersistentTabConfig(
-          screen: _buildProfileScreen(),
-          item: ItemConfig(
-            icon: const Icon(CupertinoIcons.person_crop_circle_fill),
-            inactiveIcon: const Icon(CupertinoIcons.person_crop_circle),
-            title: '我',
-            textStyle: Styles.ts_0089FF_10sp_semibold,
-          ),
-        ),
-      ];
+class _WeChatMockPageState extends State<WeChatMockPage> {
+  late final WeChatMockLogic logic;
+  late final ApiSettingsLogic apiLogic;
+  late final PageController _pageController;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    logic = Get.find<WeChatMockLogic>();
+    apiLogic = Get.find<ApiSettingsLogic>();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _switchTab(int index) {
+    if (_currentIndex == index) {
+      return;
+    }
+    setState(() {
+      _currentIndex = index;
+    });
+    _pageController.jumpToPage(index);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = TDTheme.of(context);
     return Scaffold(
-      backgroundColor: Styles.c_FFFFFF,
-      body: PersistentTabView(
-        tabs: _tabs(),
-        navBarBuilder: (navBarConfig) => Style1BottomNavBar(
-          navBarConfig: navBarConfig,
-          navBarDecoration: const NavBarDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(color: Colors.black12, blurRadius: 0.5, spreadRadius: 0.5),
-            ],
-          ),
-        ),
-        navBarOverlap: const NavBarOverlap.none(),
-        screenTransitionAnimation: const ScreenTransitionAnimation.none(),
-      ),
-    );
-  }
-
-  Widget _buildChatsScreen() {
-    return Scaffold(
-      backgroundColor: const Color(0xFFEDEDED),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF07C160),
-        elevation: 0,
-        title: const Text('微信'),
-        centerTitle: true,
-        actions: const [
-          IconButton(
-            onPressed: AppNavigator.startApiSettings,
-            icon: Icon(Icons.tune),
-            color: Colors.white,
-            tooltip: 'API 设置',
-          ),
-        ],
-      ),
-      body: _buildChatsTab(),
-    );
-  }
-
-  Widget _buildContactsScreen() {
-    return Scaffold(
-      backgroundColor: const Color(0xFFEDEDED),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF07C160),
-        elevation: 0,
-        title: const Text('通讯录'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: AppNavigator.startApiSettings,
-            icon: const Icon(Icons.person_outline),
-            color: Colors.white,
-            tooltip: '管理角色',
-          ),
-        ],
-      ),
-      body: _buildContactsTab(),
-    );
-  }
-
-  Widget _buildDiscoverScreen() {
-    return Scaffold(
-      backgroundColor: const Color(0xFFEDEDED),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF07C160),
-        elevation: 0,
-        title: const Text('发现'),
-        centerTitle: true,
-      ),
-      body: _buildPlaceholder('探索更多玩法，未来将接入 SillyTavern 式扩展。'),
-    );
-  }
-
-  Widget _buildProfileScreen() {
-    return Scaffold(
-      backgroundColor: const Color(0xFFEDEDED),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF07C160),
-        elevation: 0,
-        title: const Text('我'),
-        centerTitle: true,
-      ),
-      body: _buildPlaceholder('个人中心正在开发中，敬请期待。'),
-    );
-  }
-
-  Widget _buildChatsTab() {
-    return Obx(() {
-      final items = controller.conversations;
-      if (items.isEmpty) {
-        return _buildPlaceholder('还没有配置 AI 伙伴，点击右上角「API 设置」去创建吧。');
-      }
-      return ListView.separated(
-        itemCount: items.length,
-        separatorBuilder: (_, __) => Divider(height: 0, indent: 76.w, endIndent: 16.w),
-        itemBuilder: (context, index) {
-          final conversation = items[index];
-          return InkWell(
-            onTap: () => _openConversation(conversation),
-            child: Container(
-              color: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 24.w,
-                    backgroundColor: conversation.character.avatarColor,
-                    child: Text(
-                      conversation.character.name.characters.first,
-                      style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  12.horizontalSpace,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                conversation.character.name,
-                                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
-                              ),
-                            ),
-                            Text(_formatTime(conversation.preview.lastTime),
-                                style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
-                          ],
-                        ),
-                        6.verticalSpace,
-                        Text(
-                          conversation.preview.lastMessage,
-                          style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+      backgroundColor: theme.grayColor1,
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                _buildChatsPage(context),
+                _buildContactsPage(context),
+                _buildDiscoverPage(context),
+                _buildProfilePage(context),
+              ],
             ),
-          );
-        },
-      );
-    });
+          ),
+          TDBottomTabBar(
+            TDBottomTabBarBasicType.iconText,
+            outlineType: TDBottomTabBarOutlineType.capsule,
+            componentType: TDBottomTabBarComponentType.label,
+            backgroundColor: Colors.transparent,
+            selectedBgColor: theme.brandColor1,
+            unselectedBgColor: theme.grayColor1,
+            currentIndex: _currentIndex,
+            navigationTabs: _buildTabConfigs(context),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildContactsTab() {
-    return Obx(() {
-      final characters = controller.service.characters;
-      final selectedId = controller.service.selectedCharacterId.value;
-      final endpoints = {for (final ep in controller.service.endpoints) ep.id: ep};
-      final padding = EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h);
+  List<TDBottomTabBarTabConfig> _buildTabConfigs(BuildContext context) {
+    final theme = TDTheme.of(context);
+    final selectedStyle = TextStyle(
+      fontSize: 11.sp,
+      fontWeight: FontWeight.w600,
+      color: Colors.white,
+    );
+    final unselectedStyle = TextStyle(
+      fontSize: 11.sp,
+      fontWeight: FontWeight.w500,
+      color: theme.fontGyColor2,
+    );
+    return [
+      TDBottomTabBarTabConfig(
+        tabText: '微信',
+        selectedIcon: Icon(TDIcons.chat_bubble_filled, color: Colors.white, size: 22.w),
+        unselectedIcon: Icon(TDIcons.chat_bubble, color: theme.fontGyColor2, size: 22.w),
+        selectTabTextStyle: selectedStyle,
+        unselectTabTextStyle: unselectedStyle,
+        onTap: () => _switchTab(0),
+      ),
+      TDBottomTabBarTabConfig(
+        tabText: '通讯录',
+        selectedIcon: Icon(TDIcons.user_1_filled, color: Colors.white, size: 22.w),
+        unselectedIcon: Icon(TDIcons.user_1, color: theme.fontGyColor2, size: 22.w),
+        selectTabTextStyle: selectedStyle,
+        unselectTabTextStyle: unselectedStyle,
+        onTap: () => _switchTab(1),
+      ),
+      TDBottomTabBarTabConfig(
+        tabText: '发现',
+        selectedIcon: Icon(TDIcons.compass_filled, color: Colors.white, size: 22.w),
+        unselectedIcon: Icon(TDIcons.compass, color: theme.fontGyColor2, size: 22.w),
+        selectTabTextStyle: selectedStyle,
+        unselectTabTextStyle: unselectedStyle,
+        onTap: () => _switchTab(2),
+      ),
+      TDBottomTabBarTabConfig(
+        tabText: '我',
+        selectedIcon: Icon(TDIcons.user_circle_filled, color: Colors.white, size: 22.w),
+        unselectedIcon: Icon(TDIcons.user_circle, color: theme.fontGyColor2, size: 22.w),
+        selectTabTextStyle: selectedStyle,
+        unselectTabTextStyle: unselectedStyle,
+        onTap: () => _switchTab(3),
+      ),
+    ];
+  }
 
-      if (characters.isEmpty) {
-        return Container(
-          color: const Color(0xFFF2F2F7),
-          padding: padding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildContactsHeader(),
-              SizedBox(height: 16.h),
-              _buildAddCharacterButton(),
-              SizedBox(height: 24.h),
-              _buildContactsEmptyHint(),
-            ],
-          ),
-        );
-      }
-
-      return Container(
-        color: const Color(0xFFF2F2F7),
-        child: ListView(
-          padding: padding,
-          children: [
-            _buildContactsHeader(),
-            SizedBox(height: 16.h),
-            _buildAddCharacterButton(),
-            SizedBox(height: 16.h),
-            ...characters.map((character) {
-              final endpoint = endpoints[character.endpointId];
-              final isDefault = selectedId == character.id;
-              return Padding(
-                padding: EdgeInsets.only(bottom: 12.h),
-                child: _buildContactCard(
-                  character: character,
-                  endpoint: endpoint,
-                  isDefault: isDefault,
-                ),
-              );
-            }),
+  Widget _buildChatsPage(BuildContext context) {
+    final theme = TDTheme.of(context);
+    return Column(
+      children: [
+        _buildNavBar(
+          context,
+          title: '微信',
+          actions: [
+            TDNavBarItem(
+              icon: TDIcons.setting_1,
+              iconColor: Colors.white,
+              action: AppNavigator.startApiSettings,
+            ),
           ],
         ),
-      );
-    });
-  }
-
-  Widget _buildContactsHeader() {
-    final persona = controller.service.persona.value;
-    final loreCount = controller.service.worldInfos.length;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'AI 联系人',
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF1C1C1E),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          child: TDSearchBar(
+            placeHolder: '搜索对话或角色',
+            backgroundColor: Colors.white,
+            style: TDSearchStyle.round,
+            readOnly: true,
+            onInputClick: () => IMViews.showToast('搜索功能开发中'),
           ),
         ),
-        SizedBox(height: 6.h),
-        Text(
-          '集中管理 SillyTavern 风格的 AI 伙伴，轻点卡片即可开始对话。',
-          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-        ),
-        if (persona != null) ...[
-          SizedBox(height: 16.h),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0F000000),
-                  blurRadius: 12,
-                  offset: Offset(0, 6),
-                ),
-              ],
-            ),
-            padding: EdgeInsets.all(16.w),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 40.w,
-                  height: 40.w,
-                  decoration: const BoxDecoration(
-                    color: Color(0x26007AFF),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(CupertinoIcons.person_crop_circle, color: Color(0xFF007AFF)),
-                ),
-                12.horizontalSpace,
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        persona.displayName,
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-                      ),
-                      if (persona.description.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.only(top: 6.h),
-                          child: Text(
-                            persona.description,
-                            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-                          ),
+        Expanded(
+          child: Obx(() {
+            final items = logic.conversations;
+            if (items.isEmpty) {
+              return _buildEmpty(
+                context,
+                description: '还没有配置 AI 伙伴，点击右上角「API 设置」去创建吧。',
+                actionText: '前往设置',
+                onTap: AppNavigator.startApiSettings,
+              );
+            }
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              child: Column(
+                children: items
+                    .map(
+                      (conversation) => Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: TDCellGroup(
+                          theme: TDCellGroupTheme.cardTheme,
+                          bordered: false,
+                          cells: [
+                            TDCell(
+                              titleWidget: Row(
+                                children: [
+                                  Container(
+                                    width: 44.w,
+                                    height: 44.w,
+                                    decoration: BoxDecoration(
+                                      color: conversation.character.avatarColor,
+                                      borderRadius: BorderRadius.circular(12.w),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      conversation.character.name.characters.first,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18.sp,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  12.horizontalSpace,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                conversation.character.name,
+                                                style: TextStyle(
+                                                  fontSize: 15.sp,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: theme.fontGyColor1,
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              _formatTime(conversation.preview.lastTime),
+                                              style: TextStyle(
+                                                fontSize: 11.sp,
+                                                color: theme.fontGyColor3,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        4.verticalSpace,
+                                        Text(
+                                          conversation.preview.lastMessage,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: theme.fontGyColor2,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              descriptionWidget: Padding(
+                                padding: EdgeInsets.only(top: 12.h),
+                                child: Wrap(
+                                  spacing: 6.w,
+                                  runSpacing: 6.h,
+                                  children: [
+                                    TDTag(
+                                      conversation.endpoint.name,
+                                      theme: TDTagTheme.primary,
+                                      size: TDTagSize.small,
+                                      isLight: true,
+                                    ),
+                                    if (conversation.persona != null)
+                                      TDTag(
+                                        'Persona',
+                                        theme: TDTagTheme.success,
+                                        size: TDTagSize.small,
+                                        isLight: true,
+                                      ),
+                                    if (conversation.worldInfos.isNotEmpty)
+                                      TDTag(
+                                        '世界书 ${conversation.worldInfos.length}',
+                                        theme: TDTagTheme.warning,
+                                        size: TDTagSize.small,
+                                        isLight: true,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              bordered: false,
+                              arrow: true,
+                              onClick: (_) => _openConversation(conversation),
+                            ),
+                          ],
                         ),
-                    ],
-                  ),
-                ),
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  minSize: 0,
-                  onPressed: AppNavigator.startApiSettings,
-                  child: const Icon(CupertinoIcons.chevron_forward, color: Color(0xFF8E8E93)),
-                ),
-              ],
-            ),
-          ),
-        ],
-        if (loreCount > 0) ...[
-          SizedBox(height: 12.h),
-          GestureDetector(
-            onTap: AppNavigator.startApiSettings,
-            child: Text(
-              '世界信息：$loreCount 条（点击管理）',
-              style: TextStyle(fontSize: 12.sp, color: const Color(0xFF007AFF)),
-            ),
-          ),
-        ],
+                      ),
+                    )
+                    .toList(),
+              ),
+            );
+          }),
+        ),
       ],
     );
   }
 
-  Widget _buildAddCharacterButton() {
-    return CupertinoButton.filled(
-      padding: EdgeInsets.symmetric(vertical: 12.h),
-      borderRadius: BorderRadius.circular(14.r),
-      onPressed: () => _apiLogic.addOrEditCharacter(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(CupertinoIcons.person_add_solid, size: 18),
-          6.horizontalSpace,
-          Text(
-            '新增 AI 角色',
-            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContactsEmptyHint() {
-    final borderRadius = BorderRadius.circular(18.r);
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: borderRadius,
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D000000),
-            blurRadius: 18,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 36.w,
-                height: 36.w,
-                decoration: const BoxDecoration(
-                  color: Color(0x2607C160),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(CupertinoIcons.chat_bubble_text, color: Color(0xFF07C160)),
-              ),
-              12.horizontalSpace,
-              Expanded(
-                child: Text(
-                  '还没有 AI 联系人',
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            '点击上方按钮创建你的第一个 AI 伙伴，绑定接口后会自动出现在列表中。',
-            style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600, height: 1.35),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContactCard({
-    required AiCharacter character,
-    required ApiEndpoint? endpoint,
-    required bool isDefault,
-  }) {
-    return GestureDetector(
-      onTap: () => _openCharacterConversation(character),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18.r),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0D000000),
-              blurRadius: 14,
-              offset: Offset(0, 6),
+  Widget _buildContactsPage(BuildContext context) {
+    final theme = TDTheme.of(context);
+    return Column(
+      children: [
+        _buildNavBar(
+          context,
+          title: '通讯录',
+          actions: [
+            TDNavBarItem(
+              icon: TDIcons.api,
+              iconColor: Colors.white,
+              action: AppNavigator.startApiSettings,
             ),
           ],
         ),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 24.w,
-              backgroundColor: character.avatarColor,
-              child: Text(
-                character.name.characters.first,
-                style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
-              ),
-            ),
-            12.horizontalSpace,
-            Expanded(
+        Expanded(
+          child: Obx(() {
+            final characters = logic.service.characters;
+            if (characters.isEmpty) {
+              return _buildEmpty(
+                context,
+                description: '暂无联系人。创建 AI 角色后，这里将显示可对话的伙伴。',
+                actionText: '新增 AI 角色',
+                onTap: apiLogic.addOrEditCharacter,
+              );
+            }
+            final selectedId = logic.service.selectedCharacterId.value;
+            final persona = logic.service.persona.value;
+            final worldCount = logic.service.worldInfos.length;
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          character.name,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1C1C1E),
+                  if (persona != null) _buildPersonaCard(theme, persona, worldCount),
+                  TDButton(
+                    size: TDButtonSize.large,
+                    theme: TDButtonTheme.primary,
+                    type: TDButtonType.fill,
+                    text: '新增 AI 角色',
+                    margin: EdgeInsets.only(top: persona == null ? 0 : 16.h, bottom: 12.h),
+                    onTap: apiLogic.addOrEditCharacter,
+                  ),
+                  ...characters.map((character) {
+                    final endpoint = logic.endpointForCharacter(character);
+                    final isDefault = selectedId == character.id;
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: TDCellGroup(
+                        theme: TDCellGroupTheme.cardTheme,
+                        bordered: false,
+                        cells: [
+                          TDCell(
+                            titleWidget: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 24.w,
+                                  backgroundColor: character.avatarColor,
+                                  child: Text(
+                                    character.name.characters.first,
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                12.horizontalSpace,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              character.name,
+                                              style: TextStyle(
+                                                fontSize: 15.sp,
+                                                fontWeight: FontWeight.w600,
+                                                color: theme.fontGyColor1,
+                                              ),
+                                            ),
+                                          ),
+                                          if (isDefault)
+                                            TDTag(
+                                              '默认',
+                                              theme: TDTagTheme.success,
+                                              size: TDTagSize.small,
+                                              isLight: true,
+                                            ),
+                                        ],
+                                      ),
+                                      4.verticalSpace,
+                                      Text(
+                                        endpoint == null
+                                            ? '未绑定接口'
+                                            : '${endpoint.name} · ${endpoint.model.isEmpty ? endpoint.baseUrl : endpoint.model}',
+                                        style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            descriptionWidget: character.persona.isEmpty
+                                ? null
+                                : Padding(
+                                    padding: EdgeInsets.only(top: 12.h),
+                                    child: Text(
+                                      character.persona,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                                    ),
+                                  ),
+                            rightIconWidget: Icon(TDIcons.more, color: theme.fontGyColor3),
+                            bordered: false,
+                            onClick: (_) => _openCharacterConversation(character),
+                            onLongPress: (_) => _showCharacterActions(character),
                           ),
-                        ),
+                        ],
                       ),
-                      if (isDefault)
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                          decoration: BoxDecoration(
-                            color: const Color(0x1F34C759),
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          child: Text(
-                            '默认',
-                            style: TextStyle(fontSize: 11.sp, color: const Color(0xFF34C759)),
-                          ),
-                        ),
-                    ],
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    endpoint == null
-                        ? '未绑定接口'
-                        : '${endpoint.name} · ${endpoint.model.isEmpty ? endpoint.baseUrl : endpoint.model}',
-                    style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    );
+                  }),
                 ],
               ),
-            ),
-            GestureDetector(
-              onTap: () => _showCharacterActions(character),
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
-                child: const Icon(
-                  CupertinoIcons.ellipsis_vertical,
-                  size: 20,
-                  color: Color(0xFF8E8E93),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPersonaCard(TDThemeData theme, UserPersona persona, int worldCount) {
+    return TDCellGroup(
+      theme: TDCellGroupTheme.cardTheme,
+      bordered: false,
+      cells: [
+        TDCell(
+          titleWidget: Row(
+            children: [
+              Icon(TDIcons.user_circle, color: theme.brandColor8, size: 28.w),
+              12.horizontalSpace,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      persona.displayName,
+                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor1),
+                    ),
+                    if (persona.style.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 4.h),
+                        child: Text(
+                          persona.style,
+                          style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              TDButton(
+                text: '配置',
+                size: TDButtonSize.small,
+                theme: TDButtonTheme.primary,
+                type: TDButtonType.outline,
+                onTap: () => apiLogic.handleSectionAction(1),
+              ),
+            ],
+          ),
+          descriptionWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (persona.description.isNotEmpty)
+                Padding(
+                  padding: EdgeInsets.only(top: 12.h),
+                  child: Text(
+                    persona.description,
+                    style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor2),
+                  ),
+                ),
+              if (persona.goals.isNotEmpty)
+                Padding(
+                  padding: EdgeInsets.only(top: 8.h),
+                  child: Text(
+                    '目标：${persona.goals}',
+                    style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
+                  ),
+                ),
+              if (worldCount > 0)
+                Padding(
+                  padding: EdgeInsets.only(top: 8.h),
+                  child: TDTag(
+                    '世界信息 $worldCount',
+                    theme: TDTagTheme.warning,
+                    size: TDTagSize.small,
+                    isLight: true,
+                  ),
+                ),
+            ],
+          ),
+          bordered: false,
         ),
+      ],
+    );
+  }
+
+  Widget _buildDiscoverPage(BuildContext context) {
+    return Column(
+      children: [
+        _buildNavBar(context, title: '发现'),
+        Expanded(
+          child: _buildEmpty(
+            context,
+            description: '探索更多玩法，未来将接入 SillyTavern 式扩展。',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfilePage(BuildContext context) {
+    return Column(
+      children: [
+        _buildNavBar(context, title: '我'),
+        Expanded(
+          child: _buildEmpty(
+            context,
+            description: '个人中心正在开发中，敬请期待。',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavBar(BuildContext context,
+      {required String title, List<TDNavBarItem>? actions}) {
+    final theme = TDTheme.of(context);
+    return TDNavBar(
+      title: title,
+      centerTitle: true,
+      useDefaultBack: false,
+      backgroundColor: const Color(0xFF07C160),
+      titleColor: Colors.white,
+      titleFontWeight: FontWeight.w600,
+      height: 52,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      rightBarItems: actions,
+      boxShadow: theme.shadowsTop,
+    );
+  }
+
+  Widget _buildEmpty(
+    BuildContext context, {
+    required String description,
+    String? actionText,
+    VoidCallback? onTap,
+  }) {
+    final hasAction = actionText != null && onTap != null;
+    return Center(
+      child: TDEmpty(
+        emptyText: description,
+        type: hasAction ? TDEmptyType.operation : TDEmptyType.plain,
+        operationText: hasAction ? actionText : null,
+        onTapEvent: hasAction ? onTap : null,
+        operationTheme: TDButtonTheme.primary,
       ),
     );
   }
 
+  Future<void> _openConversation(WeChatConversation conversation) async {
+    final result = await Get.to<ChatPreview>(
+      () => WeChatChatPage(conversation: conversation),
+    );
+    if (result != null) {
+      logic.updatePreview(conversation.character.id, result);
+    }
+  }
+
   void _openCharacterConversation(AiCharacter character) {
-    final conv = controller.conversations.firstWhereOrNull(
+    final conv = logic.conversations.firstWhereOrNull(
       (element) => element.character.id == character.id,
     );
     if (conv != null) {
@@ -520,69 +572,51 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
   }
 
   void _showCharacterActions(AiCharacter character) {
-    final isDefault = controller.service.selectedCharacterId.value == character.id;
-    final endpoint = controller.service.endpoints.firstWhereOrNull(
-      (element) => element.id == character.endpointId,
-    );
-    showCupertinoModalPopup(
-      context: Get.context!,
-      builder: (_) => CupertinoActionSheet(
-        title: Text(character.name),
-        message: Text(
-          endpoint == null
-              ? '未绑定接口'
-              : '${endpoint.name} · ${endpoint.model.isEmpty ? endpoint.baseUrl : endpoint.model}',
-          style: const TextStyle(fontSize: 13),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Get.back();
-              _openCharacterConversation(character);
-            },
-            child: const Text('发起聊天'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Get.back();
-              _showCharacterPromptPreview(character);
-            },
-            child: const Text('查看提示组合'),
-          ),
-          if (!isDefault)
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Get.back();
-                _apiLogic.setDefaultCharacter(character.id);
-              },
-              child: const Text('设为默认角色'),
-            ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Get.back();
-              _apiLogic.addOrEditCharacter(character: character);
-            },
-            child: const Text('编辑资料'),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Get.back();
-              _apiLogic.removeCharacter(character);
-            },
-            child: const Text('删除角色'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Get.back(),
-          child: const Text('取消'),
-        ),
+    final context = Get.context;
+    if (context == null) return;
+    final isDefault = logic.service.selectedCharacterId.value == character.id;
+    final items = <TDActionSheetItem>[
+      TDActionSheetItem(label: '发起聊天'),
+      TDActionSheetItem(label: '查看提示组合'),
+      TDActionSheetItem(label: '设为默认角色',
+          textStyle: TextStyle(color: isDefault ? TDTheme.of(context).fontGyColor4 : TDTheme.of(context).brandColor8),
+          disabled: isDefault),
+      TDActionSheetItem(label: '编辑资料'),
+      TDActionSheetItem(
+        label: '删除角色',
+        textStyle: TextStyle(color: TDTheme.of(context).errorColor6),
       ),
+    ];
+
+    TDActionSheet.showListActionSheet(
+      context,
+      items: items,
+      onSelected: (item, index) {
+        switch (index) {
+          case 0:
+            _openCharacterConversation(character);
+            break;
+          case 1:
+            _showCharacterPromptPreview(character);
+            break;
+          case 2:
+            if (!isDefault) {
+              apiLogic.setDefaultCharacter(character.id);
+            }
+            break;
+          case 3:
+            apiLogic.addOrEditCharacter(character: character);
+            break;
+          case 4:
+            apiLogic.removeCharacter(character);
+            break;
+        }
+      },
     );
   }
 
   void _showCharacterPromptPreview(AiCharacter character) {
-    final conv = controller.conversations.firstWhereOrNull(
+    final conv = logic.conversations.firstWhereOrNull(
       (element) => element.character.id == character.id,
     );
     if (conv == null) {
@@ -597,36 +631,36 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Persona',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
-              ),
-              SizedBox(height: 6.h),
-              if (conv.persona != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(conv.persona!.displayName, style: TextStyle(fontSize: 13.sp)),
-                    if (conv.persona!.description.isNotEmpty)
-                      Padding(
-                        padding: EdgeInsets.only(top: 4.h),
-                        child: Text(
-                          conv.persona!.description,
-                          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
-                        ),
-                      ),
-                  ],
-                )
-              else
-                Text('未设置用户个性', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500)),
-              SizedBox(height: 12.h),
+              if (conv.persona != null) ...[
+                Text(
+                  'Persona · ${conv.persona!.displayName}',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+                ),
+                SizedBox(height: 6.h),
+                if (conv.persona!.description.isNotEmpty)
+                  Text(
+                    conv.persona!.description,
+                    style: TextStyle(fontSize: 12.sp, color: TDTheme.of(context).fontGyColor2),
+                  ),
+                if (conv.persona!.goals.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: 4.h),
+                    child: Text(
+                      '目标：${conv.persona!.goals}',
+                      style: TextStyle(fontSize: 12.sp, color: TDTheme.of(context).fontGyColor3),
+                    ),
+                  ),
+                SizedBox(height: 12.h),
+              ],
               Text(
                 '角色设定',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
               ),
               SizedBox(height: 6.h),
-              Text(character.persona.isEmpty ? '未填写' : character.persona,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700)),
+              Text(
+                character.persona.isEmpty ? '未填写' : character.persona,
+                style: TextStyle(fontSize: 12.sp, color: TDTheme.of(context).fontGyColor2),
+              ),
               SizedBox(height: 12.h),
               Text(
                 '世界信息 (${conv.worldInfos.length})',
@@ -634,7 +668,10 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
               ),
               SizedBox(height: 6.h),
               if (conv.worldInfos.isEmpty)
-                Text('暂无设定条目', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500))
+                Text(
+                  '暂无设定条目',
+                  style: TextStyle(fontSize: 12.sp, color: TDTheme.of(context).fontGyColor3),
+                )
               else
                 ...conv.worldInfos.map(
                   (entry) => Padding(
@@ -642,9 +679,15 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(entry.title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+                        Text(
+                          entry.title,
+                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+                        ),
                         SizedBox(height: 4.h),
-                        Text(entry.content, style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700)),
+                        Text(
+                          entry.content,
+                          style: TextStyle(fontSize: 12.sp, color: TDTheme.of(context).fontGyColor2),
+                        ),
                       ],
                     ),
                   ),
@@ -659,33 +702,10 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
     );
   }
 
-  Widget _buildPlaceholder(String text) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 32.w),
-        child: Text(
-          text,
-          style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _openConversation(WeChatConversation conversation) async {
-    final result = await Get.to<ChatPreview>(
-      () => WeChatChatPage(conversation: conversation),
-    );
-    if (result != null) {
-      controller.updatePreview(conversation.character.id, result);
-    }
-  }
-
   String _formatTime(DateTime time) {
     final now = DateTime.now();
-    final formatter = DateFormat('HH:mm');
-    if (now.day == time.day && now.month == time.month && now.year == time.year) {
-      return formatter.format(time);
+    if (now.year == time.year && now.month == time.month && now.day == time.day) {
+      return DateFormat('HH:mm').format(time);
     }
     return DateFormat('MM-dd HH:mm').format(time);
   }
@@ -775,9 +795,7 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
         return;
       }
       final distance = (target - _scrollController.position.pixels).abs();
-      final duration = Duration(
-        milliseconds: distance < 120 ? 140 : 220,
-      );
+      final duration = Duration(milliseconds: distance < 120 ? 140 : 220);
       _scrollController.animateTo(
         target,
         duration: duration,
@@ -797,36 +815,48 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final contextBanner = _buildConversationContextBanner();
+    final theme = TDTheme.of(context);
+    final contextBanner = _buildConversationContextBanner(theme);
     return Scaffold(
-      backgroundColor: const Color(0xFFEDEDED),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF07C160),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-          color: Colors.white,
-          onPressed: _exit,
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.character.name, style: const TextStyle(color: Colors.white)),
-            Text(
-              widget.endpoint.name,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => _showEndpointInfo(),
-            icon: const Icon(Icons.info_outline, color: Colors.white),
-          ),
-        ],
-      ),
+      backgroundColor: theme.grayColor1,
       body: Column(
         children: [
+          TDNavBar(
+            useDefaultBack: false,
+            centerTitle: false,
+            titleWidget: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.character.name,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  widget.endpoint.name,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF07C160),
+            titleColor: Colors.white,
+            boxShadow: theme.shadowsTop,
+            height: 60,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            leftBarItems: [
+              TDNavBarItem(
+                icon: TDIcons.arrow_left,
+                iconColor: Colors.white,
+                action: _exit,
+              ),
+            ],
+            rightBarItems: [
+              TDNavBarItem(
+                icon: TDIcons.info_circle,
+                iconColor: Colors.white,
+                action: _showEndpointInfo,
+              ),
+            ],
+          ),
           if (contextBanner != null) contextBanner,
           Expanded(
             child: ListView.builder(
@@ -842,7 +872,7 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
                     mainAxisAlignment: isSelf ? MainAxisAlignment.end : MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (!isSelf) _buildAvatar(isSelf: false),
+                      if (!isSelf) _buildAvatar(theme, isSelf: false),
                       if (!isSelf) 8.horizontalSpace,
                       Flexible(
                         child: Container(
@@ -855,11 +885,12 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
                               bottomLeft: Radius.circular(isSelf ? 12.r : 4.r),
                               bottomRight: Radius.circular(isSelf ? 4.r : 12.r),
                             ),
+                            boxShadow: isSelf ? null : theme.shadowsTop,
                           ),
                           child: Text(
                             message.text,
                             style: TextStyle(
-                              color: isSelf ? Colors.white : Colors.black87,
+                              color: isSelf ? Colors.white : theme.fontGyColor1,
                               fontSize: 15.sp,
                               height: 1.35,
                             ),
@@ -867,23 +898,23 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
                         ),
                       ),
                       if (isSelf) 8.horizontalSpace,
-                      if (isSelf) _buildAvatar(isSelf: true),
+                      if (isSelf) _buildAvatar(theme, isSelf: true),
                     ],
                   ),
                 );
               },
             ),
           ),
-          _buildInputBar(),
+          _buildInputBar(theme),
         ],
       ),
     );
   }
 
-  Widget _buildAvatar({required bool isSelf}) {
+  Widget _buildAvatar(TDThemeData theme, {required bool isSelf}) {
     return CircleAvatar(
       radius: 18.w,
-      backgroundColor: isSelf ? const Color(0xFF07C160) : widget.character.avatarColor,
+      backgroundColor: isSelf ? theme.brandColor6 : widget.character.avatarColor,
       child: Text(
         isSelf ? '我' : widget.character.name.characters.first,
         style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
@@ -891,7 +922,7 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
     );
   }
 
-  Widget? _buildConversationContextBanner() {
+  Widget? _buildConversationContextBanner(TDThemeData theme) {
     final persona = widget.persona;
     final lore = widget.worldInfos;
     if (persona == null && lore.isEmpty) {
@@ -904,17 +935,11 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F000000),
-            blurRadius: 12,
-            offset: Offset(0, 6),
-          ),
-        ],
+        boxShadow: theme.shadowsTop,
       ),
       child: Row(
         children: [
-          const Icon(CupertinoIcons.info_circle_fill, color: Color(0xFF07C160)),
+          Icon(TDIcons.info_circle_filled, color: theme.brandColor8),
           12.horizontalSpace,
           Expanded(
             child: Column(
@@ -922,7 +947,7 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
               children: [
                 Text(
                   '上下文已启用',
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF1C1C1E)),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: theme.fontGyColor1),
                 ),
                 SizedBox(height: 4.h),
                 Text(
@@ -930,23 +955,24 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
                     if (persona != null) 'Persona：${persona.displayName}',
                     if (lore.isNotEmpty) '世界信息：${lore.length} 条',
                   ].join(' · '),
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12.sp, color: theme.fontGyColor3),
                 ),
               ],
             ),
           ),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            minSize: 0,
-            onPressed: _showPromptContextSheet,
-            child: const Icon(CupertinoIcons.chevron_forward, color: Color(0xFF8E8E93)),
+          TDButton(
+            theme: TDButtonTheme.primary,
+            type: TDButtonType.text,
+            text: '详情',
+            size: TDButtonSize.small,
+            onTap: _showPromptContextSheet,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInputBar() {
+  Widget _buildInputBar(TDThemeData theme) {
     return Container(
       color: Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
@@ -954,12 +980,12 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
         top: false,
         child: Row(
           children: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.mic_none), color: Colors.grey),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.mic_none), color: theme.fontGyColor3),
             Expanded(
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF6F6F6),
+                  color: theme.grayColor1,
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: TextField(
@@ -970,103 +996,10 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
               ),
             ),
             8.horizontalSpace,
-            IconButton(onPressed: () {}, icon: const Icon(Icons.emoji_emotions_outlined), color: Colors.grey),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.emoji_emotions_outlined), color: theme.fontGyColor3),
             IconButton(onPressed: _sendMessage, icon: const Icon(Icons.send), color: const Color(0xFF07C160)),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showEndpointInfo() {
-    Get.dialog(
-      AlertDialog(
-        title: Text(widget.endpoint.name),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('类型：${widget.endpoint.type == ApiProviderType.openai ? 'OpenAI 兼容' : 'Google Gemini'}'),
-              const SizedBox(height: 8),
-              Text('Base URL：${widget.endpoint.baseUrl}'),
-              const SizedBox(height: 8),
-              Text('默认模型：${widget.endpoint.model.isEmpty ? '未设置' : widget.endpoint.model}'),
-              const SizedBox(height: 12),
-              Text(
-                '生成参数',
-                style: TextStyle(fontWeight: FontWeight.w600, color: const Color(0xFF1C1C1E), fontSize: 14.sp),
-              ),
-              SizedBox(height: 8.h),
-              Wrap(
-                spacing: 10.w,
-                runSpacing: 6.h,
-                children: [
-                  _buildInfoChip('temperature', widget.generationConfig.temperature.toStringAsFixed(2)),
-                  _buildInfoChip('top_p', widget.generationConfig.topP.toStringAsFixed(2)),
-                  _buildInfoChip('top_k', widget.generationConfig.topK.toString()),
-                  _buildInfoChip('max_tokens', widget.generationConfig.maxTokens.toString()),
-                  _buildInfoChip(
-                    'presence_penalty',
-                    widget.generationConfig.presencePenalty.toStringAsFixed(2),
-                  ),
-                  _buildInfoChip(
-                    'frequency_penalty',
-                    widget.generationConfig.frequencyPenalty.toStringAsFixed(2),
-                  ),
-                  _buildInfoChip('stream', widget.generationConfig.stream ? 'ON' : 'OFF'),
-                ],
-              ),
-              if (widget.endpoint.notes.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text('备注：${widget.endpoint.notes}'),
-              ],
-              if (widget.persona != null) ...[
-                SizedBox(height: 16.h),
-                Text(
-                  'Persona',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  widget.persona!.description.isEmpty
-                      ? widget.persona!.displayName
-                      : '${widget.persona!.displayName} · ${widget.persona!.description}',
-                ),
-              ],
-              if (widget.worldInfos.isNotEmpty) ...[
-                SizedBox(height: 16.h),
-                Text(
-                  '世界信息 (${widget.worldInfos.length})',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
-                ),
-                SizedBox(height: 8.h),
-                ...widget.worldInfos.map(
-                  (entry) => Padding(
-                    padding: EdgeInsets.only(bottom: 8.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          entry.title,
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          entry.content,
-                          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('关闭')),
-        ],
       ),
     );
   }
@@ -1085,65 +1018,57 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
               if (persona != null) ...[
                 Text(
                   'Persona · ${persona.displayName}',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                SizedBox(height: 6.h),
+                const SizedBox(height: 6),
                 if (persona.description.isNotEmpty)
-                  Text(persona.description, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
-                if (persona.goals.isNotEmpty) ...[
-                  SizedBox(height: 4.h),
-                  Text('目标：${persona.goals}', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
-                ],
-                if (persona.style.isNotEmpty) ...[
-                  SizedBox(height: 4.h),
-                  Text('风格：${persona.style}', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
-                ],
-                SizedBox(height: 12.h),
+                  Text(
+                    persona.description,
+                    style: TextStyle(color: Colors.grey.shade700),
+                  ),
+                if (persona.goals.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      '目标：${persona.goals}',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  ),
+                if (persona.style.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      '风格：${persona.style}',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  ),
+                const SizedBox(height: 12),
               ],
               Text(
                 '世界信息 (${lore.length})',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              SizedBox(height: 6.h),
+              const SizedBox(height: 6),
               if (lore.isEmpty)
-                Text('暂无设定条目', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600))
+                Text(
+                  '暂无设定条目',
+                  style: TextStyle(color: Colors.grey.shade600),
+                )
               else
                 ...lore.map(
                   (entry) => Padding(
-                    padding: EdgeInsets.only(bottom: 10.h),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                entry.title,
-                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
-                              ),
-                            ),
-                            Text(
-                              '优先级 ${entry.priority}',
-                              style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade500),
-                            ),
-                          ],
+                        Text(
+                          entry.title,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
-                        SizedBox(height: 4.h),
+                        const SizedBox(height: 4),
                         Text(
                           entry.content,
-                          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700),
-                        ),
-                        SizedBox(height: 4.h),
-                        Wrap(
-                          spacing: 6.w,
-                          children: entry.keywords
-                              .map((k) => Chip(
-                                    label: Text(k, style: TextStyle(fontSize: 11.sp)),
-                                    backgroundColor: const Color(0xFFE5E5EA),
-                                    padding: EdgeInsets.zero,
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  ))
-                              .toList(),
+                          style: TextStyle(color: Colors.grey.shade700),
                         ),
                       ],
                     ),
@@ -1159,17 +1084,59 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
     );
   }
 
+  void _showEndpointInfo() {
+    final generation = widget.generationConfig;
+    Get.dialog(
+      AlertDialog(
+        title: Text(widget.endpoint.name),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('类型：${widget.endpoint.type == ApiProviderType.openai ? 'OpenAI 兼容' : 'Google Gemini'}'),
+              const SizedBox(height: 8),
+              Text('Base URL：${widget.endpoint.baseUrl}'),
+              const SizedBox(height: 8),
+              Text('默认模型：${widget.endpoint.model.isEmpty ? '未设置' : widget.endpoint.model}'),
+              const SizedBox(height: 12),
+              Text('生成参数', style: const TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  _buildInfoChip('temperature', generation.temperature.toStringAsFixed(2)),
+                  _buildInfoChip('top_p', generation.topP.toStringAsFixed(2)),
+                  _buildInfoChip('top_k', generation.topK.toString()),
+                  _buildInfoChip('max_tokens', generation.maxTokens.toString()),
+                  _buildInfoChip('presence_penalty', generation.presencePenalty.toStringAsFixed(2)),
+                  _buildInfoChip('frequency_penalty', generation.frequencyPenalty.toStringAsFixed(2)),
+                  _buildInfoChip('stream', generation.stream ? 'ON' : 'OFF'),
+                ],
+              ),
+              if (widget.endpoint.notes.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text('备注：${widget.endpoint.notes}'),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('关闭')),
+        ],
+      ),
+    );
+  }
+
   Widget _buildInfoChip(String label, String value) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFFE5E5EA),
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
-        '$label = $value',
-        style: TextStyle(fontSize: 11.sp, color: const Color(0xFF3C3C43)),
-      ),
+      child: Text('$label = $value', style: const TextStyle(fontSize: 11, color: Color(0xFF3C3C43))),
     );
   }
 }

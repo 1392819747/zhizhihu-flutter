@@ -1162,10 +1162,10 @@ packages:
     dependency: "direct main"
     description:
       name: image_picker
-      sha256: "021834d9c0c3de46bf0fe40341fa07168407f694d9b2bb18d532dc1261867f7a"
+      sha256: "1f498d086203360cca099d20ffea2963f48c39ce91bdd8a3b6d4a045786b02c8"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.0.8"
   image_picker_android:
     dependency: transitive
     description:
@@ -2341,18 +2341,18 @@ packages:
     dependency: "direct main"
     description:
       name: tdesign_flutter
-      sha256: "6c95cd746d7ff3ee5e3c9c4dd0e202f69c8c6e04cf53f29ace4da16f5cfbc7e4"
+      sha256: "0cee25925b3350fde8f7258be754170bcab15813f7c2c142e1233d84a2c0a046"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.5"
+    version: "0.2.0"
   tdesign_flutter_adaptation:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: tdesign_flutter_adaptation
-      sha256: "707bbc52ec8b5872ea808500200f402007acf24c03a1cc823a3be2113c1d813a"
+      sha256: "8c5ba936abd2651472495b19dd23c525f04fb2eac6ba23de55a8b63a7c226deb"
       url: "https://pub.dev"
     source: hosted
-    version: "3.32.0"
+    version: "3.16.0"
   term_glyph:
     dependency: transitive
     description:

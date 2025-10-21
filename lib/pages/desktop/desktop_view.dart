@@ -293,99 +293,108 @@ class DesktopPage extends StatelessWidget {
   }
 
   Widget _buildAppGridForPage(int pageIndex) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: GridView.builder(
-        physics: const NeverScrollableScrollPhysics(), // 禁用GridView的滚动
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 12.w,
-          mainAxisSpacing: 16.h,
-          childAspectRatio: 0.9,
+    return Obx(() {
+      final pageApps = logic.getAppsForPage(pageIndex);
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: GridView.builder(
+          physics: const NeverScrollableScrollPhysics(), // 禁用GridView的滚动
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            crossAxisSpacing: 12.w,
+            mainAxisSpacing: 16.h,
+            childAspectRatio: 0.9,
+          ),
+          itemCount: pageApps.length,
+          itemBuilder: (context, index) {
+            final app = pageApps[index];
+            if (app == null) {
+              return _buildEmptySlot(pageIndex, index);
+            }
+            return _buildDraggableAppItem(app, pageIndex, index);
+          },
         ),
-        itemCount: logic.getAppsForPage(pageIndex).length,
-        itemBuilder: (context, index) {
-          final app = logic.getAppsForPage(pageIndex)[index];
-          if (app == null) {
-            return _buildEmptySlot(pageIndex, index);
-          }
-          return _buildDraggableAppItem(app, pageIndex, index);
+      );
+    });
+  }
+
+  Widget _buildEmptySlot(int pageIndex, int index) {
+    return KeyedSubtree(
+      key: ValueKey('empty_${pageIndex}_$index'),
+      child: DragTarget<AppItem>(
+        onWillAccept: (data) {
+          print('空位 $pageIndex-$index 准备接受: ${data?.name}');
+          return data != null;
+        },
+        onAccept: (data) {
+          print('空位 $pageIndex-$index 接受: ${data.name}');
+          // 处理拖拽到空位
+          logic.moveAppToPosition(data, pageIndex, index);
+        },
+        builder: (context, candidateData, rejectedData) {
+          return Container(
+            width: 60.w,
+            height: 60.w,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(18.r),
+            ),
+          );
         },
       ),
     );
   }
 
-  Widget _buildEmptySlot(int pageIndex, int index) {
-    return DragTarget<AppItem>(
-      onWillAccept: (data) {
-        print('空位 $pageIndex-$index 准备接受: ${data?.name}');
-        return data != null;
-      },
-      onAccept: (data) {
-        print('空位 $pageIndex-$index 接受: ${data.name}');
-        // 处理拖拽到空位
-        logic.moveAppToPosition(data, pageIndex, index);
-      },
-      builder: (context, candidateData, rejectedData) {
-        return Container(
-          width: 60.w,
-          height: 60.w,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(18.r),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildDraggableAppItem(AppItem app, int pageIndex, int index) {
-    return LongPressDraggable<AppItem>(
-      data: app,
-      dragAnchorStrategy: (draggable, context, position) => Offset(30.w, 30.w),
-      hapticFeedbackOnStart: true, // 长按震动反馈
-      feedback: Material(
-        elevation: 8,
-        borderRadius: BorderRadius.circular(18.r),
-        child: Container(
+    return KeyedSubtree(
+      key: ValueKey('app_${app.name}_${pageIndex}_$index'),
+      child: LongPressDraggable<AppItem>(
+        data: app,
+        dragAnchorStrategy: (draggable, context, position) => Offset(30.w, 30.w),
+        hapticFeedbackOnStart: true, // 长按震动反馈
+        feedback: Material(
+          elevation: 8,
+          borderRadius: BorderRadius.circular(18.r),
+          child: Container(
+            width: 60.w,
+            height: 60.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: _buildAppIconBody(app, 60.w),
+          ),
+        ),
+        childWhenDragging: Container(
           width: 60.w,
           height: 60.w,
           decoration: BoxDecoration(
+            color: Colors.grey.withOpacity(0.3),
             borderRadius: BorderRadius.circular(18.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
           ),
-          child: _buildAppIconBody(app, 60.w),
         ),
-      ),
-      childWhenDragging: Container(
-        width: 60.w,
-        height: 60.w,
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(18.r),
-        ),
-      ),
-      child: GestureDetector(
-        onTap: () => logic.onAppTap(app),
-        child: DragTarget<AppItem>(
-          onWillAccept: (data) {
-            print('App位置 $pageIndex-$index 准备接受: ${data?.name}');
-            return data != null && data != app; // 不能拖拽到自己身上
-          },
-          onAccept: (data) {
-            print('App位置 $pageIndex-$index 接受: ${data.name}');
-            // 处理拖拽到其他位置
-            logic.moveAppToPosition(data, pageIndex, index);
-          },
-          builder: (context, candidateData, rejectedData) {
-            return _buildAppItem(app);
-          },
+        child: GestureDetector(
+          onTap: () => logic.onAppTap(app),
+          child: DragTarget<AppItem>(
+            onWillAccept: (data) {
+              print('App位置 $pageIndex-$index 准备接受: ${data?.name}');
+              return data != null && data != app; // 不能拖拽到自己身上
+            },
+            onAccept: (data) {
+              print('App位置 $pageIndex-$index 接受: ${data.name}');
+              // 处理拖拽到其他位置
+              logic.moveAppToPosition(data, pageIndex, index);
+            },
+            builder: (context, candidateData, rejectedData) {
+              return _buildAppItem(app);
+            },
+          ),
         ),
       ),
     );

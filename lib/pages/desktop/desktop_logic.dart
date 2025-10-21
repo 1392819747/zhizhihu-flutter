@@ -39,8 +39,8 @@ class DesktopLogic extends GetxController {
   final isLoadingWeather = false.obs;
   final WeatherService _weatherService = WeatherService();
 
-  // App位置管理：使用Map来存储每个位置的App，null表示空位
-  final Map<int, AppItem?> appPositions = {};
+  // App位置管理：使用可观察的Map来存储每个位置的App，null表示空位
+  final RxMap<int, AppItem?> appPositions = <int, AppItem?>{}.obs;
 
   final List<AppItem> appList = [
     AppItem(
@@ -150,10 +150,12 @@ class DesktopLogic extends GetxController {
 
   // 初始化App位置
   void _initializeAppPositions() {
-    appPositions.clear();
-    for (int i = 0; i < appList.length; i++) {
-      appPositions[i] = appList[i];
-    }
+    appPositions
+      ..clear()
+      ..addAll({
+        for (int i = 0; i < appList.length; i++) i: appList[i],
+      });
+    appPositions.refresh();
   }
 
   void onAppTap(AppItem app) async {
@@ -240,6 +242,7 @@ class DesktopLogic extends GetxController {
       print('移动到空位: $targetGlobalIndex');
     }
 
+    appPositions.refresh();
     update([appsUpdateId]);
     print('App位置更新完成');
   }

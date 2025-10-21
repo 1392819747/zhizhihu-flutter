@@ -1,4 +1,4 @@
-import 'package:characters/characters.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -7,10 +7,13 @@ import 'package:openim_common/openim_common.dart';
 
 import '../../services/api_settings_service.dart';
 import '../../routes/app_navigator.dart';
+import '../api_settings/api_settings_logic.dart';
 import 'wechat_mock_logic.dart';
 
 class WeChatMockPage extends GetView<WeChatMockLogic> {
   const WeChatMockPage({super.key});
+
+  ApiSettingsLogic get _apiLogic => Get.find<ApiSettingsLogic>();
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +26,10 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
           elevation: 0,
           title: const Text('微信'),
           centerTitle: true,
-          actions: [
+          actions: const [
             IconButton(
               onPressed: AppNavigator.startApiSettings,
-              icon: const Icon(Icons.tune),
+              icon: Icon(Icons.tune),
               color: Colors.white,
               tooltip: 'API 设置',
             ),
@@ -119,40 +122,299 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
   Widget _buildContactsTab() {
     return Obx(() {
       final characters = controller.service.characters;
+      final selectedId = controller.service.selectedCharacterId.value;
+      final endpoints = {for (final ep in controller.service.endpoints) ep.id: ep};
+      final padding = EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h);
+
       if (characters.isEmpty) {
-        return _buildPlaceholder('暂无联系人。创建 AI 角色后，这里将显示可对话的「好友」。');
+        return Container(
+          color: const Color(0xFFF2F2F7),
+          padding: padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildContactsHeader(),
+              SizedBox(height: 16.h),
+              _buildAddCharacterButton(),
+              SizedBox(height: 24.h),
+              _buildContactsEmptyHint(),
+            ],
+          ),
+        );
       }
-      final endpointMap = {for (final ep in controller.service.endpoints) ep.id: ep};
-      return ListView.builder(
-        itemCount: characters.length,
-        itemBuilder: (context, index) {
-          final character = characters[index];
-          final endpoint = endpointMap[character.endpointId];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: character.avatarColor,
-              child: Text(character.name.characters.first, style: const TextStyle(color: Colors.white)),
-            ),
-            title: Text(character.name),
-            subtitle: Text(
-              endpoint == null
-                  ? '未绑定接口'
-                  : '${endpoint.name} · ${endpoint.model.isEmpty ? endpoint.baseUrl : endpoint.model}',
-            ),
-            onTap: () {
-              final conv = controller.conversations.firstWhereOrNull(
-                (element) => element.character.id == character.id,
+
+      return Container(
+        color: const Color(0xFFF2F2F7),
+        child: ListView(
+          padding: padding,
+          children: [
+            _buildContactsHeader(),
+            SizedBox(height: 16.h),
+            _buildAddCharacterButton(),
+            SizedBox(height: 16.h),
+            ...characters.map((character) {
+              final endpoint = endpoints[character.endpointId];
+              final isDefault = selectedId == character.id;
+              return Padding(
+                padding: EdgeInsets.only(bottom: 12.h),
+                child: _buildContactCard(
+                  character: character,
+                  endpoint: endpoint,
+                  isDefault: isDefault,
+                ),
               );
-              if (conv != null) {
-                _openConversation(conv);
-              } else {
-                IMViews.showToast('请先为该角色配置接口');
-              }
-            },
-          );
-        },
+            }),
+          ],
+        ),
       );
     });
+  }
+
+  Widget _buildContactsHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'AI 联系人',
+          style: TextStyle(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1C1C1E),
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          '集中管理 SillyTavern 风格的 AI 伙伴，轻点卡片即可开始对话。',
+          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddCharacterButton() {
+    return CupertinoButton.filled(
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      borderRadius: BorderRadius.circular(14.r),
+      onPressed: () => _apiLogic.addOrEditCharacter(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(CupertinoIcons.person_add_solid, size: 18),
+          6.horizontalSpace,
+          Text(
+            '新增 AI 角色',
+            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactsEmptyHint() {
+    final borderRadius = BorderRadius.circular(18.r);
+    return Container(
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: borderRadius,
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D000000),
+            blurRadius: 18,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36.w,
+                height: 36.w,
+                decoration: const BoxDecoration(
+                  color: Color(0x2607C160),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(CupertinoIcons.chat_bubble_text, color: Color(0xFF07C160)),
+              ),
+              12.horizontalSpace,
+              Expanded(
+                child: Text(
+                  '还没有 AI 联系人',
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            '点击上方按钮创建你的第一个 AI 伙伴，绑定接口后会自动出现在列表中。',
+            style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600, height: 1.35),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactCard({
+    required AiCharacter character,
+    required ApiEndpoint? endpoint,
+    required bool isDefault,
+  }) {
+    return GestureDetector(
+      onTap: () => _openCharacterConversation(character),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18.r),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0D000000),
+              blurRadius: 14,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 24.w,
+              backgroundColor: character.avatarColor,
+              child: Text(
+                character.name.characters.first,
+                style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
+              ),
+            ),
+            12.horizontalSpace,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          character.name,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1C1C1E),
+                          ),
+                        ),
+                      ),
+                      if (isDefault)
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color: const Color(0x1F34C759),
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: Text(
+                            '默认',
+                            style: TextStyle(fontSize: 11.sp, color: const Color(0xFF34C759)),
+                          ),
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    endpoint == null
+                        ? '未绑定接口'
+                        : '${endpoint.name} · ${endpoint.model.isEmpty ? endpoint.baseUrl : endpoint.model}',
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () => _showCharacterActions(character),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                child: const Icon(
+                  CupertinoIcons.ellipsis_vertical,
+                  size: 20,
+                  color: Color(0xFF8E8E93),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openCharacterConversation(AiCharacter character) {
+    final conv = controller.conversations.firstWhereOrNull(
+      (element) => element.character.id == character.id,
+    );
+    if (conv != null) {
+      _openConversation(conv);
+    } else {
+      IMViews.showToast('请先为该角色绑定接口');
+    }
+  }
+
+  void _showCharacterActions(AiCharacter character) {
+    final isDefault = controller.service.selectedCharacterId.value == character.id;
+    final endpoint = controller.service.endpoints.firstWhereOrNull(
+      (element) => element.id == character.endpointId,
+    );
+    showCupertinoModalPopup(
+      context: Get.context!,
+      builder: (_) => CupertinoActionSheet(
+        title: Text(character.name),
+        message: Text(
+          endpoint == null
+              ? '未绑定接口'
+              : '${endpoint.name} · ${endpoint.model.isEmpty ? endpoint.baseUrl : endpoint.model}',
+          style: const TextStyle(fontSize: 13),
+        ),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Get.back();
+              _openCharacterConversation(character);
+            },
+            child: const Text('发起聊天'),
+          ),
+          if (!isDefault)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Get.back();
+                _apiLogic.setDefaultCharacter(character.id);
+              },
+              child: const Text('设为默认角色'),
+            ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Get.back();
+              _apiLogic.addOrEditCharacter(character: character);
+            },
+            child: const Text('编辑资料'),
+          ),
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Get.back();
+              _apiLogic.removeCharacter(character);
+            },
+            child: const Text('删除角色'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Get.back(),
+          child: const Text('取消'),
+        ),
+      ),
+    );
   }
 
   Widget _buildPlaceholder(String text) {
@@ -236,7 +498,7 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
       _messages.add(_ChatMessage(text: content, isSelf: true, timestamp: DateTime.now()));
     });
     _controller.clear();
-    _scrollToBottom();
+    _scrollToBottom(animated: false);
     _scheduleMockReply();
   }
 
@@ -251,12 +513,21 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
     });
   }
 
-  void _scrollToBottom() {
+  void _scrollToBottom({bool animated = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
+      final target = _scrollController.position.maxScrollExtent;
+      if (!animated) {
+        _scrollController.jumpTo(target);
+        return;
+      }
+      final distance = (target - _scrollController.position.pixels).abs();
+      final duration = Duration(
+        milliseconds: distance < 120 ? 140 : 220,
+      );
       _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent + 80.h,
-        duration: const Duration(milliseconds: 200),
+        target,
+        duration: duration,
         curve: Curves.easeOut,
       );
     });

@@ -8,6 +8,7 @@ import '../../domain/entities/api_entities.dart';
 import '../../domain/entities/chat_entities.dart' as chat;
 import '../../services/chat_service.dart';
 import 'wechat_mock_logic.dart';
+import '../../routes/app_navigator.dart';
 
 class WeChatChatPage extends StatefulWidget {
   const WeChatChatPage(

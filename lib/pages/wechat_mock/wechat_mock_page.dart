@@ -171,6 +171,8 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
   }
 
   Widget _buildContactsHeader() {
+    final persona = controller.service.persona.value;
+    final loreCount = controller.service.worldInfos.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -187,6 +189,73 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
           '集中管理 SillyTavern 风格的 AI 伙伴，轻点卡片即可开始对话。',
           style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
         ),
+        if (persona != null) ...[
+          SizedBox(height: 16.h),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0F000000),
+                  blurRadius: 12,
+                  offset: Offset(0, 6),
+                ),
+              ],
+            ),
+            padding: EdgeInsets.all(16.w),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 40.w,
+                  height: 40.w,
+                  decoration: const BoxDecoration(
+                    color: Color(0x26007AFF),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(CupertinoIcons.person_crop_circle, color: Color(0xFF007AFF)),
+                ),
+                12.horizontalSpace,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        persona.displayName,
+                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+                      ),
+                      if (persona.description.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.only(top: 6.h),
+                          child: Text(
+                            persona.description,
+                            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  onPressed: AppNavigator.startApiSettings,
+                  child: const Icon(CupertinoIcons.chevron_forward, color: Color(0xFF8E8E93)),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (loreCount > 0) ...[
+          SizedBox(height: 12.h),
+          GestureDetector(
+            onTap: AppNavigator.startApiSettings,
+            child: Text(
+              '世界信息：$loreCount 条（点击管理）',
+              style: TextStyle(fontSize: 12.sp, color: const Color(0xFF007AFF)),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -385,6 +454,13 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
             },
             child: const Text('发起聊天'),
           ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Get.back();
+              _showCharacterPromptPreview(character);
+            },
+            child: const Text('查看提示组合'),
+          ),
           if (!isDefault)
             CupertinoActionSheetAction(
               onPressed: () {
@@ -417,6 +493,84 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
     );
   }
 
+  void _showCharacterPromptPreview(AiCharacter character) {
+    final conv = controller.conversations.firstWhereOrNull(
+      (element) => element.character.id == character.id,
+    );
+    if (conv == null) {
+      IMViews.showToast('请先为该角色绑定接口');
+      return;
+    }
+    Get.dialog(
+      AlertDialog(
+        title: Text('${character.name} · 提示预览'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Persona',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+              ),
+              SizedBox(height: 6.h),
+              if (conv.persona != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(conv.persona!.displayName, style: TextStyle(fontSize: 13.sp)),
+                    if (conv.persona!.description.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 4.h),
+                        child: Text(
+                          conv.persona!.description,
+                          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+                        ),
+                      ),
+                  ],
+                )
+              else
+                Text('未设置用户个性', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500)),
+              SizedBox(height: 12.h),
+              Text(
+                '角色设定',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+              ),
+              SizedBox(height: 6.h),
+              Text(character.persona.isEmpty ? '未填写' : character.persona,
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700)),
+              SizedBox(height: 12.h),
+              Text(
+                '世界信息 (${conv.worldInfos.length})',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+              ),
+              SizedBox(height: 6.h),
+              if (conv.worldInfos.isEmpty)
+                Text('暂无设定条目', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500))
+              else
+                ...conv.worldInfos.map(
+                  (entry) => Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(entry.title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+                        SizedBox(height: 4.h),
+                        Text(entry.content, style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700)),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('关闭')),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPlaceholder(String text) {
     return Center(
       child: Padding(
@@ -432,7 +586,7 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
 
   Future<void> _openConversation(WeChatConversation conversation) async {
     final result = await Get.to<ChatPreview>(
-      () => WeChatChatPage(character: conversation.character, endpoint: conversation.endpoint),
+      () => WeChatChatPage(conversation: conversation),
     );
     if (result != null) {
       controller.updatePreview(conversation.character.id, result);
@@ -450,10 +604,15 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
 }
 
 class WeChatChatPage extends StatefulWidget {
-  const WeChatChatPage({super.key, required this.character, required this.endpoint});
+  const WeChatChatPage({super.key, required this.conversation});
 
-  final AiCharacter character;
-  final ApiEndpoint endpoint;
+  final WeChatConversation conversation;
+
+  AiCharacter get character => conversation.character;
+  ApiEndpoint get endpoint => conversation.endpoint;
+  UserPersona? get persona => conversation.persona;
+  List<WorldInfoEntry> get worldInfos => conversation.worldInfos;
+  GenerationConfig get generationConfig => conversation.generationConfig;
 
   @override
   State<WeChatChatPage> createState() => _WeChatChatPageState();
@@ -467,8 +626,14 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
   List<String> get _fallbackReplies => widget.character.sampleReplies.isNotEmpty
       ? widget.character.sampleReplies
       : [
-          '这听起来很有意思，我们继续聊聊吧。',
-          '让我整理一下思路，再为你提供建议。',
+          if (widget.persona?.style.isNotEmpty == true)
+            '按照我的风格（${widget.persona!.style}）来回应你。'
+          else
+            '这听起来很有意思，我们继续聊聊吧。',
+          if (widget.persona?.goals.isNotEmpty == true)
+            '记得我们的目标：${widget.persona!.goals}。'
+          else
+            '让我整理一下思路，再为你提供建议。',
           '收到，我会以 ${widget.endpoint.name} 的接口风格进行输出。',
         ];
 
@@ -544,6 +709,7 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final contextBanner = _buildConversationContextBanner();
     return Scaffold(
       backgroundColor: const Color(0xFFEDEDED),
       appBar: AppBar(
@@ -573,6 +739,7 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
       ),
       body: Column(
         children: [
+          if (contextBanner != null) contextBanner,
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -636,6 +803,61 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
     );
   }
 
+  Widget? _buildConversationContextBanner() {
+    final persona = widget.persona;
+    final lore = widget.worldInfos;
+    if (persona == null && lore.isEmpty) {
+      return null;
+    }
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 0),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0F000000),
+            blurRadius: 12,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(CupertinoIcons.info_circle_fill, color: Color(0xFF07C160)),
+          12.horizontalSpace,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '上下文已启用',
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF1C1C1E)),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  [
+                    if (persona != null) 'Persona：${persona.displayName}',
+                    if (lore.isNotEmpty) '世界信息：${lore.length} 条',
+                  ].join(' · '),
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+          ),
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            onPressed: _showPromptContextSheet,
+            child: const Icon(CupertinoIcons.chevron_forward, color: Color(0xFF8E8E93)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildInputBar() {
     return Container(
       color: Colors.white,
@@ -672,24 +894,193 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
     Get.dialog(
       AlertDialog(
         title: Text(widget.endpoint.name),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('类型：${widget.endpoint.type == ApiProviderType.openai ? 'OpenAI 兼容' : 'Google Gemini'}'),
-            const SizedBox(height: 8),
-            Text('Base URL：${widget.endpoint.baseUrl}'),
-            const SizedBox(height: 8),
-            Text('默认模型：${widget.endpoint.model.isEmpty ? '未设置' : widget.endpoint.model}'),
-            if (widget.endpoint.notes.isNotEmpty) ...[
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('类型：${widget.endpoint.type == ApiProviderType.openai ? 'OpenAI 兼容' : 'Google Gemini'}'),
               const SizedBox(height: 8),
-              Text('备注：${widget.endpoint.notes}')
+              Text('Base URL：${widget.endpoint.baseUrl}'),
+              const SizedBox(height: 8),
+              Text('默认模型：${widget.endpoint.model.isEmpty ? '未设置' : widget.endpoint.model}'),
+              const SizedBox(height: 12),
+              Text(
+                '生成参数',
+                style: TextStyle(fontWeight: FontWeight.w600, color: const Color(0xFF1C1C1E), fontSize: 14.sp),
+              ),
+              SizedBox(height: 8.h),
+              Wrap(
+                spacing: 10.w,
+                runSpacing: 6.h,
+                children: [
+                  _buildInfoChip('temperature', widget.generationConfig.temperature.toStringAsFixed(2)),
+                  _buildInfoChip('top_p', widget.generationConfig.topP.toStringAsFixed(2)),
+                  _buildInfoChip('top_k', widget.generationConfig.topK.toString()),
+                  _buildInfoChip('max_tokens', widget.generationConfig.maxTokens.toString()),
+                  _buildInfoChip(
+                    'presence_penalty',
+                    widget.generationConfig.presencePenalty.toStringAsFixed(2),
+                  ),
+                  _buildInfoChip(
+                    'frequency_penalty',
+                    widget.generationConfig.frequencyPenalty.toStringAsFixed(2),
+                  ),
+                  _buildInfoChip('stream', widget.generationConfig.stream ? 'ON' : 'OFF'),
+                ],
+              ),
+              if (widget.endpoint.notes.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text('备注：${widget.endpoint.notes}'),
+              ],
+              if (widget.persona != null) ...[
+                SizedBox(height: 16.h),
+                Text(
+                  'Persona',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  widget.persona!.description.isEmpty
+                      ? widget.persona!.displayName
+                      : '${widget.persona!.displayName} · ${widget.persona!.description}',
+                ),
+              ],
+              if (widget.worldInfos.isNotEmpty) ...[
+                SizedBox(height: 16.h),
+                Text(
+                  '世界信息 (${widget.worldInfos.length})',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+                ),
+                SizedBox(height: 8.h),
+                ...widget.worldInfos.map(
+                  (entry) => Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          entry.title,
+                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          entry.content,
+                          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('关闭')),
         ],
+      ),
+    );
+  }
+
+  void _showPromptContextSheet() {
+    final persona = widget.persona;
+    final lore = widget.worldInfos;
+    Get.dialog(
+      AlertDialog(
+        title: Text('${widget.character.name} · 对话上下文'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (persona != null) ...[
+                Text(
+                  'Persona · ${persona.displayName}',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+                ),
+                SizedBox(height: 6.h),
+                if (persona.description.isNotEmpty)
+                  Text(persona.description, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
+                if (persona.goals.isNotEmpty) ...[
+                  SizedBox(height: 4.h),
+                  Text('目标：${persona.goals}', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
+                ],
+                if (persona.style.isNotEmpty) ...[
+                  SizedBox(height: 4.h),
+                  Text('风格：${persona.style}', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
+                ],
+                SizedBox(height: 12.h),
+              ],
+              Text(
+                '世界信息 (${lore.length})',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14.sp),
+              ),
+              SizedBox(height: 6.h),
+              if (lore.isEmpty)
+                Text('暂无设定条目', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600))
+              else
+                ...lore.map(
+                  (entry) => Padding(
+                    padding: EdgeInsets.only(bottom: 10.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                entry.title,
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+                              ),
+                            ),
+                            Text(
+                              '优先级 ${entry.priority}',
+                              style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade500),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          entry.content,
+                          style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700),
+                        ),
+                        SizedBox(height: 4.h),
+                        Wrap(
+                          spacing: 6.w,
+                          children: entry.keywords
+                              .map((k) => Chip(
+                                    label: Text(k, style: TextStyle(fontSize: 11.sp)),
+                                    backgroundColor: const Color(0xFFE5E5EA),
+                                    padding: EdgeInsets.zero,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ))
+                              .toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('关闭')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(String label, String value) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE5E5EA),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Text(
+        '$label = $value',
+        style: TextStyle(fontSize: 11.sp, color: const Color(0xFF3C3C43)),
       ),
     );
   }

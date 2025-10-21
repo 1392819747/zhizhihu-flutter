@@ -24,7 +24,6 @@ String apiProviderTypeToString(ApiProviderType type) {
     case ApiProviderType.gemini:
       return 'gemini';
     case ApiProviderType.openai:
-    default:
       return 'openai';
   }
 }
@@ -38,6 +37,8 @@ class ApiEndpoint {
     required this.apiKey,
     required this.model,
     this.notes = '',
+    this.enabledFunctions = const [],
+    this.generationConfig = const GenerationConfig(),
   });
 
   final String id;
@@ -47,6 +48,8 @@ class ApiEndpoint {
   final String apiKey;
   final String model;
   final String notes;
+  final List<String> enabledFunctions;
+  final GenerationConfig generationConfig;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -56,6 +59,8 @@ class ApiEndpoint {
         'apiKey': apiKey,
         'model': model,
         'notes': notes,
+        'enabledFunctions': enabledFunctions,
+        'generationConfig': generationConfig.toJson(),
       };
 
   factory ApiEndpoint.fromJson(Map<String, dynamic> json) => ApiEndpoint(
@@ -66,6 +71,15 @@ class ApiEndpoint {
         apiKey: json['apiKey'] as String? ?? '',
         model: json['model'] as String? ?? '',
         notes: json['notes'] as String? ?? '',
+        enabledFunctions: (json['enabledFunctions'] as List?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            const [],
+        generationConfig: GenerationConfig.fromJson(
+          Map<String, dynamic>.from(
+            (json['generationConfig'] as Map?) ?? const {},
+          ),
+        ),
       );
 
   ApiEndpoint copyWith({
@@ -76,6 +90,8 @@ class ApiEndpoint {
     String? apiKey,
     String? model,
     String? notes,
+    List<String>? enabledFunctions,
+    GenerationConfig? generationConfig,
   }) =>
       ApiEndpoint(
         id: id ?? this.id,
@@ -85,6 +101,8 @@ class ApiEndpoint {
         apiKey: apiKey ?? this.apiKey,
         model: model ?? this.model,
         notes: notes ?? this.notes,
+        enabledFunctions: enabledFunctions ?? this.enabledFunctions,
+        generationConfig: generationConfig ?? this.generationConfig,
       );
 }
 
@@ -157,11 +175,15 @@ class ApiSettingsService extends GetxService {
   static const _charactersKey = 'api_settings.characters';
   static const _selectedEndpointKey = 'api_settings.selected_endpoint';
   static const _selectedCharacterKey = 'api_settings.selected_character';
+  static const _personaKey = 'api_settings.user_persona';
+  static const _worldInfoKey = 'api_settings.world_info';
 
   final endpoints = <ApiEndpoint>[].obs;
   final characters = <AiCharacter>[].obs;
   final selectedEndpointId = ''.obs;
   final selectedCharacterId = ''.obs;
+  final persona = Rxn<UserPersona>();
+  final worldInfos = <WorldInfoEntry>[].obs;
 
   ApiSettingsService() {
     _loadState();
@@ -194,6 +216,31 @@ class ApiSettingsService extends GetxService {
       characters.clear();
     }
 
+    try {
+      final personaJson = SpUtil().getString(_personaKey, defValue: '') ?? '';
+      if (personaJson.isNotEmpty) {
+        persona.value = UserPersona.fromJson(
+          Map<String, dynamic>.from(jsonDecode(personaJson) as Map),
+        );
+      }
+    } catch (e) {
+      Logger.print('加载用户个性失败: $e', onlyConsole: true);
+      persona.value = null;
+    }
+
+    try {
+      final worldJson = SpUtil().getString(_worldInfoKey, defValue: '') ?? '';
+      if (worldJson.isNotEmpty) {
+        final list = (jsonDecode(worldJson) as List)
+            .map((e) => WorldInfoEntry.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList();
+        worldInfos.assignAll(list);
+      }
+    } catch (e) {
+      Logger.print('加载世界信息失败: $e', onlyConsole: true);
+      worldInfos.clear();
+    }
+
     selectedEndpointId.value =
         SpUtil().getString(_selectedEndpointKey, defValue: endpoints.isNotEmpty ? endpoints.first.id : '') ?? '';
     if (selectedEndpointId.value.isEmpty && endpoints.isNotEmpty) {
@@ -218,6 +265,11 @@ class ApiSettingsService extends GetxService {
       characters.assignAll(defaults);
       selectedCharacterId.value = defaults.first.id;
       _persistCharacters();
+    }
+
+    if (persona.value == null) {
+      persona.value = _buildDefaultPersona();
+      _persistPersona();
     }
   }
 
@@ -296,11 +348,28 @@ class ApiSettingsService extends GetxService {
   Future<void> _persistEndpoints() async {
     final jsonStr = jsonEncode(endpoints.map((e) => e.toJson()).toList());
     await SpUtil().putString(_endpointsKey, jsonStr);
+    endpoints.refresh();
   }
 
   Future<void> _persistCharacters() async {
     final jsonStr = jsonEncode(characters.map((e) => e.toJson()).toList());
     await SpUtil().putString(_charactersKey, jsonStr);
+    characters.refresh();
+  }
+
+  Future<void> _persistPersona() async {
+    final value = persona.value;
+    if (value == null) {
+      await SpUtil().remove(_personaKey);
+    } else {
+      await SpUtil().putString(_personaKey, jsonEncode(value.toJson()));
+    }
+  }
+
+  Future<void> _persistWorldInfos() async {
+    final jsonStr = jsonEncode(worldInfos.map((e) => e.toJson()).toList());
+    await SpUtil().putString(_worldInfoKey, jsonStr);
+    worldInfos.refresh();
   }
 
   ApiEndpoint? get selectedEndpoint => getEndpointById(selectedEndpointId.value);
@@ -311,6 +380,49 @@ class ApiSettingsService extends GetxService {
   ApiEndpoint ensureEndpointForCharacter(AiCharacter character) {
     final endpoint = getEndpointById(character.endpointId);
     return endpoint ?? selectedEndpoint ?? endpoints.first;
+  }
+
+  Future<void> updateGenerationConfig({
+    required ApiEndpoint endpoint,
+    required GenerationConfig config,
+  }) async {
+    final updated = endpoint.copyWith(generationConfig: config);
+    await addOrUpdateEndpoint(updated);
+  }
+
+  Future<void> setEnabledFunctions({
+    required ApiEndpoint endpoint,
+    required List<String> functions,
+  }) async {
+    final updated = endpoint.copyWith(enabledFunctions: functions);
+    await addOrUpdateEndpoint(updated);
+  }
+
+  Future<void> setPersona(UserPersona? value) async {
+    persona.value = value;
+    await _persistPersona();
+  }
+
+  Future<void> addOrUpdateWorldInfo(WorldInfoEntry entry) async {
+    final index = worldInfos.indexWhere((element) => element.id == entry.id);
+    if (index >= 0) {
+      worldInfos[index] = entry;
+    } else {
+      worldInfos.add(entry);
+    }
+    await _persistWorldInfos();
+  }
+
+  Future<void> deleteWorldInfo(String id) async {
+    worldInfos.removeWhere((element) => element.id == id);
+    await _persistWorldInfos();
+  }
+
+  Future<void> reorderWorldInfos(int oldIndex, int newIndex) async {
+    if (newIndex > oldIndex) newIndex -= 1;
+    final item = worldInfos.removeAt(oldIndex);
+    worldInfos.insert(newIndex, item);
+    await _persistWorldInfos();
   }
 
   String generateEndpointId() => const Uuid().v4();
@@ -328,7 +440,8 @@ class ApiSettingsService extends GetxService {
       const Color(0xFF5AC8FA),
     ];
     final color = colors[rand.nextInt(colors.length)];
-    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+    final argb = color.toARGB32();
+    return '#${argb.toRadixString(16).padLeft(8, '0').substring(2)}';
   }
 
   List<ApiEndpoint> _buildDefaultEndpoints() {
@@ -341,6 +454,8 @@ class ApiSettingsService extends GetxService {
         apiKey: '',
         model: 'gpt-4o-mini',
         notes: '示例配置，填写自己的 API Key 后即可使用。',
+        enabledFunctions: const ['chat', 'vision'],
+        generationConfig: const GenerationConfig(),
       ),
       ApiEndpoint(
         id: generateEndpointId(),
@@ -350,6 +465,8 @@ class ApiSettingsService extends GetxService {
         apiKey: '',
         model: 'gemini-1.5-flash',
         notes: '需要 Google API Key。',
+        enabledFunctions: const ['chat', 'image'],
+        generationConfig: const GenerationConfig(temperature: 0.8, topP: 0.95, maxTokens: 2048),
       ),
     ];
   }
@@ -372,4 +489,171 @@ class ApiSettingsService extends GetxService {
       ),
     ];
   }
+
+  UserPersona _buildDefaultPersona() => const UserPersona(
+        id: 'persona-default',
+        displayName: '我',
+        description: '喜欢探索新点子、保持好奇心的产品经理。',
+        goals: '与 AI 合作快速原型设计、整理灵感、维持温暖的对话氛围。',
+        style: '语气亲切，偶尔自嘲，关注他人情绪。',
+      );
+}
+
+class GenerationConfig {
+  const GenerationConfig({
+    this.temperature = 0.7,
+    this.topP = 1.0,
+    this.topK = 40,
+    this.maxTokens = 1024,
+    this.presencePenalty = 0.0,
+    this.frequencyPenalty = 0.0,
+    this.stream = false,
+  });
+
+  final double temperature;
+  final double topP;
+  final int topK;
+  final int maxTokens;
+  final double presencePenalty;
+  final double frequencyPenalty;
+  final bool stream;
+
+  GenerationConfig copyWith({
+    double? temperature,
+    double? topP,
+    int? topK,
+    int? maxTokens,
+    double? presencePenalty,
+    double? frequencyPenalty,
+    bool? stream,
+  }) =>
+      GenerationConfig(
+        temperature: temperature ?? this.temperature,
+        topP: topP ?? this.topP,
+        topK: topK ?? this.topK,
+        maxTokens: maxTokens ?? this.maxTokens,
+        presencePenalty: presencePenalty ?? this.presencePenalty,
+        frequencyPenalty: frequencyPenalty ?? this.frequencyPenalty,
+        stream: stream ?? this.stream,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'temperature': temperature,
+        'topP': topP,
+        'topK': topK,
+        'maxTokens': maxTokens,
+        'presencePenalty': presencePenalty,
+        'frequencyPenalty': frequencyPenalty,
+        'stream': stream,
+      };
+
+  factory GenerationConfig.fromJson(Map<String, dynamic> json) => GenerationConfig(
+        temperature: (json['temperature'] as num?)?.toDouble() ?? 0.7,
+        topP: (json['topP'] as num?)?.toDouble() ?? 1.0,
+        topK: (json['topK'] as num?)?.toInt() ?? 40,
+        maxTokens: (json['maxTokens'] as num?)?.toInt() ?? 1024,
+        presencePenalty: (json['presencePenalty'] as num?)?.toDouble() ?? 0.0,
+        frequencyPenalty: (json['frequencyPenalty'] as num?)?.toDouble() ?? 0.0,
+        stream: json['stream'] as bool? ?? false,
+      );
+}
+
+class UserPersona {
+  const UserPersona({
+    required this.id,
+    required this.displayName,
+    required this.description,
+    required this.goals,
+    this.style = '',
+  });
+
+  final String id;
+  final String displayName;
+  final String description;
+  final String goals;
+  final String style;
+
+  UserPersona copyWith({
+    String? id,
+    String? displayName,
+    String? description,
+    String? goals,
+    String? style,
+  }) =>
+      UserPersona(
+        id: id ?? this.id,
+        displayName: displayName ?? this.displayName,
+        description: description ?? this.description,
+        goals: goals ?? this.goals,
+        style: style ?? this.style,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'displayName': displayName,
+        'description': description,
+        'goals': goals,
+        'style': style,
+      };
+
+  factory UserPersona.fromJson(Map<String, dynamic> json) => UserPersona(
+        id: json['id'] as String,
+        displayName: json['displayName'] as String? ?? '我',
+        description: json['description'] as String? ?? '',
+        goals: json['goals'] as String? ?? '',
+        style: json['style'] as String? ?? '',
+      );
+}
+
+class WorldInfoEntry {
+  const WorldInfoEntry({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.keywords,
+    this.priority = 0,
+    this.enabled = true,
+  });
+
+  final String id;
+  final String title;
+  final String content;
+  final List<String> keywords;
+  final int priority;
+  final bool enabled;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'content': content,
+        'keywords': keywords,
+        'priority': priority,
+        'enabled': enabled,
+      };
+
+  factory WorldInfoEntry.fromJson(Map<String, dynamic> json) => WorldInfoEntry(
+        id: json['id'] as String,
+        title: json['title'] as String? ?? '',
+        content: json['content'] as String? ?? '',
+        keywords: (json['keywords'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+        priority: (json['priority'] as num?)?.toInt() ?? 0,
+        enabled: json['enabled'] as bool? ?? true,
+      );
+
+  WorldInfoEntry copyWith({
+    String? id,
+    String? title,
+    String? content,
+    List<String>? keywords,
+    int? priority,
+    bool? enabled,
+  }) =>
+      WorldInfoEntry(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        content: content ?? this.content,
+        keywords: keywords ?? this.keywords,
+        priority: priority ?? this.priority,
+        enabled: enabled ?? this.enabled,
+      );
 }

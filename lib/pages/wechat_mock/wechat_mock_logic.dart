@@ -1,4 +1,3 @@
-import 'package:characters/characters.dart';
 import 'package:get/get.dart';
 
 import '../../services/api_settings_service.dart';
@@ -11,11 +10,21 @@ class ChatPreview {
 }
 
 class WeChatConversation {
-  WeChatConversation({required this.character, required this.endpoint, required this.preview});
+  WeChatConversation({
+    required this.character,
+    required this.endpoint,
+    required this.preview,
+    required this.persona,
+    required this.worldInfos,
+  });
 
   final AiCharacter character;
   final ApiEndpoint endpoint;
   final ChatPreview preview;
+  final UserPersona? persona;
+  final List<WorldInfoEntry> worldInfos;
+
+  GenerationConfig get generationConfig => endpoint.generationConfig;
 }
 
 class WeChatMockLogic extends GetxController {
@@ -32,6 +41,8 @@ class WeChatMockLogic extends GetxController {
     _rebuildConversations();
     ever(_service.characters, (_) => _rebuildConversations());
     ever(_service.endpoints, (_) => _rebuildConversations());
+    ever(_service.persona, (_) => _rebuildConversations());
+    ever(_service.worldInfos, (_) => _rebuildConversations());
   }
 
   void _rebuildConversations() {
@@ -40,11 +51,19 @@ class WeChatMockLogic extends GetxController {
       return;
     }
     final endpointMap = {for (final ep in _service.endpoints) ep.id: ep};
+    final persona = _service.persona.value;
+    final lore = _service.worldInfos.where((element) => element.enabled).toList();
     final list = _service.characters.map((character) {
       final endpoint = endpointMap[character.endpointId] ?? _service.selectedEndpoint ?? _service.endpoints.first;
       final preview = previewHistory[character.id] ??
           ChatPreview(lastMessage: character.greeting, lastTime: DateTime.now().subtract(const Duration(minutes: 5)));
-      return WeChatConversation(character: character, endpoint: endpoint, preview: preview);
+      return WeChatConversation(
+        character: character,
+        endpoint: endpoint,
+        preview: preview,
+        persona: persona,
+        worldInfos: lore,
+      );
     }).toList();
     list.sort((a, b) => b.preview.lastTime.compareTo(a.preview.lastTime));
     conversations.assignAll(list);

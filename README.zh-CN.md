@@ -78,7 +78,8 @@ OpenIM 为开发者提供开源即时通讯 SDK，作为 Twilio、Sendbird 等�
    static const _host = "your-server-ip or your-domain";
  ```
 
-  - ~~桌面天气小组件需配置和风天气密钥，请参考 [`docs/qweather_setup.md`](docs/qweather_setup.md) 管理本地 `QWEATHER_API_TOKEN` 并同步到 Codemagic。~~ **已更新**：现在使用JWT自动认证，无需手动配置。
+  - 桌面天气小组件已切换至 wttr.in 公共接口，无需密钥，详见 [`docs/qweather_setup.md`](docs/qweather_setup.md)。
+  - 桌面新增“API 设置”应用，可管理 OpenAI/Gemini 接口与 AI 角色，快速构建 SillyTavern 风格体验。
 
 4. 通过终端执行 `flutter run` 或者IDE的启动菜单来运行iOS/Android应用程序。
 

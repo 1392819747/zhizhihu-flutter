@@ -25,16 +25,16 @@ class ApiSettingsLogic extends GetxController {
   }
 
   Future<void> addOrEditEndpoint({ApiEndpoint? endpoint}) async {
+    var providerType = endpoint?.type ?? ApiProviderType.openai;
     final nameCtrl = TextEditingController(text: endpoint?.name ?? '');
     final baseUrlCtrl = TextEditingController(
-        text: endpoint?.baseUrl ?? _defaultBaseUrl(endpoint?.type));
+        text: endpoint?.baseUrl ?? providerType.defaultBaseUrl);
     final keyLabelCtrl = TextEditingController(
         text: endpoint?.keyLabel ?? 'API_KEY_${service.endpoints.length + 1}');
     final apiKeyCtrl = TextEditingController();
     final modelCtrl =
-        TextEditingController(text: endpoint?.model ?? 'gpt-4o-mini');
+        TextEditingController(text: endpoint?.model ?? providerType.defaultModel);
     final notesCtrl = TextEditingController(text: endpoint?.notes ?? '');
-    var providerType = endpoint?.type ?? ApiProviderType.openai;
     final isNew = endpoint == null;
 
     final confirmed = await Get.dialog<bool>(
@@ -122,20 +122,19 @@ class ApiSettingsLogic extends GetxController {
                         _buildModernDropdown<ApiProviderType>(
                           value: providerType,
                           label: 'API 提供商',
-                          items: const [
+                          items: ApiProviderType.values.map((type) => 
                             DropdownMenuItem(
-                                value: ApiProviderType.openai,
-                                child: Text('OpenAI 兼容接口')),
-                            DropdownMenuItem(
-                                value: ApiProviderType.gemini,
-                                child: Text('Google Gemini')),
-                          ],
+                              value: type,
+                              child: Text(type.displayName),
+                            ),
+                          ).toList(),
                           onChanged: (value) {
                             if (value == null) return;
                             setState(() {
                               providerType = value;
                               if (baseUrlCtrl.text.trim().isEmpty || endpoint == null) {
-                                baseUrlCtrl.text = _defaultBaseUrl(providerType);
+                                baseUrlCtrl.text = providerType.defaultBaseUrl;
+                                modelCtrl.text = providerType.defaultModel;
                               }
                             });
                           },

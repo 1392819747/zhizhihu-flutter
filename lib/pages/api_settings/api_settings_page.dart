@@ -173,8 +173,8 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
                               SizedBox(height: 4.h),
                               Text(
                                 selectedEndpoint != null
-                                    ? '${selectedEndpoint.type == ApiProviderType.openai ? 'OpenAI' : 'Google Gemini'} - ${selectedEndpoint.model}'
-                                    : 'OpenAI - gpt-3.5-turbo',
+                                    ? '${selectedEndpoint.type.displayName} - ${selectedEndpoint.model}'
+                                    : '智知狐 AI - gpt-3.5-turbo',
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   color: const Color(0xFF999999),
@@ -369,7 +369,7 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
                       ),
                     ),
                     Text(
-                      endpoint.type == ApiProviderType.openai ? 'OpenAI' : 'Google Gemini',
+                      endpoint.type.displayName,
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: const Color(0xFF999999),
@@ -818,15 +818,11 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
                 width: 24.w,
                 height: 24.w,
                 decoration: BoxDecoration(
-                  color: endpoint.type == ApiProviderType.openai 
-                      ? const Color(0xFF34C759) 
-                      : const Color(0xFF4285F4),
+                  color: _getProviderColor(endpoint.type),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  endpoint.type == ApiProviderType.openai 
-                      ? Icons.auto_awesome 
-                      : Icons.cloud,
+                  _getProviderIcon(endpoint.type),
                   size: 14,
                   color: Colors.white,
                 ),
@@ -846,7 +842,7 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      '${endpoint.type == ApiProviderType.openai ? 'OpenAI' : 'Google Gemini'} - ${endpoint.model.isEmpty ? '未指定模型' : endpoint.model}',
+                      '${endpoint.type.displayName} - ${endpoint.model.isEmpty ? '未指定模型' : endpoint.model}',
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: const Color(0xFF999999),
@@ -1001,6 +997,40 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
         ),
       ],
     );
+  }
+
+  Color _getProviderColor(ApiProviderType type) {
+    switch (type) {
+      case ApiProviderType.openai:
+        return const Color(0xFF34C759);
+      case ApiProviderType.gemini:
+        return const Color(0xFF4285F4);
+      case ApiProviderType.zhipuai:
+        return const Color(0xFF1E88E5);
+      case ApiProviderType.qwen:
+        return const Color(0xFFFF6B35);
+      case ApiProviderType.moonshot:
+        return const Color(0xFF9C27B0);
+      case ApiProviderType.other:
+        return const Color(0xFF666666);
+    }
+  }
+
+  IconData _getProviderIcon(ApiProviderType type) {
+    switch (type) {
+      case ApiProviderType.openai:
+        return Icons.auto_awesome;
+      case ApiProviderType.gemini:
+        return Icons.cloud;
+      case ApiProviderType.zhipuai:
+        return Icons.psychology;
+      case ApiProviderType.qwen:
+        return Icons.lightbulb;
+      case ApiProviderType.moonshot:
+        return Icons.nightlight_round;
+      case ApiProviderType.other:
+        return Icons.api;
+    }
   }
 
   void _showConfigActions(BuildContext context, ApiEndpoint endpoint, bool isSelected) {

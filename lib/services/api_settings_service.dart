@@ -308,28 +308,107 @@ class ApiSettingsService extends GetxService {
 
   List<ApiEndpoint> _buildDefaultEndpoints() {
     return [
+      // 智知狐API - 默认配置
       ApiEndpoint(
         id: generateEndpointId(),
-        name: 'OpenAI 兼容',
+        name: '智知狐 AI',
+        type: ApiProviderType.openai,
+        baseUrl: 'https://api.zhizhihu.cn/v1',
+        model: 'gpt-3.5-turbo',
+        keyLabel: 'ZHIZHIHU_KEY',
+        notes: '智知狐AI服务，支持OpenAI协议，开箱即用。',
+        enabledFunctions: const ['chat', 'vision'],
+        generationConfig: const GenerationConfig(
+          temperature: 0.7,
+          topP: 1.0,
+          maxTokens: 2048,
+          stream: true,
+        ),
+      ),
+      // OpenAI官方API
+      ApiEndpoint(
+        id: generateEndpointId(),
+        name: 'OpenAI 官方',
         type: ApiProviderType.openai,
         baseUrl: 'https://api.openai.com/v1',
         model: 'gpt-4o-mini',
         keyLabel: 'OPENAI_KEY',
-        notes: '示例配置，填写自己的 API Key 后即可使用。',
-        enabledFunctions: const ['chat', 'vision'],
-        generationConfig: const GenerationConfig(),
+        notes: 'OpenAI官方API，需要有效的API Key。支持GPT-4、GPT-3.5等模型。',
+        enabledFunctions: const ['chat', 'vision', 'tools'],
+        generationConfig: const GenerationConfig(
+          temperature: 0.7,
+          topP: 1.0,
+          maxTokens: 4096,
+          stream: true,
+        ),
       ),
+      // Google Gemini API
       ApiEndpoint(
         id: generateEndpointId(),
-        name: 'Gemini 官方',
+        name: 'Google Gemini',
         type: ApiProviderType.gemini,
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
         model: 'gemini-1.5-flash',
         keyLabel: 'GEMINI_KEY',
-        notes: '需要 Google API Key。',
+        notes: 'Google Gemini API，需要Google API Key。支持多模态对话。',
         enabledFunctions: const ['chat', 'image'],
         generationConfig: const GenerationConfig(
-            temperature: 0.8, topP: 0.95, maxTokens: 2048),
+          temperature: 0.8,
+          topP: 0.95,
+          maxTokens: 2048,
+          stream: false,
+        ),
+      ),
+      // 智谱AI - 兼容OpenAI协议
+      ApiEndpoint(
+        id: generateEndpointId(),
+        name: '智谱AI (GLM)',
+        type: ApiProviderType.openai,
+        baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+        model: 'glm-4',
+        keyLabel: 'ZHIPUAI_KEY',
+        notes: '智谱AI GLM模型，兼容OpenAI协议。支持GLM-4等大模型。',
+        enabledFunctions: const ['chat', 'vision'],
+        generationConfig: const GenerationConfig(
+          temperature: 0.7,
+          topP: 0.7,
+          maxTokens: 2048,
+          stream: true,
+        ),
+      ),
+      // 通义千问 - 兼容OpenAI协议
+      ApiEndpoint(
+        id: generateEndpointId(),
+        name: '通义千问 (Qwen)',
+        type: ApiProviderType.openai,
+        baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        model: 'qwen-turbo',
+        keyLabel: 'QWEN_KEY',
+        notes: '阿里云通义千问，兼容OpenAI协议。支持Qwen系列模型。',
+        enabledFunctions: const ['chat', 'vision'],
+        generationConfig: const GenerationConfig(
+          temperature: 0.7,
+          topP: 0.8,
+          maxTokens: 2048,
+          stream: true,
+        ),
+      ),
+      // 月之暗面 - 兼容OpenAI协议
+      ApiEndpoint(
+        id: generateEndpointId(),
+        name: '月之暗面 (Kimi)',
+        type: ApiProviderType.openai,
+        baseUrl: 'https://api.moonshot.cn/v1',
+        model: 'moonshot-v1-8k',
+        keyLabel: 'MOONSHOT_KEY',
+        notes: '月之暗面Kimi AI，兼容OpenAI协议。支持长文本处理。',
+        enabledFunctions: const ['chat'],
+        generationConfig: const GenerationConfig(
+          temperature: 0.7,
+          topP: 0.8,
+          maxTokens: 4096,
+          stream: true,
+        ),
       ),
     ];
   }

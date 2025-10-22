@@ -603,8 +603,484 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
   }
 
   void _showAllConfigs(BuildContext context) {
-    // 这里可以导航到完整的管理页面，或者显示一个更详细的管理界面
-    // 暂时显示一个提示，后续可以实现完整的管理页面
-    IMViews.showToast('管理功能开发中...');
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.8,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          children: [
+            // 顶部拖拽条和标题
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F9FA),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE5E5EA),
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  Row(
+                    children: [
+                      Container(
+                        width: 32.w,
+                        height: 32.w,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF34C759),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.settings,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          '管理所有配置',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF333333),
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 28.w,
+                          height: 28.w,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE5E5EA),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Color(0xFF666666),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // 配置列表
+            Expanded(
+              child: Obx(() {
+                final endpoints = service.endpoints;
+                if (endpoints.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 80.w,
+                          height: 80.w,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF5F5F5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.api,
+                            size: 40,
+                            color: Color(0xFF999999),
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                        Text(
+                          '暂无配置',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF666666),
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          '点击下方按钮添加第一个配置',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: const Color(0xFF999999),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  padding: EdgeInsets.all(16.w),
+                  itemCount: endpoints.length,
+                  itemBuilder: (context, index) {
+                    final endpoint = endpoints[index];
+                    final isSelected = service.selectedEndpointId.value == endpoint.id;
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: _buildConfigManagementCard(context, endpoint, isSelected),
+                    );
+                  },
+                );
+              }),
+            ),
+            // 底部添加按钮
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(
+                    color: const Color(0xFFE5E5EA),
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.addOrEditEndpoint();
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 48.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34C759),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.add,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        '添加新配置',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfigManagementCard(BuildContext context, ApiEndpoint endpoint, bool isSelected) {
+    final config = endpoint.generationConfig;
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: isSelected ? const Color(0xFF34C759) : const Color(0xFFE5E5EA),
+          width: isSelected ? 2 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 顶部标题和状态
+          Row(
+            children: [
+              Container(
+                width: 24.w,
+                height: 24.w,
+                decoration: BoxDecoration(
+                  color: endpoint.type == ApiProviderType.openai 
+                      ? const Color(0xFF34C759) 
+                      : const Color(0xFF4285F4),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  endpoint.type == ApiProviderType.openai 
+                      ? Icons.auto_awesome 
+                      : Icons.cloud,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      endpoint.name,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF333333),
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      '${endpoint.type == ApiProviderType.openai ? 'OpenAI' : 'Google Gemini'} - ${endpoint.model.isEmpty ? '未指定模型' : endpoint.model}',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: const Color(0xFF999999),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isSelected)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34C759),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    '当前使用',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          // 配置详情
+          _buildConfigInfoRow('基础 URL', endpoint.baseUrl),
+          SizedBox(height: 8.h),
+          _buildConfigInfoRow('温度', config.temperature.toStringAsFixed(1)),
+          SizedBox(height: 8.h),
+          _buildConfigInfoRow('最大令牌', '${config.maxTokens}'),
+          SizedBox(height: 8.h),
+          _buildConfigInfoRow('流式输出', config.stream ? '开启' : '关闭'),
+          if (endpoint.notes.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            _buildConfigInfoRow('备注', endpoint.notes),
+          ],
+          SizedBox(height: 16.h),
+          // 操作按钮
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => controller.addOrEditEndpoint(endpoint: endpoint),
+                  child: Container(
+                    height: 36.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: const Color(0xFFE5E5EA),
+                        width: 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '编辑',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: const Color(0xFF333333),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _showConfigActions(context, endpoint, isSelected),
+                  child: Container(
+                    height: 36.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: const Color(0xFFE5E5EA),
+                        width: 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '更多',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: const Color(0xFF333333),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              if (!isSelected)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      controller.setDefaultEndpoint(endpoint.id);
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      height: 36.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF34C759),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '设为当前',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfigInfoRow(String label, String value) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 80.w,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: const Color(0xFF666666),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: const Color(0xFF333333),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showConfigActions(BuildContext context, ApiEndpoint endpoint, bool isSelected) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40.w,
+              height: 4.h,
+              margin: EdgeInsets.symmetric(vertical: 12.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5E5EA),
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Text(
+                endpoint.name,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF333333),
+                ),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            if (!isSelected)
+              ListTile(
+                leading: const Icon(Icons.check_circle, color: Color(0xFF34C759)),
+                title: const Text('设为当前配置'),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.setDefaultEndpoint(endpoint.id);
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.edit, color: Color(0xFF007AFF)),
+              title: const Text('编辑配置'),
+              onTap: () {
+                Navigator.pop(context);
+                controller.addOrEditEndpoint(endpoint: endpoint);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.tune, color: Color(0xFFFF9500)),
+              title: const Text('生成参数'),
+              onTap: () {
+                Navigator.pop(context);
+                controller.editGenerationConfig(endpoint);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings, color: Color(0xFF5856D6)),
+              title: const Text('功能开关'),
+              onTap: () {
+                Navigator.pop(context);
+                controller.editEnabledFunctions(endpoint);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Color(0xFFFF3B30)),
+              title: const Text('删除配置'),
+              onTap: () {
+                Navigator.pop(context);
+                controller.removeEndpoint(endpoint);
+              },
+            ),
+            SizedBox(height: 16.h),
+          ],
+        ),
+      ),
+    );
   }
 }

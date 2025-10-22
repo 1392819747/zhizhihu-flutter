@@ -1,6 +1,7 @@
 import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../data/repositories/chat_repository.dart';
@@ -50,38 +51,83 @@ class _WeChatChatPageState extends State<WeChatChatPage> {
     final stream = _chatRepository.watchMessages(widget.conversation.id);
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0xFF07C160),
+        foregroundColor: Colors.white,
+        elevation: 0,
         titleSpacing: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundColor: widget.character.avatarColor,
-              child: Text(widget.character.name.characters.first,
-                  style: const TextStyle(color: Colors.white)),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.character.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                if (widget.conversation.providerProfileId != null)
-                  Text(
-                    '模型：${widget.conversation.modelPresetId ?? widget.conversation.providerProfileId}',
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+            Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: BoxDecoration(
+                color: widget.character.avatarColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white,
+                  width: 2,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  widget.character.name.characters.first,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
                   ),
-              ],
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.character.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16.sp,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (widget.conversation.providerProfileId != null)
+                    Text(
+                      '模型：${widget.conversation.modelPresetId ?? widget.conversation.providerProfileId}',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_outlined),
-            tooltip: '重生最新回复',
-            onPressed: _regenerateLast,
+          Container(
+            margin: EdgeInsets.only(right: 8.w),
+            child: IconButton(
+              icon: Icon(
+                Icons.refresh_outlined,
+                size: 24.sp,
+                color: Colors.white,
+              ),
+              tooltip: '重生最新回复',
+              onPressed: _regenerateLast,
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => AppNavigator.startApiSettings(),
+          Container(
+            margin: EdgeInsets.only(right: 8.w),
+            child: IconButton(
+              icon: Icon(
+                Icons.info_outline,
+                size: 24.sp,
+                color: Colors.white,
+              ),
+              onPressed: () => AppNavigator.startApiSettings(),
+            ),
           ),
         ],
       ),
@@ -199,41 +245,94 @@ class _InputBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            border: Border(top: BorderSide(color: Colors.grey.shade200))),
+          color: const Color(0xFFF5F5F5),
+          border: Border(
+            top: BorderSide(
+              color: Colors.grey.shade200,
+              width: 0.5,
+            ),
+          ),
+        ),
         child: Row(
           children: [
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: 0.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
                 child: TextField(
                   controller: controller,
                   minLines: 1,
                   maxLines: 4,
-                  decoration: const InputDecoration(
-                      border: InputBorder.none, hintText: '输入消息…'),
+                  style: TextStyle(fontSize: 15.sp),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: '输入消息…',
+                    hintStyle: TextStyle(
+                      fontSize: 15.sp,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            ElevatedButton(
-              onPressed: isSending ? null : onSend,
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF07C160),
-                  foregroundColor: Colors.white),
-              child: isSending
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.send),
+            SizedBox(width: 12.w),
+            Container(
+              width: 40.w,
+              height: 40.w,
+              decoration: BoxDecoration(
+                color: isSending 
+                    ? Colors.grey.shade400 
+                    : const Color(0xFF07C160),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF07C160).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20.r),
+                  onTap: isSending ? null : onSend,
+                  child: Center(
+                    child: isSending
+                        ? SizedBox(
+                            width: 16.w,
+                            height: 16.w,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : Icon(
+                            Icons.send,
+                            size: 20.sp,
+                            color: Colors.white,
+                          ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -254,17 +353,17 @@ class _MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final background = isSelf ? const Color(0xFF95EC69) : Colors.white;
     final radius = isSelf
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(4),
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16),
+        ? BorderRadius.only(
+            topLeft: Radius.circular(16.r),
+            topRight: Radius.circular(4.r),
+            bottomLeft: Radius.circular(16.r),
+            bottomRight: Radius.circular(16.r),
           )
-        : const BorderRadius.only(
-            topLeft: Radius.circular(4),
-            topRight: Radius.circular(16),
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16),
+        : BorderRadius.only(
+            topLeft: Radius.circular(4.r),
+            topRight: Radius.circular(16.r),
+            bottomLeft: Radius.circular(16.r),
+            bottomRight: Radius.circular(16.r),
           );
     final statusText = _statusLabel(message.status);
     return Column(
@@ -281,32 +380,64 @@ class _MessageBubble extends StatelessWidget {
           child: Container(
             constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width * 0.75),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
             decoration: BoxDecoration(
               color: background,
               borderRadius: radius,
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(
+                color: isSelf 
+                    ? const Color(0xFF95EC69).withOpacity(0.3)
+                    : Colors.grey.shade200,
+                width: 0.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
             ),
             child: Text(
               message.content,
               style: TextStyle(
-                  color: isSelf ? Colors.white : Colors.black87,
-                  fontSize: 15,
-                  height: 1.35),
+                color: isSelf ? Colors.white : Colors.black87,
+                fontSize: 15.sp,
+                height: 1.35,
+              ),
             ),
           ),
         ),
         if (statusText != null)
           Padding(
-            padding: const EdgeInsets.only(top: 4),
+            padding: EdgeInsets.only(top: 4.h),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(statusText,
-                    style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                Text(
+                  statusText,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
                 if (message.status == chat.MessageStatus.failed &&
                     onRetry != null)
-                  TextButton(onPressed: onRetry, child: const Text('重试')),
+                  TextButton(
+                    onPressed: onRetry,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      '重试',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: const Color(0xFF07C160),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

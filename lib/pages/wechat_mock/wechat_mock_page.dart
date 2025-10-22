@@ -1,5 +1,6 @@
 import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -29,22 +30,114 @@ class WeChatMockPage extends GetView<WeChatMockLogic> {
         }
       }),
       bottomNavigationBar: Obx(
-        () => BottomNavigationBar(
-          currentIndex: controller.currentTab.value,
-          onTap: controller.switchTab,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: const Color(0xFF07C160),
-          unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble_outline), label: '会话'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.contacts_outlined), label: '通讯录'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.explore_outlined), label: '发现'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline), label: '我'),
-          ],
+        () => Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: Colors.grey.shade200,
+                width: 0.5,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            currentIndex: controller.currentTab.value,
+            onTap: controller.switchTab,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            selectedItemColor: const Color(0xFF07C160),
+            unselectedItemColor: const Color(0xFF999999),
+            selectedLabelStyle: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+            ),
+            unselectedLabelStyle: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w400,
+            ),
+            items: [
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: controller.currentTab.value == 0 
+                        ? const Color(0xFF07C160).withOpacity(0.1)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Icon(
+                    controller.currentTab.value == 0 
+                        ? Icons.chat_bubble 
+                        : Icons.chat_bubble_outline,
+                    size: 24.sp,
+                  ),
+                ),
+                label: '会话',
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: controller.currentTab.value == 1 
+                        ? const Color(0xFF07C160).withOpacity(0.1)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Icon(
+                    controller.currentTab.value == 1 
+                        ? Icons.contacts 
+                        : Icons.contacts_outlined,
+                    size: 24.sp,
+                  ),
+                ),
+                label: '通讯录',
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: controller.currentTab.value == 2 
+                        ? const Color(0xFF07C160).withOpacity(0.1)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Icon(
+                    controller.currentTab.value == 2 
+                        ? Icons.explore 
+                        : Icons.explore_outlined,
+                    size: 24.sp,
+                  ),
+                ),
+                label: '发现',
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: controller.currentTab.value == 3 
+                        ? const Color(0xFF07C160).withOpacity(0.1)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Icon(
+                    controller.currentTab.value == 3 
+                        ? Icons.person 
+                        : Icons.person_outline,
+                    size: 24.sp,
+                  ),
+                ),
+                label: '我',
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -483,24 +576,62 @@ class _EmptyPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: EdgeInsets.symmetric(horizontal: 32.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 64, color: Colors.grey.shade400),
-            const SizedBox(height: 16),
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
+            Container(
+              width: 80.w,
+              height: 80.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 40.sp,
+                color: const Color(0xFF999999),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF666666),
+              ),
+            ),
+            SizedBox(height: 8.h),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: const Color(0xFF999999),
+                height: 1.4,
+              ),
             ),
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
+              SizedBox(height: 24.h),
+              GestureDetector(
+                onTap: onAction,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF07C160),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    actionLabel!,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ],
         ),

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
@@ -38,63 +39,184 @@ class ApiSettingsLogic extends GetxController {
 
     final confirmed = await Get.dialog<bool>(
       StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(endpoint == null ? '新增 API 接入' : '编辑 API 接入'),
-          content: SingleChildScrollView(
+        builder: (context, setState) => Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            margin: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildTextField(nameCtrl,
-                    label: '名称', hint: '例如：公司专用 OpenAI 网关'),
-                const SizedBox(height: 12),
-                _buildDropdown<ApiProviderType>(
-                  value: providerType,
-                  items: const [
-                    DropdownMenuItem(
-                        value: ApiProviderType.openai,
-                        child: Text('OpenAI 兼容接口')),
-                    DropdownMenuItem(
-                        value: ApiProviderType.gemini,
-                        child: Text('Google Gemini')),
-                  ],
-                  onChanged: (value) {
-                    if (value == null) return;
-                    setState(() {
-                      providerType = value;
-                      if (baseUrlCtrl.text.trim().isEmpty || endpoint == null) {
-                        baseUrlCtrl.text = _defaultBaseUrl(providerType);
-                      }
-                    });
-                  },
+                // 顶部标题栏
+                Container(
+                  padding: EdgeInsets.all(20.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32.w,
+                        height: 32.w,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF34C759),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          endpoint == null ? '添加新配置' : '编辑配置',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF333333),
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Get.back(result: false),
+                        child: Container(
+                          width: 28.w,
+                          height: 28.w,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE5E5EA),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Color(0xFF666666),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                _buildTextField(baseUrlCtrl, label: 'Base URL'),
-                const SizedBox(height: 12),
-                _buildTextField(keyLabelCtrl,
-                    label: '密钥标记', hint: '用于在列表中辨识此密钥'),
-                const SizedBox(height: 12),
-                _buildTextField(
-                  apiKeyCtrl,
-                  label: 'API Key',
-                  hint: endpoint == null ? null : '留空表示保持现有密钥',
-                  obscure: true,
+                // 表单内容
+                Padding(
+                  padding: EdgeInsets.all(20.w),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildModernTextField(nameCtrl,
+                            label: '配置名称', hint: '例如：公司专用 OpenAI 网关'),
+                        SizedBox(height: 16.h),
+                        _buildModernDropdown<ApiProviderType>(
+                          value: providerType,
+                          label: 'API 提供商',
+                          items: const [
+                            DropdownMenuItem(
+                                value: ApiProviderType.openai,
+                                child: Text('OpenAI 兼容接口')),
+                            DropdownMenuItem(
+                                value: ApiProviderType.gemini,
+                                child: Text('Google Gemini')),
+                          ],
+                          onChanged: (value) {
+                            if (value == null) return;
+                            setState(() {
+                              providerType = value;
+                              if (baseUrlCtrl.text.trim().isEmpty || endpoint == null) {
+                                baseUrlCtrl.text = _defaultBaseUrl(providerType);
+                              }
+                            });
+                          },
+                        ),
+                        SizedBox(height: 16.h),
+                        _buildModernTextField(baseUrlCtrl, label: 'Base URL'),
+                        SizedBox(height: 16.h),
+                        _buildModernTextField(keyLabelCtrl,
+                            label: '密钥标记', hint: '用于在列表中辨识此密钥'),
+                        SizedBox(height: 16.h),
+                        _buildModernTextField(
+                          apiKeyCtrl,
+                          label: 'API Key',
+                          hint: endpoint == null ? '请输入您的 API Key' : '留空表示保持现有密钥',
+                          obscure: true,
+                        ),
+                        SizedBox(height: 16.h),
+                        _buildModernTextField(modelCtrl, label: '默认模型', hint: '例如：gpt-4o-mini'),
+                        SizedBox(height: 16.h),
+                        _buildModernTextField(notesCtrl,
+                            label: '备注说明', maxLines: 3, hint: '用途说明、速率限制等'),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 12),
-                _buildTextField(modelCtrl, label: '默认模型/Version'),
-                const SizedBox(height: 12),
-                _buildTextField(notesCtrl,
-                    label: '备注', maxLines: 3, hint: '用途说明、速率限制等'),
+                // 底部按钮
+                Container(
+                  padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.w),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => Get.back(result: false),
+                          child: Container(
+                            height: 48.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F5F5),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '取消',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF666666),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => Get.back(result: true),
+                          child: Container(
+                            height: 48.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF34C759),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '保存',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-                onPressed: () => Get.back(result: false),
-                child: const Text('取消')),
-            ElevatedButton(
-                onPressed: () => Get.back(result: true),
-                child: const Text('保存')),
-          ],
         ),
       ),
     );
@@ -929,6 +1051,111 @@ class ApiSettingsLogic extends GetxController {
     final updatedConfig = endpoint.generationConfig.copyWith(stream: stream);
     await service.updateGenerationConfig(endpoint: endpoint, config: updatedConfig);
     IMViews.showToast('流式输出设置已更新');
+  }
+
+  Widget _buildModernTextField(TextEditingController controller,
+      {required String label,
+      String? hint,
+      bool obscure = false,
+      int maxLines = 1}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF333333),
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F9FA),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: const Color(0xFFE5E5EA),
+              width: 1,
+            ),
+          ),
+          child: TextField(
+            controller: controller,
+            maxLines: maxLines,
+            obscureText: obscure,
+            style: TextStyle(
+              fontSize: 16.sp,
+              color: const Color(0xFF333333),
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                fontSize: 16.sp,
+                color: const Color(0xFF999999),
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 12.h,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModernDropdown<T>({
+    required T value,
+    required String label,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF333333),
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F9FA),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: const Color(0xFFE5E5EA),
+              width: 1,
+            ),
+          ),
+          child: DropdownButtonFormField<T>(
+            value: value,
+            items: items,
+            onChanged: onChanged,
+            style: TextStyle(
+              fontSize: 16.sp,
+              color: const Color(0xFF333333),
+            ),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 12.h,
+              ),
+            ),
+            dropdownColor: Colors.white,
+            icon: const Icon(
+              Icons.keyboard_arrow_down,
+              color: Color(0xFF666666),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   DropdownButtonFormField<T> _buildDropdown<T>({

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:tdesign_flutter/tdesign_flutter.dart';
 import 'package:openim_common/openim_common.dart';
+import 'package:extended_image/extended_image.dart';
 
 import '../../data/models/api_provider.dart';
 import '../../domain/entities/api_entities.dart';
@@ -144,19 +145,9 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
                   Expanded(
                     child: Row(
                       children: [
-                        Container(
-                          width: 24.w,
-                          height: 24.w,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF34C759),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.auto_awesome,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                        ),
+                        selectedEndpoint != null 
+                          ? _buildProviderLogo(selectedEndpoint!.type, size: 24)
+                          : _buildProviderLogo(ApiProviderType.openai, size: 24),
                         SizedBox(width: 12.w),
                         Expanded(
                           child: Column(
@@ -257,28 +248,16 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
       ),
       child: Column(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 24.w,
-                height: 24.w,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF34C759),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.auto_awesome,
-                  size: 14,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '默认 OpenAI配置',
+            Row(
+              children: [
+                _buildProviderLogo(ApiProviderType.openai, size: 24),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '默认 OpenAI配置',
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
@@ -544,19 +523,7 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
                   final endpoint = service.endpoints[index];
                   final isSelected = service.selectedEndpointId.value == endpoint.id;
                   return ListTile(
-                    leading: Container(
-                      width: 24.w,
-                      height: 24.w,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF34C759),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.auto_awesome,
-                        size: 14,
-                        color: Colors.white,
-                      ),
-                    ),
+                    leading: _buildProviderLogo(endpoint.type, size: 24),
                     title: Text(
                       endpoint.name,
                       style: TextStyle(
@@ -566,7 +533,7 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
                       ),
                     ),
                     subtitle: Text(
-                      '${endpoint.type == ApiProviderType.openai ? 'OpenAI' : 'Google Gemini'} - ${endpoint.model}',
+                      '${endpoint.type.displayName} - ${endpoint.model}',
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: const Color(0xFF999999),
@@ -814,19 +781,7 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
           // 顶部标题和状态
           Row(
             children: [
-              Container(
-                width: 24.w,
-                height: 24.w,
-                decoration: BoxDecoration(
-                  color: _getProviderColor(endpoint.type),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _getProviderIcon(endpoint.type),
-                  size: 14,
-                  color: Colors.white,
-                ),
-              ),
+              _buildProviderLogo(endpoint.type, size: 24),
               SizedBox(width: 12.w),
               Expanded(
                 child: Column(
@@ -999,10 +954,79 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
     );
   }
 
+  String _getProviderLogoUrl(ApiProviderType type) {
+    switch (type) {
+      case ApiProviderType.openai:
+        return 'https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg';
+      case ApiProviderType.gemini:
+        return 'https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg';
+      case ApiProviderType.zhipuai:
+        return 'https://open.bigmodel.cn/static/images/logo.png';
+      case ApiProviderType.qwen:
+        return 'https://img.alicdn.com/imgextra/i4/O1CN01QJ8QJQ1QJ8QJQ1QJQ_!!6000000000000-0-tps-200-200.jpg';
+      case ApiProviderType.moonshot:
+        return 'https://api.moonshot.cn/static/images/logo.png';
+      case ApiProviderType.other:
+        return 'https://via.placeholder.com/24x24/666666/FFFFFF?text=API';
+    }
+  }
+
+  Widget _buildProviderLogo(ApiProviderType type, {double size = 24}) {
+    return Container(
+      width: size.w,
+      height: size.w,
+      decoration: BoxDecoration(
+        color: _getProviderColor(type),
+        shape: BoxShape.circle,
+      ),
+      child: ClipOval(
+        child: ExtendedImage.network(
+          _getProviderLogoUrl(type),
+          width: size.w,
+          height: size.w,
+          fit: BoxFit.cover,
+          cache: true,
+          loadStateChanged: (state) {
+            if (state.extendedImageLoadState == LoadState.loading) {
+              return Container(
+                width: size.w,
+                height: size.w,
+                decoration: BoxDecoration(
+                  color: _getProviderColor(type),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.api,
+                  size: size * 0.6,
+                  color: Colors.white,
+                ),
+              );
+            } else if (state.extendedImageLoadState == LoadState.failed) {
+              return Container(
+                width: size.w,
+                height: size.w,
+                decoration: BoxDecoration(
+                  color: _getProviderColor(type),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.api,
+                  size: size * 0.6,
+                  color: Colors.white,
+                ),
+              );
+            }
+            return null;
+          },
+        ),
+      ),
+    );
+  }
+
   Color _getProviderColor(ApiProviderType type) {
     switch (type) {
       case ApiProviderType.openai:
-        return const Color(0xFF34C759);
+        return const Color(0xFF10A37F);
       case ApiProviderType.gemini:
         return const Color(0xFF4285F4);
       case ApiProviderType.zhipuai:
@@ -1013,23 +1037,6 @@ class _ApiSettingsPageState extends State<ApiSettingsPage> {
         return const Color(0xFF9C27B0);
       case ApiProviderType.other:
         return const Color(0xFF666666);
-    }
-  }
-
-  IconData _getProviderIcon(ApiProviderType type) {
-    switch (type) {
-      case ApiProviderType.openai:
-        return Icons.auto_awesome;
-      case ApiProviderType.gemini:
-        return Icons.cloud;
-      case ApiProviderType.zhipuai:
-        return Icons.psychology;
-      case ApiProviderType.qwen:
-        return Icons.lightbulb;
-      case ApiProviderType.moonshot:
-        return Icons.nightlight_round;
-      case ApiProviderType.other:
-        return Icons.api;
     }
   }
 

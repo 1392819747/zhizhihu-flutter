@@ -925,6 +925,12 @@ class ApiSettingsLogic extends GetxController {
     }
   }
 
+  Future<void> updateStreamSetting(ApiEndpoint endpoint, bool stream) async {
+    final updatedConfig = endpoint.generationConfig.copyWith(stream: stream);
+    await service.updateGenerationConfig(endpoint: endpoint, config: updatedConfig);
+    IMViews.showToast('流式输出设置已更新');
+  }
+
   DropdownButtonFormField<T> _buildDropdown<T>({
     required T value,
     required List<DropdownMenuItem<T>> items,

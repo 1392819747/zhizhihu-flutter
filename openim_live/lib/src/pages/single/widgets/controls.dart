@@ -4,17 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_openim_sdk/flutter_openim_sdk.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:livekit_client/livekit_client.dart';
-import 'package:openim_common/openim_common.dart';
-import 'package:openim_live/src/widgets/live_button.dart';
-import 'package:synchronized/synchronized.dart';
-
-import '../../../live_client.dart';
-import '../../../widgets/loading_view.dart';
-
-import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:openim_common/openim_common.dart';
@@ -22,6 +11,7 @@ import 'package:openim_live/src/widgets/live_button.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../live_client.dart';
+import '../../../widgets/loading_view.dart';
 
 class ControlsView extends StatefulWidget {
   const ControlsView({
@@ -69,12 +59,7 @@ class _ControlsViewState extends State<ControlsView> {
   //
   CameraPosition position = CameraPosition.front;
 
-  List<MediaDevice>? _audioInputs;
-  List<MediaDevice>? _audioOutputs;
-  List<MediaDevice>? _videoInputs;
-
   StreamSubscription<CallState>? _callStateChangedSub;
-  StreamSubscription? _deviceChangeSub;
   StreamSubscription<Room>? _roomDidUpdateSub;
 
   Room? _room;
@@ -92,7 +77,6 @@ class _ControlsViewState extends State<ControlsView> {
     _callStateChangedSub?.cancel();
     _roomDidUpdateSub?.cancel();
     _callingTimer?.cancel();
-    _deviceChangeSub?.cancel();
     _participant?.removeListener(_onChange);
     super.dispose();
   }
@@ -103,9 +87,6 @@ class _ControlsViewState extends State<ControlsView> {
     _callStateChangedSub = widget.callStateStream.listen(_onChangedCallState);
     _roomDidUpdateSub = widget.roomDidUpdateStream.listen(_roomDidUpdate);
     // _queryUserInfo();
-
-    _deviceChangeSub = Hardware.instance.onDeviceChange.stream.listen(_loadDevices);
-    Hardware.instance.enumerateDevices().then(_loadDevices);
     super.initState();
   }
 
@@ -136,13 +117,6 @@ class _ControlsViewState extends State<ControlsView> {
         widget.onCallingDuration?.call(_callingDuration);
       });
     });
-  }
-
-  void _loadDevices(List<MediaDevice> devices) async {
-    _audioInputs = devices.where((d) => d.kind == 'audioinput').toList();
-    _audioOutputs = devices.where((d) => d.kind == 'audiooutput').toList();
-    _videoInputs = devices.where((d) => d.kind == 'videoinput').toList();
-    // setState(() {});
   }
 
   void _onChange() {
@@ -205,21 +179,6 @@ class _ControlsViewState extends State<ControlsView> {
 
   Future<void> _enableSpeaker() async {
     await Hardware.instance.setSpeakerphoneOn(true);
-  }
-
-  void _selectAudioOutput(MediaDevice device) async {
-    await _room?.setAudioOutputDevice(device);
-    setState(() {});
-  }
-
-  void _selectAudioInput(MediaDevice device) async {
-    await _room?.setAudioInputDevice(device);
-    setState(() {});
-  }
-
-  void _selectVideoInput(MediaDevice device) async {
-    await _room?.setVideoInputDevice(device);
-    setState(() {});
   }
 
   void _toggleCamera() async {

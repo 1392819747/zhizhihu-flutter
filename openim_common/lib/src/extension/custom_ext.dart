@@ -64,6 +64,7 @@ extension StrExt on String {
   }
 }
 
+// ignore: must_be_immutable
 class LottieView extends StatelessWidget {
   LottieView({
     Key? key,
@@ -89,6 +90,7 @@ class LottieView extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class TextView extends StatelessWidget {
   TextView(
       {Key? key,
@@ -125,6 +127,7 @@ class TextView extends StatelessWidget {
       );
 }
 
+// ignore: must_be_immutable
 class ImageView extends StatelessWidget {
   ImageView({
     Key? key,

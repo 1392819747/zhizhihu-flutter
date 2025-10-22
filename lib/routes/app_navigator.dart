@@ -17,6 +17,10 @@ class AppNavigator {
     Get.offAllNamed(AppRoutes.login);
   }
 
+  static void startCover() {
+    Get.offAllNamed(AppRoutes.cover);
+  }
+
   static void startBackLogin() {
     Get.until((route) => Get.currentRoute == AppRoutes.login);
   }
@@ -34,6 +38,18 @@ class AppNavigator {
 
   static void startWeather() {
     Get.toNamed(AppRoutes.weather);
+  }
+
+  static void startApiSettings() {
+    Get.toNamed(AppRoutes.apiSettings);
+  }
+
+  static void startWeChatMock() {
+    Get.toNamed(AppRoutes.wechatMock);
+  }
+
+  static void startSearch() {
+    Get.toNamed(AppRoutes.search);
   }
 
   static void startSplashToMain({bool isAutoLogin = false, List<ConversationInfo>? conversations}) {

@@ -18,20 +18,6 @@ MaterialVideoControlsThemeData _theme(BuildContext context) => FullscreenInherit
     ? MaterialVideoControlsTheme.maybeOf(context)?.normal ?? kDefaultMaterialVideoControlsThemeData
     : MaterialVideoControlsTheme.maybeOf(context)?.fullscreen ?? kDefaultMaterialVideoControlsThemeDataFullscreen;
 
-class _CustomMKMaterialVideoControls extends StatefulWidget {
-  const _CustomMKMaterialVideoControls({super.key});
-
-  @override
-  State<_CustomMKMaterialVideoControls> createState() => _CustomMMaterialVideoControlsState();
-}
-
-class _CustomMMaterialVideoControlsState extends State<_CustomMKMaterialVideoControls> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
 class _MaterialVideoControls extends StatefulWidget {
   const _MaterialVideoControls();
 

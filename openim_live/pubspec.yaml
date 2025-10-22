@@ -1,6 +1,7 @@
 name: openim_live
 description: A new Flutter project.
 version: 0.0.1
+publish_to: 'none'
 homepage:
 
 environment:
@@ -16,6 +17,7 @@ dependencies:
   flutter_background: 1.3.0+1
   eva_icons_flutter: 3.1.0
   flutter_svg: 2.0.9
+  collection: ^1.18.0
   rxdart:
   lottie:
   synchronized:
@@ -25,9 +27,11 @@ dependencies:
   common_utils: 2.1.0
   uuid:
   device_info_plus:
+  just_audio: ^0.9.46
   openim_common:
     path: ../openim_common
   flutter_openim_sdk: 3.8.3+3
+  flutter_webrtc: 0.12.10
 
 dev_dependencies:
   flutter_test:

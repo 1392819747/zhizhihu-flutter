@@ -10,6 +10,8 @@ on:
 jobs:
   build-android-simple:
     runs-on: ubuntu-latest
+    env:
+      QWEATHER_API_KEY: ${{ secrets.QWEATHER_API_KEY }}
     steps:
     - uses: actions/checkout@v4
     
@@ -198,10 +200,14 @@ jobs:
       run: flutter test || echo "No tests found, continuing..."
     
     - name: Build APK (no signing)
-      run: flutter build apk --release
-    
+      run: >
+        flutter build apk --release
+        --dart-define=QWEATHER_API_KEY=${{ secrets.QWEATHER_API_KEY }}
+
     - name: Build AAB (no signing)
-      run: flutter build appbundle --release
+      run: >
+        flutter build appbundle --release
+        --dart-define=QWEATHER_API_KEY=${{ secrets.QWEATHER_API_KEY }}
     
     - name: Upload APK
       uses: actions/upload-artifact@v4

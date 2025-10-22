@@ -4,8 +4,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
+import 'package:tdesign_flutter/tdesign_flutter.dart';
 
 import 'core/controller/im_controller.dart';
+import 'data/app_database.dart';
 import 'routes/app_pages.dart';
 import 'widgets/app_view.dart';
 
@@ -14,28 +16,31 @@ class ChatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppView(
-      builder: (locale, builder) => GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        enableLog: true,
-        builder: builder,
-        translations: TranslationService(),
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        fallbackLocale: TranslationService.fallbackLocale,
-        locale: locale,
-        localeResolutionCallback: (locale, list) {
-          Get.locale ??= locale;
-          return locale;
-        },
-        supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'US')],
-        getPages: AppPages.routes,
-        initialBinding: InitBinding(),
-        initialRoute: AppRoutes.splash,
-        theme: _themeData,
+    return TDTheme(
+      data: TDThemeData.defaultData(),
+      child: AppView(
+        builder: (locale, builder) => GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          enableLog: true,
+          builder: builder,
+          translations: TranslationService(),
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          fallbackLocale: TranslationService.fallbackLocale,
+          locale: locale,
+          localeResolutionCallback: (locale, list) {
+            Get.locale ??= locale;
+            return locale;
+          },
+          supportedLocales: const [Locale('zh', 'CN'), Locale('en', 'US')],
+          getPages: AppPages.routes,
+          initialBinding: InitBinding(),
+          initialRoute: AppRoutes.splash,
+          theme: _themeData,
+        ),
       ),
     );
   }
@@ -104,6 +109,9 @@ class ChatApp extends StatelessWidget {
 class InitBinding extends Bindings {
   @override
   void dependencies() {
+    if (!Get.isRegistered<AppDatabase>()) {
+      Get.put<AppDatabase>(AppDatabase.instance, permanent: true);
+    }
     Get.put<IMController>(IMController());
     Get.put<PushController>(PushController());
     Get.put<CacheController>(CacheController());

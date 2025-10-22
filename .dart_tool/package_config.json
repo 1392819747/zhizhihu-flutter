@@ -20,6 +20,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "analyzer_plugin",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/analyzer_plugin-0.11.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "animate_do",
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/animate_do-3.0.2",
       "packageUri": "lib/",
@@ -164,6 +170,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "charcode",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/charcode-1.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "chat_listview",
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/chat_listview-0.0.3",
       "packageUri": "lib/",
@@ -248,6 +260,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "cryptography",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/cryptography-2.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "csslib",
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/csslib-1.0.2",
       "packageUri": "lib/",
@@ -318,6 +336,24 @@
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/dio_web_adapter-2.1.1",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "drift",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/drift-2.21.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "drift_dev",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/drift_dev-2.21.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "easy_refresh",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/easy_refresh-3.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
     },
     {
       "name": "emoji_picker_flutter",
@@ -638,10 +674,52 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "flutter_secure_storage",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_secure_storage-9.2.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_linux",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_macos",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_secure_storage_macos-3.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_platform_interface",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_secure_storage_platform_interface-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_web",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_secure_storage_web-1.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_windows",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_secure_storage_windows-3.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_sensors",
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_sensors-1.0.1",
       "packageUri": "lib/",
       "languageVersion": "2.14"
+    },
+    {
+      "name": "flutter_slidable",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_slidable-3.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "flutter_spinkit",
@@ -654,6 +732,12 @@
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_svg-2.0.9",
       "packageUri": "lib/",
       "languageVersion": "2.19"
+    },
+    {
+      "name": "flutter_swiper_null_safety",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/flutter_swiper_null_safety-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "flutter_test",
@@ -855,15 +939,15 @@
     },
     {
       "name": "image_picker",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/image_picker-1.1.2",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/image_picker-1.0.8",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.1"
     },
     {
       "name": "image_picker_android",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+21",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+23",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.6"
     },
     {
       "name": "image_picker_for_web",
@@ -1190,6 +1274,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "path_drawing",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/path_drawing-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "path_parsing",
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/path_parsing-1.1.0",
       "packageUri": "lib/",
@@ -1347,7 +1437,7 @@
     },
     {
       "name": "provider",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/provider-6.1.2",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/provider-6.1.5+1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -1392,6 +1482,12 @@
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/rational-2.2.3",
       "packageUri": "lib/",
       "languageVersion": "2.14"
+    },
+    {
+      "name": "recase",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/recase-4.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "record",
@@ -1676,6 +1772,24 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "sqlite3",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/sqlite3-2.9.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.5"
+    },
+    {
+      "name": "sqlite3_flutter_libs",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/sqlite3_flutter_libs-0.5.40",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "sqlparser",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/sqlparser-0.39.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "stack_trace",
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/stack_trace-1.12.1",
       "packageUri": "lib/",
@@ -1734,6 +1848,18 @@
       "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/talker_logger-4.6.14",
       "packageUri": "lib/",
       "languageVersion": "2.15"
+    },
+    {
+      "name": "tdesign_flutter",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/tdesign_flutter-0.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "tdesign_flutter_adaptation",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/tdesign_flutter_adaptation-3.16.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "term_glyph",
@@ -2001,15 +2127,15 @@
     },
     {
       "name": "webview_flutter_platform_interface",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/webview_flutter_platform_interface-2.10.0",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/webview_flutter_platform_interface-2.14.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.6"
     },
     {
       "name": "webview_flutter_wkwebview",
-      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.18.4",
+      "rootUri": "file:///Users/lizhiyin/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.23.1",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.9"
     },
     {
       "name": "wechat_assets_picker",

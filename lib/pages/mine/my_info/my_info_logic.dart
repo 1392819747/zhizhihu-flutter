@@ -30,17 +30,35 @@ class MyInfoLogic extends GetxController {
 
   void openPhotoSheet() {
     IMViews.openPhotoSheet(
-        onData: (path, url) async {
-          if (url != null) {
-            LoadingView.singleton.wrap(
-              asyncFunction: () => Apis.updateUserInfo(userID: OpenIM.iMManager.userID, faceURL: url)
-                  .then((value) => imLogic.userInfo.update((val) {
-                        val?.faceURL = url;
-                      })),
-            );
-          }
-        },
-        quality: 15);
+      onData: (path, url) async {
+        final avatarUrl = IMUtils.emptyStrToNull(url);
+        if (avatarUrl == null) {
+          IMViews.showToast(StrRes.saveFailed);
+          return;
+        }
+
+        try {
+          await LoadingView.singleton.wrap(
+            asyncFunction: () async {
+              await Apis.updateUserInfo(
+                userID: OpenIM.iMManager.userID,
+                faceURL: avatarUrl,
+              );
+              await OpenIM.iMManager.userManager.setSelfInfo(faceURL: avatarUrl);
+            },
+          );
+
+          imLogic.userInfo.update((val) {
+            val?.faceURL = avatarUrl;
+          });
+          OpenIM.iMManager.userInfo.faceURL = avatarUrl;
+          IMViews.showToast(StrRes.saveSuccessfully);
+        } catch (_) {
+          IMViews.showToast(StrRes.saveFailed);
+        }
+      },
+      quality: 15,
+    );
   }
 
   void openDatePicker() {
@@ -125,6 +143,4 @@ class MyInfoLogic extends GetxController {
       });
     }
   }
-
-  static _trimNullStr(String? value) => IMUtils.emptyStrToNull(value);
 }

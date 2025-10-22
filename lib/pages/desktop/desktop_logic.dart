@@ -4,101 +4,104 @@ import 'package:openim_common/openim_common.dart';
 
 import '../../routes/app_navigator.dart';
 import '../conversation/conversation_logic.dart';
-import '../../weather_models/models.dart';
-import '../../weather_service/dart_service.dart';
 import '../../services/weather_service.dart';
-import 'package:geolocator/geolocator.dart';
+import '../../services/weather_visuals.dart';
 
 class AppItem {
   final String name;
   final IconData? icon;
-  final String? iconPath;
+  final String? assetIconPath;
   final Color color;
   final VoidCallback? onTap;
 
-  AppItem({
+  const AppItem({
     required this.name,
     this.icon,
-    this.iconPath,
+    this.assetIconPath,
     required this.color,
     this.onTap,
-  }) : assert(icon != null || iconPath != null, 'Either icon or iconPath must be provided');
+  }) : assert(
+            icon != null || assetIconPath != null,
+            'At least one icon source must be provided');
 }
 
 class DesktopLogic extends GetxController {
+  static const appsUpdateId = 'desktopApps';
+
   // 夜间模式状态
   final isDarkMode = false.obs;
-  
+
   // PageView控制器
   late PageController pageController;
-  
+
   // 天气数据
   final weatherData = Rxn<WeatherData>();
   final isLoadingWeather = false.obs;
   final WeatherService _weatherService = WeatherService();
-  
-  // App位置管理：使用Map来存储每个位置的App，null表示空位
-  final Map<int, AppItem?> appPositions = {};
-  
+
+  // App位置管理：使用可观察的Map来存储每个位置的App，null表示空位
+  final RxMap<int, AppItem?> appPositions = <int, AppItem?>{}.obs;
+
   final List<AppItem> appList = [
     AppItem(
       name: '社区',
-      iconPath: 'packages/openim_common/assets/images/wechat_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/wechat_icon.png',
       color: const Color(0xFF007AFF), // iOS Messages Blue
     ),
     AppItem(
       name: '通讯录',
-      iconPath: 'packages/openim_common/assets/images/phone_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/phone_icon.png',
       color: const Color(0xFF34C759), // iOS Contacts Green
     ),
     AppItem(
       name: '发现',
-      iconPath: 'packages/openim_common/assets/images/browser_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/browser_icon.png',
       color: const Color(0xFFFF9500), // iOS Safari Orange
     ),
     AppItem(
       name: '我的',
-      iconPath: 'packages/openim_common/assets/images/mail_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/mail_icon.png',
       color: const Color(0xFF5856D6), // iOS Settings Purple
     ),
     AppItem(
       name: '设置',
-      iconPath: 'packages/openim_common/assets/images/settings_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/settings_icon.png',
       color: const Color(0xFF8E8E93), // iOS Settings Gray
     ),
     AppItem(
       name: '相册',
-      iconPath: 'packages/openim_common/assets/images/photos_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/photos_icon.png',
       color: const Color(0xFFFF3B30), // iOS Photos Red
     ),
     AppItem(
       name: '相机',
-      iconPath: 'packages/openim_common/assets/images/camera_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/camera_icon.png',
       color: const Color(0xFF32D74B), // iOS Camera Green
     ),
     AppItem(
       name: '音乐',
-      iconPath: 'packages/openim_common/assets/images/music_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/music_icon.png',
       color: const Color(0xFFFF2D92), // iOS Music Pink
     ),
     AppItem(
-      name: '视频',
-      iconPath: 'packages/openim_common/assets/images/video_icon.png',
-      color: const Color(0xFF007AFF), // iOS Camera Blue
+      name: 'API 设置',
+      assetIconPath: 'packages/openim_common/assets/images/settings_icon.png',
+      color: const Color(0xFF5856D6),
     ),
     AppItem(
-      name: '文件',
-      iconPath: 'packages/openim_common/assets/images/files_icon.png',
-      color: const Color(0xFFFF9500), // iOS Files Orange
+      name: 'WeChat',
+      assetIconPath:
+          'packages/openim_common/assets/images/wechat_desktop_icon.png',
+      color: const Color(0xFF07C160), // WeChat Green
     ),
     AppItem(
       name: '日历',
-      iconPath: 'packages/openim_common/assets/images/calendar_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/calendar_icon.png',
       color: const Color(0xFF5856D6), // iOS Calendar Purple
     ),
     AppItem(
       name: '备忘录',
-      iconPath: 'packages/openim_common/assets/images/notes_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/notes_icon.png',
       color: const Color(0xFFFFCC00), // iOS Notes Yellow
     ),
     AppItem(
@@ -111,22 +114,22 @@ class DesktopLogic extends GetxController {
   final List<AppItem> dockApps = [
     AppItem(
       name: '社区',
-      iconPath: 'packages/openim_common/assets/images/wechat_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/wechat_icon.png',
       color: const Color(0xFF007AFF), // iOS Messages Blue
     ),
     AppItem(
       name: '通讯录',
-      iconPath: 'packages/openim_common/assets/images/phone_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/phone_icon.png',
       color: const Color(0xFF34C759), // iOS Contacts Green
     ),
     AppItem(
       name: '发现',
-      iconPath: 'packages/openim_common/assets/images/browser_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/browser_icon.png',
       color: const Color(0xFFFF9500), // iOS Safari Orange
     ),
     AppItem(
       name: '我的',
-      iconPath: 'packages/openim_common/assets/images/mail_icon.png',
+      assetIconPath: 'packages/openim_common/assets/images/mail_icon.png',
       color: const Color(0xFF5856D6), // iOS Settings Purple
     ),
   ];
@@ -147,18 +150,27 @@ class DesktopLogic extends GetxController {
 
   // 初始化App位置
   void _initializeAppPositions() {
-    appPositions.clear();
-    for (int i = 0; i < appList.length; i++) {
-      appPositions[i] = appList[i];
-    }
+    appPositions
+      ..clear()
+      ..addAll({
+        for (int i = 0; i < appList.length; i++) i: appList[i],
+      });
+    appPositions.refresh();
   }
 
   void onAppTap(AppItem app) async {
     switch (app.name) {
       case '社区':
         // 进入聊天应用，先获取会话数据
-        final conversations = await ConversationLogic.getConversationFirstPage();
+        final conversations =
+            await ConversationLogic.getConversationFirstPage();
         AppNavigator.startMain(conversations: conversations);
+        break;
+      case 'WeChat':
+        AppNavigator.startWeChatMock();
+        break;
+      case 'API 设置':
+        AppNavigator.startApiSettings();
         break;
       case '天气':
         // 打开天气应用
@@ -183,18 +195,18 @@ class DesktopLogic extends GetxController {
     final List<AppItem?> pageApps = [];
     final startIndex = pageIndex * 12;
     final endIndex = startIndex + 12;
-    
+
     for (int i = startIndex; i < endIndex; i++) {
       pageApps.add(appPositions[i]);
     }
-    
+
     return pageApps;
   }
 
   // 移动App到指定位置
   void moveAppToPosition(AppItem app, int targetPageIndex, int targetIndex) {
     print('移动App: ${app.name} 到页面: $targetPageIndex, 位置: $targetIndex');
-    
+
     // 找到当前App的位置
     int? currentIndex;
     for (var entry in appPositions.entries) {
@@ -203,7 +215,7 @@ class DesktopLogic extends GetxController {
         break;
       }
     }
-    
+
     if (currentIndex == null) {
       print('未找到App: ${app.name}');
       return;
@@ -212,13 +224,13 @@ class DesktopLogic extends GetxController {
     // 计算目标位置
     final targetGlobalIndex = targetPageIndex * 12 + targetIndex;
     print('当前位置: $currentIndex, 目标位置: $targetGlobalIndex');
-    
+
     // 如果目标位置有App，先保存它
     AppItem? targetApp = appPositions[targetGlobalIndex];
-    
+
     // 移除原位置的App
     appPositions[currentIndex] = null;
-    
+
     // 如果目标位置有App，交换位置
     if (targetApp != null) {
       appPositions[targetGlobalIndex] = app;
@@ -229,9 +241,9 @@ class DesktopLogic extends GetxController {
       appPositions[targetGlobalIndex] = app;
       print('移动到空位: $targetGlobalIndex');
     }
-    
-    // 刷新UI
-    update();
+
+    appPositions.refresh();
+    update([appsUpdateId]);
     print('App位置更新完成');
   }
 
@@ -252,15 +264,15 @@ class DesktopLogic extends GetxController {
 
   // 获取小组件背景颜色
   Color getWidgetBackgroundColor() {
-    return isDarkMode.value 
-        ? Colors.white.withOpacity(0.1) 
+    return isDarkMode.value
+        ? Colors.white.withOpacity(0.1)
         : Colors.white.withOpacity(0.2);
   }
 
   // 获取边框颜色
   Color getBorderColor() {
-    return isDarkMode.value 
-        ? Colors.white.withOpacity(0.2) 
+    return isDarkMode.value
+        ? Colors.white.withOpacity(0.2)
         : Colors.white.withOpacity(0.3);
   }
 
@@ -273,25 +285,7 @@ class DesktopLogic extends GetxController {
   Future<void> _loadWeatherData() async {
     try {
       isLoadingWeather.value = true;
-      
-      // 尝试获取当前位置
-      final position = await _weatherService.getCurrentPosition();
-      WeatherData? weather;
-      
-      if (position != null) {
-        // 使用当前位置获取天气
-        weather = await _weatherService.getWeatherByLocation(
-          position.latitude, 
-          position.longitude
-        );
-      }
-      
-      // 如果获取当前位置失败，使用默认位置（上海）
-      if (weather == null) {
-        weather = await _weatherService.getWeatherByLocation(31.2304, 121.4737);
-      }
-      
-      weatherData.value = weather;
+      weatherData.value = await _weatherService.getWeather();
     } catch (e) {
       print('加载天气数据失败: $e');
     } finally {
@@ -348,45 +342,12 @@ class DesktopLogic extends GetxController {
   }
 
   // 获取天气图标路径
-  String getWeatherIconPath() {
-    if (weatherData.value != null) {
-      return 'packages/openim_common/weather_assets/icons/${weatherData.value!.icon}.png';
-    }
-    return 'packages/openim_common/weather_assets/icons/02d.png';
-  }
+  String getWeatherIconPath() =>
+      weatherData.value?.iconAsset ?? WeatherVisuals.iconAsset(null);
 
   // 获取天气渐变背景颜色
-  List<Color> getWeatherGradientColors() {
-    if (isDarkMode.value) {
-      return [
-        const Color(0xFF2C3E50),
-        const Color(0xFF34495E),
-      ];
-    } else {
-      // 根据天气状况返回不同的渐变颜色
-      if (weatherData.value != null) {
-        final weatherIcon = weatherData.value!.icon;
-        if (weatherIcon.contains('01')) {
-          // 晴天
-          return [const Color(0xFFFFD700), const Color(0xFFFFA500)];
-        } else if (weatherIcon.contains('02') || weatherIcon.contains('03') || weatherIcon.contains('04')) {
-          // 多云
-          return [const Color(0xFF74B9FF), const Color(0xFF0984E3)];
-        } else if (weatherIcon.contains('09') || weatherIcon.contains('10')) {
-          // 雨天
-          return [const Color(0xFF6C7CE7), const Color(0xFF4C63D2)];
-        } else if (weatherIcon.contains('11')) {
-          // 雷雨
-          return [const Color(0xFF2D3436), const Color(0xFF636E72)];
-        } else if (weatherIcon.contains('13')) {
-          // 雪天
-          return [const Color(0xFFDDD6FE), const Color(0xFFC4B5FD)];
-        } else {
-          // 默认
-          return [const Color(0xFF74B9FF), const Color(0xFF0984E3)];
-        }
-      }
-      return [const Color(0xFF74B9FF), const Color(0xFF0984E3)];
-    }
-  }
+  List<Color> getWeatherGradientColors() => WeatherVisuals.gradient(
+        weatherData.value?.iconCode,
+        isDarkMode: isDarkMode.value,
+      );
 }

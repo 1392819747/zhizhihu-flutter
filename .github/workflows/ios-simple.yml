@@ -10,6 +10,8 @@ on:
 jobs:
   build-ios-simple:
     runs-on: macos-latest
+    env:
+      QWEATHER_API_KEY: ${{ secrets.QWEATHER_API_KEY }}
     steps:
     - uses: actions/checkout@v4
     
@@ -30,7 +32,9 @@ jobs:
       run: flutter test || echo "No tests found, continuing..."
     
     - name: Build iOS without codesign
-      run: flutter build ios --no-codesign
+      run: >
+        flutter build ios --no-codesign
+        --dart-define=QWEATHER_API_KEY=${{ secrets.QWEATHER_API_KEY }}
     
     - name: Create IPA manually
       run: |

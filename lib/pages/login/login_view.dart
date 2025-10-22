@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:openim_common/openim_common.dart';
-import 'package:sprintf/sprintf.dart';
 
 import 'login_logic.dart';
 
@@ -215,37 +214,4 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  void _showForgetPasswordBottomSheet() {
-    showCupertinoModalPopup(
-      context: Get.context!,
-      builder: (BuildContext context) {
-        return CupertinoActionSheet(
-          actions: [
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(context);
-                logic.operateType = LoginType.email;
-                logic.forgetPassword();
-              },
-              child: Text(sprintf(StrRes.through, [StrRes.email])),
-            ),
-            CupertinoActionSheetAction(
-              onPressed: () {
-                Navigator.pop(context);
-                logic.operateType = LoginType.phone;
-                logic.forgetPassword();
-              },
-              child: Text(sprintf(StrRes.through, [StrRes.phoneNumber])),
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Text(StrRes.cancel),
-          ),
-        );
-      },
-    );
-  }
 }

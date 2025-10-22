@@ -10,11 +10,17 @@ enum OperateType {
 
 class PhotoBrowserBottomBar extends StatelessWidget {
   PhotoBrowserBottomBar({super.key, this.onPressedButton, this.onlySave});
-  ValueChanged<OperateType>? onPressedButton;
-  bool? onlySave;
+  final ValueChanged<OperateType>? onPressedButton;
+  final bool? onlySave;
 
-  PhotoBrowserBottomBar.show(BuildContext context,
-      {super.key, bool onlySave = false, ValueChanged<OperateType>? onPressedButton}) {
+  PhotoBrowserBottomBar.show(
+    BuildContext context, {
+    Key? key,
+    bool onlySave = false,
+    ValueChanged<OperateType>? onPressedButton,
+  })  : onPressedButton = onPressedButton,
+        onlySave = onlySave,
+        super(key: key) {
     showModalBottomSheet(
         isScrollControlled: true,
         backgroundColor: Colors.transparent,

@@ -53,6 +53,9 @@ class Config {
   static const webKey = 'webKey';
   static const webServerKey = 'webServerKey';
   static const locationHost = 'http://location.your-domain';
+  static const String _defaultWeatherHost = 'https://wttr.in';
+
+  static String get weatherBaseUrl => _defaultWeatherHost;
 
   static OfflinePushInfo get offlinePushInfo => OfflinePushInfo(
         title: _appName,
@@ -63,9 +66,10 @@ class Config {
   static const friendScheme = "io.openim.app/addFriend/";
   static const groupScheme = "io.openim.app/joinGroup/";
 
-  static const _host = "ipv6.zy02.cn";
+  static const _host = "8.217.83.117";
 
-  static const _ipRegex = '((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)';
+  static const _ipRegex =
+      '((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)';
 
   static bool get _isIP => RegExp(_ipRegex).hasMatch(_host);
 

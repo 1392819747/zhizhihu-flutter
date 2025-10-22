@@ -136,7 +136,7 @@ class LoginLogic extends GetxController with GetTickerProviderStateMixin {
     LoadingView.singleton.wrap(asyncFunction: () async {
       var suc = await _login();
       if (suc) {
-        final result = await ConversationLogic.getConversationFirstPage();
+        await ConversationLogic.getConversationFirstPage();
 
         Get.find<CacheController>().resetCache();
         AppNavigator.startDesktop();

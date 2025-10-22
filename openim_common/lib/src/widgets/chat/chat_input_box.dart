@@ -296,12 +296,10 @@ class _ChatInputBoxState extends State<ChatInputBox> /*with TickerProviderStateM
 class _SubView extends StatelessWidget {
   const _SubView({
     this.onClose,
-    this.title,
     this.content,
     this.textSpan,
   }) : assert(content != null || textSpan != null, 'Either content or textSpan must be provided.');
   final VoidCallback? onClose;
-  final String? title;
   final String? content;
   final InlineSpan? textSpan;
 
@@ -325,16 +323,9 @@ class _SubView extends StatelessWidget {
               Flexible(
                 child: Row(
                   children: [
-                    if (title != null)
-                      Text(
-                        title!,
-                        style: Styles.ts_8E9AB0_14sp,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
                     if (content != null)
                       Text(
-                        title!,
+                        content!,
                         style: Styles.ts_8E9AB0_14sp,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,

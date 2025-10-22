@@ -79,6 +79,9 @@ Follow the steps below to set up your local development environment:
    static const _host = "your-server-ip or your-domain";
    ```
 
+   - The desktop weather widget现在使用 wttr.in 公共接口，无需密钥，详情见 [`docs/qweather_setup.md`](docs/qweather_setup.md)。
+   - 在桌面端通过“API 设置”应用管理 OpenAI/Gemini 兼容的接口与 AI 角色。
+
 4. Run the application using `flutter run` from the terminal or through your IDE.
 
 5. Start developing and testing! 🎉

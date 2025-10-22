@@ -22,11 +22,28 @@ class IMViews {
   IMViews._();
 
   static Future showToast(String msg, {Duration? duration}) {
-    if (msg.trim().isNotEmpty) {
-      return EasyLoading.showToast(msg, duration: duration);
-    } else {
+    if (msg.trim().isEmpty) {
       return Future.value();
     }
+
+    final previousMaskType = EasyLoading.instance.maskType;
+    final previousUserInteractions = EasyLoading.instance.userInteractions;
+
+    EasyLoading.instance
+      ..maskType = EasyLoadingMaskType.none
+      ..userInteractions = true;
+
+    final future = EasyLoading.showToast(
+      msg,
+      duration: duration ?? const Duration(seconds: 2),
+      dismissOnTap: true,
+    );
+
+    return future.whenComplete(() {
+      EasyLoading.instance
+        ..maskType = previousMaskType
+        ..userInteractions = previousUserInteractions;
+    });
   }
 
   static Widget buildHeader([double distance = 60]) => WaterDropMaterialHeader(
